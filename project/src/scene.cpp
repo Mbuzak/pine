@@ -22,6 +22,10 @@ void Scene::Setup() {
 		textures_.insert(std::pair<std::string, Texture*>(name, new Texture(file.c_str())));
 	}
 
+	// Camera
+	camera_.pos = {0.0, -3.0, -22.0};
+	camera_.rot = {0.3, -1.57};
+
 	// --- Shapes ---
 	background_.push_back(new Shape(models_.at("ground"), glm::vec3{0.0, -0.1, 0.0}, textures_.at("grass")));
 	background_.push_back(new Shape(models_.at("chessboard"), glm::vec3{0.0, 0.0, 0.0}, textures_.at("chessboard")));
@@ -155,19 +159,8 @@ std::vector<Piece*> Scene::get_pieces() {
 }
 
 void Scene::Init() {
-	std::vector<std::string> model_files = {
-		"square", "pawn", "knight", "bishop", "rook", "king", "queen", "chessboard"
-	};
-	
-	LoadModelsOBJ(model_files);
-
-	std::vector<std::string> texture_files = {"white", "black", "chessboard"};
-
-	LoadTexturesJPG(texture_files);
-
 	for (int i = 0; i < squares_.size(); i++) {
 		squares_[i] = new Shape(models_.at("square"), IndexToPosition(i));
-
 		if (((i % 8) + (i / 8)) % 2 == 0) {
 			squares_[i]->material_.ambient.r = 0.5;
 			squares_[i]->material_.ambient.g = 0.5;
@@ -175,42 +168,22 @@ void Scene::Init() {
 		}
 	}
 
-	std::string name;
 	std::string colour;
-	float x, y = 0.1, z;
-
 	for (int i = 0; i < chess->mBoard.size(); i++) {
-		name = chess->pieceName.at(chess->mBoard[i]);
+		std::string name = chess->pieceName.at(chess->mBoard[i]);
 		if (chess->isWhite(i / 8, i % 8)) colour = "white";
 		else colour = "black";
 
 		if (name == "x")
-				continue;
+			continue;
 
 		Piece *piece = new Piece(i, models_.at(name), textures_.at(colour));
-
+		piece->colour = colour;
 		if (colour == "white") {
 			piece->angle_.y = 3.2;
-			piece->colour = "white";
-		}
-		else {
-			piece->colour = "black";
 		}
 
 		pieces_.push_back(piece);
-	}
-}
-
-void Scene::LoadModelsOBJ(std::vector<std::string> names) {
-	for (std::string &name: names) {
-		models_.insert(std::pair<std::string, Model*>(name, new Model(name)));
-	}
-}
-
-void Scene::LoadTexturesJPG(std::vector<std::string> names) {
-	for (std::string &name: names) {
-		std::string file = name + ".jpg";
-		textures_.insert(std::pair<std::string, Texture*>(name, new Texture(file.c_str())));
 	}
 }
 
@@ -352,4 +325,12 @@ void Scene::move_piece() {
 
 	active_fields.clear();
 	selected_id = -1;
+}
+
+void Scene::rotate(int x, int y) {
+	camera_.rot.y += 2*(x - _mouse_buttonX)/(float)width;
+	_mouse_buttonX = x;
+	camera_.rot.x -= 2*(_mouse_buttonY - y)/(float)height;
+	_mouse_buttonY = y;
+	glutPostRedisplay();
 }

@@ -73,9 +73,6 @@ public:
 
 	glm::vec3 IndexToPosition(int id);
 
-	void LoadModelsOBJ(std::vector<std::string> names);
-	void LoadTexturesJPG(std::vector<std::string> names);
-
 	std::vector<Piece*> pieces_;
 	std::array<Shape*, 64> squares_;
 	float off_rank_white = -8.0;
@@ -91,6 +88,11 @@ public:
 
 	void select_piece(int wx, int wy, int x, int y);
 	void move_piece();
+
+	// Rotate camera
+	void rotate(int, int);
+
+	int width = 800, height = 600;
 };
 
 #endif

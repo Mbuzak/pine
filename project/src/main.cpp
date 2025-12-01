@@ -24,9 +24,6 @@
 Scene scene;
 float Time = 0.0;
 
-int Window_Width = 800;
-int Window_Height = 600;
-
 // Funkcja wywolywana przy nacisnieciu tzw. specjalnych
 // klawiszy (klawiszy spoza tablicy ASCII)
 inline void SpecialKeys(int key, int x, int y) {
@@ -79,9 +76,6 @@ void Initialize() {
 	positive pass stencil and depth test */
 	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
-	scene.camera_.pos = {0.0, -3.0, -22.0};
-	scene.camera_.rot = {0.3, -1.57};
-
 	stbi_set_flip_vertically_on_load(true);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -89,8 +83,8 @@ void Initialize() {
 }
 
 void Reshape(int width, int height) {
-	Window_Width = width;
-	Window_Height = height;
+	scene.width = width;
+	scene.height = height;
 
 	glViewport(0, 0, width, height);
 	scene.camera_.perspective = glm::perspectiveFov(glm::radians(60.0f), (float)width, (float)height, 0.1f, 200.f);
@@ -110,7 +104,7 @@ void MouseButton(int button, int state, int x, int y) {
 		scene._mouse_left_click_state = state;
 
 		if (state == GLUT_DOWN)	{
-			scene.select_piece(Window_Width, Window_Height, x, y);
+			scene.select_piece(scene.width, scene.height, x, y);
 		}
 		else if (state == GLUT_UP) {
 			scene.move_piece();
@@ -136,20 +130,16 @@ void MouseButton(int button, int state, int x, int y) {
 
 void MouseMotion(int x, int y) {
 	if (scene._mouse_buttonState == GLUT_DOWN) {
-		scene.camera_.rot.y += 2*(x - scene._mouse_buttonX)/(float)Window_Width;
-		scene._mouse_buttonX = x;
-		scene.camera_.rot.x -= 2*(scene._mouse_buttonY - y)/(float)Window_Height;
-		scene._mouse_buttonY = y;
-		glutPostRedisplay();
+		scene.rotate(x, y);
 	}
 
 	if (scene._mouse_left_click_state == GLUT_DOWN) {
 		if (scene.selected_id >= 0) {
 			glBindFramebuffer(GL_FRAMEBUFFER, scene.fbo.id);
-			glReadPixels(x, Window_Height - y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+			glReadPixels(x, scene.height - y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-			glm::vec3 point = glm::unProject(glm::vec3(x, Window_Height - y, depth), scene.camera_.view, scene.camera_.perspective, glm::vec4(0, 0, Window_Width, Window_Height));
+			glm::vec3 point = glm::unProject(glm::vec3(x, scene.height - y, depth), scene.camera_.view, scene.camera_.perspective, glm::vec4(0, 0, scene.width, scene.height));
 			//std::cout << "Worldspace: (" << point.x << ", " << point.y << ", " << point.z << "); Screen: (" << x << ", " << y << ")\n";
 
 			scene.UpdatePieceWorldPosition(scene.selected_id, point.x, point.z);
@@ -166,7 +156,7 @@ int main(int argc, char *argv[]) {
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_STENCIL);
 	glutInitContextVersion(3, 2);
 	glutInitContextProfile(GLUT_CORE_PROFILE);
-	glutInitWindowSize(Window_Width, Window_Height);
+	glutInitWindowSize(scene.width, scene.height);
 	glutCreateWindow("Chess 3D");
 
 	glutDisplayFunc(DisplayScene);
