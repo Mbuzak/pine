@@ -2,30 +2,25 @@
 
 Scene::Scene() {
 	skybox_ = new Skybox();
-	game_ = new Game();
-}
-
-void Scene::Load(const char *folder) {
-	for (const auto &entry: std::filesystem::directory_iterator(folder)) {
-		std::string path = entry.path();
-		std::string file = path.substr(path.find_last_of("/") + 1);
-		std::string::size_type const p(file.find_last_of("."));
-
-		std::string filename = file.substr(0, p);
-		std::string extension = file.substr(p + 1, file.size());
-
-		if (folder == "textures") AddTexture(filename.c_str(), extension.c_str());
-		else if (folder == "models") AddModel(filename.c_str());
-		else std::cout << "Folder " << folder << " isn't handled!\n";
-	}
+	chess = new chschr::Chess();
 }
 
 void Scene::Setup() {
 	program_default = program_init("default");
 	sbp = program_init("skybox");
 
-	Load("models");
-	Load("textures");
+	// Load models
+	std::vector<std::string> model_names = {"square", "pawn", "knight", "bishop", "rook", "king", "queen", "chessboard", "ground", "sphere"};
+	for (std::string &name: model_names) {
+		models_.insert(std::pair<std::string, Model*>(name, new Model(name)));
+	}
+	
+	// Load textures
+	std::vector<std::string> texture_names = {"white", "black", "chessboard", "grass"};
+	for (std::string &name: texture_names) {
+		std::string file = name + ".jpg";
+		textures_.insert(std::pair<std::string, Texture*>(name, new Texture(file.c_str())));
+	}
 
 	// --- Shapes ---
 	background_.push_back(new Shape(models_.at("ground"), glm::vec3{0.0, -0.1, 0.0}, textures_.at("grass")));
@@ -43,7 +38,7 @@ void Scene::Setup() {
 
 	dir_shadow_map.Init(sun_->direction);
 
-	game_->Init();
+	Init();
 
 	fbo.init();
 
@@ -51,15 +46,6 @@ void Scene::Setup() {
 	printf("RPM - obrót sceny\n");
 	printf("LPM - selecja obiektów\n");
 	printf("Scroll - przybliżanie/oddalanie sceny\n\n");
-}
-
-void Scene::AddModel(const char *name) {
-	models_.insert(std::pair<std::string, Model*>(name, new Model(name)));
-}
-
-void Scene::AddTexture(const char *filename, const char *extension) {
-	std::string file = std::string(filename) + "." + std::string(extension);
-	textures_.insert(std::pair<std::string, Texture*>(filename, new Texture(file.c_str())));
 }
 
 void Scene::Display() {
@@ -119,7 +105,7 @@ void Scene::SendLight() {
 }
 
 void Scene::RenderShadowMapOfDirectionalLight() {
-	dir_shadow_map.Render(game_->get_pieces());
+	dir_shadow_map.Render(get_pieces());
 }
 
 void Scene::RenderSkybox() {
@@ -150,7 +136,7 @@ void Scene::RenderShapes() {
 	for (Shape *shape : background_)
 		shape->Display(program_default);
 	
-	game_->Display(program_default);
+	Display(program_default);
 }
 
 void Scene::RenderLights() {
@@ -162,3 +148,135 @@ void Scene::RenderLights() {
 		lamps_[i]->Display(program_default);
 	}
 }
+
+// game
+std::vector<Piece*> Scene::get_pieces() {
+	return pieces_;
+}
+
+void Scene::Init() {
+	std::vector<std::string> model_files = {
+		"square", "pawn", "knight", "bishop", "rook", "king", "queen", "chessboard"
+	};
+	
+	LoadModelsOBJ(model_files);
+
+	std::vector<std::string> texture_files = {"white", "black", "chessboard"};
+
+	LoadTexturesJPG(texture_files);
+
+	for (int i = 0; i < squares_.size(); i++) {
+		squares_[i] = new Shape(models_.at("square"), IndexToPosition(i));
+
+		if (((i % 8) + (i / 8)) % 2 == 0) {
+			squares_[i]->material_.ambient.r = 0.5;
+			squares_[i]->material_.ambient.g = 0.5;
+			squares_[i]->material_.ambient.b = 0.5;
+		}
+	}
+
+	std::string name;
+	std::string colour;
+	float x, y = 0.1, z;
+
+	for (int i = 0; i < chess->mBoard.size(); i++) {
+		name = chess->pieceName.at(chess->mBoard[i]);
+		if (chess->isWhite(i / 8, i % 8)) colour = "white";
+		else colour = "black";
+
+		if (name == "x")
+				continue;
+
+		Piece *piece = new Piece(i, models_.at(name), textures_.at(colour));
+
+		if (colour == "white") {
+			piece->angle_.y = 3.2;
+			piece->colour = "white";
+		}
+		else {
+			piece->colour = "black";
+		}
+
+		pieces_.push_back(piece);
+	}
+}
+
+void Scene::LoadModelsOBJ(std::vector<std::string> names) {
+	for (std::string &name: names) {
+		models_.insert(std::pair<std::string, Model*>(name, new Model(name)));
+	}
+}
+
+void Scene::LoadTexturesJPG(std::vector<std::string> names) {
+	for (std::string &name: names) {
+		std::string file = name + ".jpg";
+		textures_.insert(std::pair<std::string, Texture*>(name, new Texture(file.c_str())));
+	}
+}
+
+void Scene::Display(GLuint program_id) {
+	for (int &value: active_fields) {
+		//std::cout << value << "\n";
+		glUniform1i(glGetUniformLocation(program_id, "active_field"), true);
+		squares_[value]->Display(program_id);
+		glUniform1i(glGetUniformLocation(program_id, "active_field"), false);
+	}
+
+	for (int i = 0; i < squares_.size(); i++) {
+		squares_[i]->Display(program_id);
+	}
+
+	for (int i = 0; i < pieces_.size(); ++i) {
+		glStencilFunc(GL_ALWAYS, i + 1, 0xFF);
+
+		pieces_[i]->Display(program_id);
+	}
+
+	if (selected_id >= 0) {
+		pieces_[selected_id]->DisplayOutline(program_id);
+	}
+}
+
+void Scene::UpdatePieceWorldPosition(int id, float x, float z) {
+	get_pieces()[id]->position_.x = x;
+	get_pieces()[id]->position_.z = z;
+}
+
+void Scene::DisactivatePiece(Piece &piece) {
+	if (piece.colour == "white") {
+		if (off_rank_white < 8.0) {
+			piece.position_.x = 12.0;
+			piece.position_.z = off_rank_white;
+		}
+		else {
+			piece.position_.x = 14.0;
+			piece.position_.z = off_rank_white - 16.0;
+		}
+		
+		off_rank_white += 2.0;
+	}
+	else {
+		if (off_rank_black < 8.0) {
+			piece.position_.x = -12.0;
+			piece.position_.z = off_rank_black;
+		}
+		else {
+			piece.position_.x = -14.0;
+			piece.position_.z = off_rank_black - 16.0;
+		}
+		off_rank_black += 2.0;
+	}
+
+	piece.is_active = false;
+}
+
+glm::vec3 Scene::IndexToPosition(int id) {
+	glm::vec3 position;
+
+	position.x = ((id % 8) - 4) * 2.25 + 1.12;
+	position.y = 0.15;
+	position.z = ((id / 8) - 4) * 2.25 + 1.12;
+
+	return position;
+}
+

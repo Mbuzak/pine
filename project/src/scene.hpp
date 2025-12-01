@@ -18,26 +18,19 @@
 #include "engine/shadow.hpp"
 #include "engine/camera.hpp"
 #include "engine/framebuffer.hpp"
-#include "game.hpp"
 #include "utilities.hpp"
+#include "chess/chess.hpp"
 
 class Scene {
 public:
 	Scene();
 
-	// Loads all files from folder
-	void Load(const char *folder);
-
 	void Setup();
-	void AddModel(const char *name);
-	void AddTexture(const char *filename, const char *extension);
 	void Display();
 
 	void SendLight();
 
 //private:
-	//glm::mat4 matrix_projection_;
-
 	GLuint sbp;
 	GLuint program_default;
 
@@ -53,8 +46,6 @@ public:
 
 	std::vector<Shape*> background_;
 
-	Game* game_;
-
 	ShadowMap dir_shadow_map;
 	Framebuffer fbo;
 
@@ -66,6 +57,29 @@ private:
 	void RenderSkybox();
 	void RenderShapes();
 	void RenderLights();
+
+public:
+	std::vector<Piece*> get_pieces();
+
+	void Init();
+	void Display(GLuint program_id);
+
+	void UpdatePieceWorldPosition(int id, float x, float z);
+
+	void DisactivatePiece(Piece &piece);
+
+	chschr::Chess* chess;
+	std::vector<int> active_fields;
+
+	glm::vec3 IndexToPosition(int id);
+
+	void LoadModelsOBJ(std::vector<std::string> names);
+	void LoadTexturesJPG(std::vector<std::string> names);
+
+	std::vector<Piece*> pieces_;
+	std::array<Shape*, 64> squares_;
+	float off_rank_white = -8.0;
+	float off_rank_black = -8.0;
 };
 
 #endif

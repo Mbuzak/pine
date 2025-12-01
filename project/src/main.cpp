@@ -100,35 +100,35 @@ void MouseButton(int button, int state, int x, int y) {
 			selected_id = stencil - 1;
 
 			if (selected_id >= 0) {
-				if (scene.game_->get_pieces()[selected_id]->is_active == false) {
+				if (scene.get_pieces()[selected_id]->is_active == false) {
 					selected_id = -1;
 				}
 			}
 
 			if (selected_id >= 0) {
-				std::string field = scene.game_->get_pieces()[selected_id]->get_field();
+				std::string field = scene.get_pieces()[selected_id]->get_field();
 				//std::cout << "Field: " << field << "\n";
 				int field_id = (field[0] - 'a') + 8 * ('8' - field[1]);
 				std::cout << "Field id: " << field_id << "\n";
 
-				for (int &value: scene.game_->chess->LegalMoves(field_id)) {
+				for (int &value: scene.chess->LegalMoves(field_id)) {
 					//std::cout << value << "\n";
-					scene.game_->active_fields.push_back(value);
+					scene.active_fields.push_back(value);
 				}
 
-				std::cout << "\nPos: (" << scene.game_->get_pieces()[selected_id]->position_.x << ", " <<
-					scene.game_->get_pieces()[selected_id]->position_.y << ", " <<
-					scene.game_->get_pieces()[selected_id]->position_.z << ")\n";
+				std::cout << "\nPos: (" << scene.get_pieces()[selected_id]->position_.x << ", " <<
+					scene.get_pieces()[selected_id]->position_.y << ", " <<
+					scene.get_pieces()[selected_id]->position_.z << ")\n";
 			}
 		}
 		else if (state == GLUT_UP) {
 			if (selected_id >= 0) {
-				std::string field = scene.game_->get_pieces()[selected_id]->get_field();
+				std::string field = scene.get_pieces()[selected_id]->get_field();
 				
 				int rank, file;
 
-				rank = 4 + (int)((scene.game_->get_pieces()[selected_id]->position_.z + 22.5) / 2.25) - 10;
-				file = 4 + (int)((scene.game_->get_pieces()[selected_id]->position_.x + 22.5) / 2.25) - 10;
+				rank = 4 + (int)((scene.get_pieces()[selected_id]->position_.z + 22.5) / 2.25) - 10;
+				file = 4 + (int)((scene.get_pieces()[selected_id]->position_.x + 22.5) / 2.25) - 10;
 
 				//std::cout << "rank: " << rank << ", file: " << file << "\n";
 				//std::cout << (char)('a' + file) << (char)('8' - rank) << "\n";
@@ -139,26 +139,26 @@ void MouseButton(int button, int state, int x, int y) {
 				// new position
 				if (field != new_field) {
 					chschr::Move move((field + new_field).c_str());
-					if (scene.game_->chess->perform(move)) {
-						scene.game_->get_pieces()[selected_id]->update_position();
+					if (scene.chess->perform(move)) {
+						scene.get_pieces()[selected_id]->update_position();
 
-						std::string remove_field = scene.game_->get_pieces()[selected_id]->get_field();
+						std::string remove_field = scene.get_pieces()[selected_id]->get_field();
 
-						for (Piece *piece: scene.game_->get_pieces()) {
-							if (piece->get_field() == remove_field && piece != scene.game_->get_pieces()[selected_id] && piece->is_active) {
+						for (Piece *piece: scene.get_pieces()) {
+							if (piece->get_field() == remove_field && piece != scene.get_pieces()[selected_id] && piece->is_active) {
 
-								scene.game_->DisactivatePiece(*piece);
+								scene.DisactivatePiece(*piece);
 							}
 						}
 
-						scene.game_->get_pieces()[selected_id]->update_world_position();
+						scene.get_pieces()[selected_id]->update_world_position();
 					}
 					else {
-						scene.game_->get_pieces()[selected_id]->update_world_position();
+						scene.get_pieces()[selected_id]->update_world_position();
 					}
 				}
 
-				scene.game_->active_fields.clear();
+				scene.active_fields.clear();
 				selected_id = -1;
 			}
 		}
@@ -200,10 +200,10 @@ void MouseMotion(int x, int y) {
 			glm::vec3 point = glm::unProject(glm::vec3(x, Window_Height - y, depth), scene.camera_.view, scene.camera_.perspective, glm::vec4(0, 0, Window_Width, Window_Height));
 			//std::cout << "Worldspace: (" << point.x << ", " << point.y << ", " << point.z << "); Screen: (" << x << ", " << y << ")\n";
 
-			//scene.game_->get_pieces()[selected_id]->position_.x = point.x;
-			//scene.game_->get_pieces()[selected_id]->position_.z = point.z;
+			//scene.get_pieces()[selected_id]->position_.x = point.x;
+			//scene.get_pieces()[selected_id]->position_.z = point.z;
 
-			scene.game_->UpdatePieceWorldPosition(selected_id, point.x, point.z);
+			scene.UpdatePieceWorldPosition(selected_id, point.x, point.z);
 		}
 	}
 }
