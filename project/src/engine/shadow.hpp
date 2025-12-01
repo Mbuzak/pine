@@ -2,32 +2,12 @@
 #define SHADOW_HPP
 
 #include <GL/glew.h>
-#include <GL/freeglut.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
 #include <vector>
-
 #include "mesh.hpp"
-
-#include "utilities.hpp"
 #include "pipeline.hpp"
-
-
-class DepthMap {
-public:
-	DepthMap() = default;
-
-public:
-	GLuint program_id_;
-	GLuint frame_buffer_id_;
-	GLuint texture_id_;
-
-	const unsigned int width_ = 1024;
-	const unsigned int height_ = 1024;
-};
-
 
 // Shadow map of direction or point light
 class ShadowMap {
@@ -35,27 +15,20 @@ public:
 	ShadowMap();
 
 	// Initialize essential components
-	void Init(glm::vec3 direction);
+	void Init(glm::vec3);
 
 	// Render shapes to depth map
-	void Render(std::vector<Piece*> pieces);
+	void Render(std::vector<Piece*>);
 
-	void SendTexture(GLuint program_id);
+	void SendTexture(GLuint);
 
 public:
-	DepthMap *depth_map_;
+	const unsigned int width_ = 1024;
+	const unsigned int height_ = 1024;
 
-private:
-	void CreateTexture();
-	void CreateDepthFrameBuffer();
-	void LinkTextureToFrameBuffer();
-	void CreateProgram();
-
-	void RenderTextureFromLightPoisiton();
-	void Activate();
-	void SendCameraFromLightPosition();
-	void RenderShapes(std::vector<Piece*> pieces);
-	void Disactivate();
+	GLuint program_id;
+	GLuint fbo_id;
+	GLuint texture_id;
 };
 
 // Parametry swiatla kierunkowego, ale znacznie lepiej ubrac
