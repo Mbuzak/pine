@@ -2,11 +2,7 @@
 
 Scene::Scene() {
 	skybox_ = new Skybox();
-	dir_shadow_map_ = new ShadowMap();
-
 	game_ = new Game();
-
-	fbo = new Framebuffer();
 }
 
 void Scene::Load(const char *folder) {
@@ -45,11 +41,11 @@ void Scene::Setup() {
 
 	skybox_->CreateVAO();
 
-	dir_shadow_map_->Init(sun_->direction);
+	dir_shadow_map.Init(sun_->direction);
 
 	game_->Init();
 
-	fbo->init();
+	fbo.init();
 
 	printf("\n---Skróty klawiszowe---\n\n");
 	printf("RPM - obrót sceny\n");
@@ -71,7 +67,7 @@ void Scene::Display() {
 
 
 	glViewport(0, 0, glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo->id);
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo.id);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	RenderToTexture();
@@ -123,7 +119,7 @@ void Scene::SendLight() {
 }
 
 void Scene::RenderShadowMapOfDirectionalLight() {
-	dir_shadow_map_->Render(game_->get_pieces());
+	dir_shadow_map.Render(game_->get_pieces());
 }
 
 void Scene::RenderSkybox() {
@@ -148,7 +144,7 @@ void Scene::RenderShapes() {
 	glUniformMatrix4fv(glGetUniformLocation(program_default, "lightProj"), 1, GL_FALSE, glm::value_ptr(lightProj));
 	glUniformMatrix4fv(glGetUniformLocation(program_default, "lightView"), 1, GL_FALSE, glm::value_ptr(lightView));
 
-	dir_shadow_map_->SendTexture(program_default);
+	dir_shadow_map.SendTexture(program_default);
 
 	// rysowanie obiektów nie-selekcyjnych (identyfikator 0)
 	glStencilFunc(GL_ALWAYS, 0, 0xFF);

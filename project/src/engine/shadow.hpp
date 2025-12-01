@@ -12,8 +12,6 @@
 // Shadow map of direction or point light
 class ShadowMap {
 public:
-	ShadowMap();
-
 	// Initialize essential components
 	void Init(glm::vec3);
 

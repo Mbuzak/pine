@@ -195,7 +195,7 @@ void MouseMotion(int x, int y) {
 	if (_mouse_left_click_state == GLUT_DOWN) {
 		if (selected_id >= 0) {
 
-			glBindFramebuffer(GL_FRAMEBUFFER, scene.fbo->id);
+			glBindFramebuffer(GL_FRAMEBUFFER, scene.fbo.id);
 			glReadPixels(x, Window_Height - y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

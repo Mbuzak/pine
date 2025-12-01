@@ -1,7 +1,5 @@
 #include "shadow.hpp"
 
-ShadowMap::ShadowMap() {}
-
 void ShadowMap::Init(glm::vec3 direction) {
 	// Ustawienie polozenia i kierunku swiatla
 	//Light_Direction = glm::normalize(glm::vec3(0.2, -0.8f, 1.1f));

@@ -4,14 +4,12 @@
 #include <time.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <iostream>
 #include <string>
 #include <vector>
 #include <array>
 #include <map>
 #include <filesystem>
-
 #include "engine/model.hpp"
 #include "engine/mesh.hpp"
 #include "engine/light.hpp"
@@ -21,9 +19,7 @@
 #include "engine/camera.hpp"
 #include "engine/framebuffer.hpp"
 #include "game.hpp"
-
 #include "utilities.hpp"
-
 
 class Scene {
 public:
@@ -59,9 +55,8 @@ public:
 
 	Game* game_;
 
-	ShadowMap *dir_shadow_map_;
-
-	Framebuffer *fbo = nullptr;
+	ShadowMap dir_shadow_map;
+	Framebuffer fbo;
 
 private:
 	void RenderShadowMapOfDirectionalLight();
