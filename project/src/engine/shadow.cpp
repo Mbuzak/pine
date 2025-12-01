@@ -36,11 +36,7 @@ void ShadowMap::Init(glm::vec3 direction) {
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	// Create program
-	program_id = glCreateProgram();
-	glAttachShader(program_id, LoadShader(GL_VERTEX_SHADER, "shaders/depthmap-vertex.glsl"));
-	glAttachShader(program_id, LoadShader(GL_FRAGMENT_SHADER, "shaders/depthmap-fragment.glsl"));
-	LinkAndValidateProgram(program_id);
+	program_id = program_init("shadow_map");
 }
 
 void ShadowMap::Render(std::vector<Piece*> pieces) {

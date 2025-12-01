@@ -6,18 +6,8 @@
 #include <string>
 #include <fstream>
 
-// Graphical pipeline class
-class Pipeline {
-public:
-	Pipeline(std::string vertex, std::string fragment);
-	~Pipeline();
-
-	void Activate();
-	void Disactivate();
-
-//private:
-	GLuint id_;
-};
+GLuint program_init(std::string);
+void program_destroy(GLuint);
 
 void LinkAndValidateProgram(GLuint);
 void CheckForErrors_Program(GLuint, GLenum);

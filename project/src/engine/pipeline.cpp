@@ -1,24 +1,18 @@
 #include "pipeline.hpp"
 
-Pipeline::Pipeline(std::string vertex, std::string fragment) {
-	id_ = glCreateProgram();
+GLuint program_init(std::string path) {
+	GLuint program_id = glCreateProgram();
 
-	glAttachShader(id_, LoadShader(GL_VERTEX_SHADER, ("shaders/" + vertex).c_str()));
-	glAttachShader(id_, LoadShader(GL_FRAGMENT_SHADER, ("shaders/" + fragment).c_str()));
+	glAttachShader(program_id, LoadShader(GL_VERTEX_SHADER, ("shaders/" + path + ".vs").c_str()));
+	glAttachShader(program_id, LoadShader(GL_FRAGMENT_SHADER, ("shaders/" + path + ".fs").c_str()));
 
-	LinkAndValidateProgram(id_);
+	LinkAndValidateProgram(program_id);
+
+	return program_id;
 }
 
-Pipeline::~Pipeline() {
-	glDeleteProgram(id_);
-}
-
-void Pipeline::Activate() {
-	glUseProgram(id_);
-}
-
-void Pipeline::Disactivate() {
-	glUseProgram(0);
+void program_destroy(GLuint program_id) {
+	glDeleteProgram(program_id);
 }
 
 void LinkAndValidateProgram(GLuint program) {

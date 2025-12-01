@@ -27,49 +27,50 @@
 
 class Scene {
 public:
-  Scene();
+	Scene();
 
-  // Loads all files from folder
-  void Load(const char *folder);
+	// Loads all files from folder
+	void Load(const char *folder);
 
-  void Setup();
-  void AddModel(const char *name);
-  void AddTexture(const char *filename, const char *extension);
-  void Display();
+	void Setup();
+	void AddModel(const char *name);
+	void AddTexture(const char *filename, const char *extension);
+	void Display();
 
-  void SendLight();
+	void SendLight();
 
 //private:
-  //glm::mat4 matrix_projection_;
+	//glm::mat4 matrix_projection_;
 
-  std::map<std::string, Pipeline*> pipelines_;
+	GLuint sbp;
+	GLuint program_default;
 
-  Skybox *skybox_ = nullptr;
-  Camera camera_;
+	Skybox *skybox_ = nullptr;
+	Camera camera_;
 
-  std::map<std::string, Model*> models_;
-  std::map<std::string, Texture*> textures_;
+	std::map<std::string, Model*> models_;
+	std::map<std::string, Texture*> textures_;
 
-  // --- meshes ---
-  Sun *sun_ = nullptr;
-  std::array<Lamp*, 4> lamps_;
+	// --- meshes ---
+	Sun *sun_ = nullptr;
+	std::array<Lamp*, 4> lamps_;
 
-  std::vector<Shape*> background_;
+	std::vector<Shape*> background_;
 
-  Game* game_;
+	Game* game_;
 
-  ShadowMap *dir_shadow_map_;
+	ShadowMap *dir_shadow_map_;
 
-  Framebuffer *fbo = nullptr;
+	Framebuffer *fbo = nullptr;
 
 private:
-  void RenderShadowMapOfDirectionalLight();
+	void RenderShadowMapOfDirectionalLight();
 
-  void RenderToTexture();
+	void RenderToTexture();
 
-  void RenderSkybox();
-  void RenderShapes();
-  void RenderLights();
+	void RenderSkybox();
+	void RenderShapes();
+	void RenderLights();
 };
 
 #endif
