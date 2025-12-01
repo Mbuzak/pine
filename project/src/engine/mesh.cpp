@@ -59,7 +59,7 @@ void Shape::Display(GLuint programID, int value) {
 	model_->Draw();
 }
 
-void Shape::DisplayOutline(GLuint program_id) {
+void Shape::DisplayOutline(GLuint program_id, int selected_id) {
 	// Wylaczenie zapisu do bufora szablonowego
 	glStencilMask(0x00);
 

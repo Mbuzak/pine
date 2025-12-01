@@ -11,7 +11,6 @@
 #include <map>
 #include <string>
 
-#include "utilities.hpp"
 #include "scene.hpp"
 
 #include "chess/chess.hpp"
@@ -19,14 +18,48 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-float off_rank_white = -8.0;
-float off_rank_black = -8.0;
+// NOWE: makro do znajdowania prostych bledow opengla
+#define __CHECK_FOR_ERRORS 	{GLenum errCode; if ((errCode = glGetError()) != GL_NO_ERROR) printf("Error (%d): %s in file %s at line %d !\n", errCode, gluErrorString(errCode), __FILE__,  __LINE__);}
+
 Scene scene;
 float Time = 0.0;
 
 int Window_Width = 800;
 int Window_Height = 600;
 
+// Funkcja wywolywana przy nacisnieciu tzw. specjalnych
+// klawiszy (klawiszy spoza tablicy ASCII)
+inline void SpecialKeys(int key, int x, int y) {
+	switch (key) {
+	case GLUT_KEY_LEFT:
+		scene.camera_.pos.x -= 0.2f;
+		break;
+	case GLUT_KEY_RIGHT:
+		scene.camera_.pos.x += 0.2f;
+		break;
+	case GLUT_KEY_UP:
+		scene.camera_.pos.y += 0.2f;
+		break;
+	case GLUT_KEY_DOWN:
+		scene.camera_.pos.y -= 0.2f;
+		break;
+	}
+
+  glutPostRedisplay();
+}
+
+// Funkcja wywolywana podczas ruchu rolki myszy
+inline void mouseWheel(int button, int dir, int x, int y) {
+	if (dir > 0) {
+		// Zoom in
+		scene.camera_.pos.z += 0.5f;
+	} else {
+		// Zoom out
+		scene.camera_.pos.z -= 0.5f;
+	}
+
+  glutPostRedisplay();
+}
 
 void DisplayScene() {
 	__CHECK_FOR_ERRORS
@@ -51,11 +84,8 @@ void Initialize() {
 	// ------------------------------------------------------------
 	// Ustawienie domyslnego odsuniecia kamery od polozenia (0,0,0)
 	// ------------------------------------------------------------
-	CameraTranslate_x = 0.0;
-	CameraTranslate_y = -3.0;
-	CameraTranslate_z = -22.0;
-	CameraRotate_x = 0.3;
-	CameraRotate_y = -1.57;
+	scene.camera_.pos = {0.0, -3.0, -22.0};
+	scene.camera_.rot = {0.3, -1.57};
 
 	stbi_set_flip_vertically_on_load(true);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -82,7 +112,7 @@ GLfloat depth;
 
 void MouseButton(int button, int state, int x, int y) {
 	if (button == GLUT_LEFT_BUTTON) {
-		_mouse_left_click_state = state;
+		scene._mouse_left_click_state = state;
 
 		if (state == GLUT_DOWN)	{
 			GLbyte color[4];
@@ -97,16 +127,16 @@ void MouseButton(int button, int state, int x, int y) {
 			printf("Depth: %f\n", depth);
 			printf("Stencil: %d\n", stencil);
 
-			selected_id = stencil - 1;
+			scene.selected_id = stencil - 1;
 
-			if (selected_id >= 0) {
-				if (scene.get_pieces()[selected_id]->is_active == false) {
-					selected_id = -1;
+			if (scene.selected_id >= 0) {
+				if (scene.get_pieces()[scene.selected_id]->is_active == false) {
+					scene.selected_id = -1;
 				}
 			}
 
-			if (selected_id >= 0) {
-				std::string field = scene.get_pieces()[selected_id]->get_field();
+			if (scene.selected_id >= 0) {
+				std::string field = scene.get_pieces()[scene.selected_id]->get_field();
 				//std::cout << "Field: " << field << "\n";
 				int field_id = (field[0] - 'a') + 8 * ('8' - field[1]);
 				std::cout << "Field id: " << field_id << "\n";
@@ -116,19 +146,19 @@ void MouseButton(int button, int state, int x, int y) {
 					scene.active_fields.push_back(value);
 				}
 
-				std::cout << "\nPos: (" << scene.get_pieces()[selected_id]->position_.x << ", " <<
-					scene.get_pieces()[selected_id]->position_.y << ", " <<
-					scene.get_pieces()[selected_id]->position_.z << ")\n";
+				std::cout << "\nPos: (" << scene.get_pieces()[scene.selected_id]->position_.x << ", " <<
+					scene.get_pieces()[scene.selected_id]->position_.y << ", " <<
+					scene.get_pieces()[scene.selected_id]->position_.z << ")\n";
 			}
 		}
 		else if (state == GLUT_UP) {
-			if (selected_id >= 0) {
-				std::string field = scene.get_pieces()[selected_id]->get_field();
+			if (scene.selected_id >= 0) {
+				std::string field = scene.get_pieces()[scene.selected_id]->get_field();
 				
 				int rank, file;
 
-				rank = 4 + (int)((scene.get_pieces()[selected_id]->position_.z + 22.5) / 2.25) - 10;
-				file = 4 + (int)((scene.get_pieces()[selected_id]->position_.x + 22.5) / 2.25) - 10;
+				rank = 4 + (int)((scene.get_pieces()[scene.selected_id]->position_.z + 22.5) / 2.25) - 10;
+				file = 4 + (int)((scene.get_pieces()[scene.selected_id]->position_.x + 22.5) / 2.25) - 10;
 
 				//std::cout << "rank: " << rank << ", file: " << file << "\n";
 				//std::cout << (char)('a' + file) << (char)('8' - rank) << "\n";
@@ -140,58 +170,58 @@ void MouseButton(int button, int state, int x, int y) {
 				if (field != new_field) {
 					chschr::Move move((field + new_field).c_str());
 					if (scene.chess->perform(move)) {
-						scene.get_pieces()[selected_id]->update_position();
+						scene.get_pieces()[scene.selected_id]->update_position();
 
-						std::string remove_field = scene.get_pieces()[selected_id]->get_field();
+						std::string remove_field = scene.get_pieces()[scene.selected_id]->get_field();
 
 						for (Piece *piece: scene.get_pieces()) {
-							if (piece->get_field() == remove_field && piece != scene.get_pieces()[selected_id] && piece->is_active) {
+							if (piece->get_field() == remove_field && piece != scene.get_pieces()[scene.selected_id] && piece->is_active) {
 
 								scene.DisactivatePiece(*piece);
 							}
 						}
 
-						scene.get_pieces()[selected_id]->update_world_position();
+						scene.get_pieces()[scene.selected_id]->update_world_position();
 					}
 					else {
-						scene.get_pieces()[selected_id]->update_world_position();
+						scene.get_pieces()[scene.selected_id]->update_world_position();
 					}
 				}
 
 				scene.active_fields.clear();
-				selected_id = -1;
+				scene.selected_id = -1;
 			}
 		}
 	}
 	else if (button == GLUT_RIGHT_BUTTON) {
-		_mouse_buttonState = state;
+		scene._mouse_buttonState = state;
 
 		if(state == GLUT_DOWN) {
-			_mouse_buttonX = x;
-			_mouse_buttonY = y;
+			scene._mouse_buttonX = x;
+			scene._mouse_buttonY = y;
 		}
 	}
 	else if (button == 3) {
-		CameraTranslate_z += 0.5f;
+		scene.camera_.pos.z += 0.5;
 	}
 	else if (button == 4) {
-		CameraTranslate_z -= 0.5f;
+		scene.camera_.pos.z -= 0.5;
 	}
 
 	glutPostRedisplay();
 }
 
 void MouseMotion(int x, int y) {
-	if (_mouse_buttonState == GLUT_DOWN) {
-		CameraRotate_y += 2*(x - _mouse_buttonX)/(float)Window_Width;
-		_mouse_buttonX = x;
-		CameraRotate_x -= 2*(_mouse_buttonY - y)/(float)Window_Height;
-		_mouse_buttonY = y;
+	if (scene._mouse_buttonState == GLUT_DOWN) {
+		scene.camera_.rot.y += 2*(x - scene._mouse_buttonX)/(float)Window_Width;
+		scene._mouse_buttonX = x;
+		scene.camera_.rot.x -= 2*(scene._mouse_buttonY - y)/(float)Window_Height;
+		scene._mouse_buttonY = y;
 		glutPostRedisplay();
 	}
 
-	if (_mouse_left_click_state == GLUT_DOWN) {
-		if (selected_id >= 0) {
+	if (scene._mouse_left_click_state == GLUT_DOWN) {
+		if (scene.selected_id >= 0) {
 
 			glBindFramebuffer(GL_FRAMEBUFFER, scene.fbo.id);
 			glReadPixels(x, Window_Height - y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
@@ -200,10 +230,10 @@ void MouseMotion(int x, int y) {
 			glm::vec3 point = glm::unProject(glm::vec3(x, Window_Height - y, depth), scene.camera_.view, scene.camera_.perspective, glm::vec4(0, 0, Window_Width, Window_Height));
 			//std::cout << "Worldspace: (" << point.x << ", " << point.y << ", " << point.z << "); Screen: (" << x << ", " << y << ")\n";
 
-			//scene.get_pieces()[selected_id]->position_.x = point.x;
-			//scene.get_pieces()[selected_id]->position_.z = point.z;
+			//scene.get_pieces()[scene.selected_id]->position_.x = point.x;
+			//scene.get_pieces()[scene.selected_id]->position_.z = point.z;
 
-			scene.UpdatePieceWorldPosition(selected_id, point.x, point.z);
+			scene.UpdatePieceWorldPosition(scene.selected_id, point.x, point.z);
 		}
 	}
 }

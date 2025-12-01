@@ -16,7 +16,6 @@
 #include "texture.hpp"
 #include "model.hpp"
 
-#include "utilities.hpp"
 #include "obj_loader.hpp"
 
 
@@ -41,7 +40,7 @@ public:
 	glm::mat4 ScaledMatModel(float x, float y, float z);
 
 	void Display(GLuint programID, int value = STANDARD);
-	void DisplayOutline(GLuint program_id);
+	void DisplayOutline(GLuint program_id, int);
 
 	void SendMaterial(GLuint programID);
 

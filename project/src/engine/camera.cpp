@@ -47,3 +47,13 @@ glm::vec3 ExtractCameraPos(const glm::mat4 & a_modelView) {
 
   return top / -denom;
 }
+
+// Funkcja zwraca macierz widoku dla kamery
+glm::mat4 Camera::UpdateViewMatrix() {
+	glm::mat4 matView = glm::mat4x4(1.0);
+	matView = glm::translate(matView, pos);
+	matView = glm::rotate(matView, rot.x, glm::vec3(1.0f, 0.0f, 0.0f));
+	matView = glm::rotate(matView, rot.y, glm::vec3(0.0f, 1.0f, 0.0f));
+
+	return matView;
+}

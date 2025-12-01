@@ -233,7 +233,7 @@ void Scene::Display(GLuint program_id) {
 	}
 
 	if (selected_id >= 0) {
-		pieces_[selected_id]->DisplayOutline(program_id);
+		pieces_[selected_id]->DisplayOutline(program_id, selected_id);
 	}
 }
 

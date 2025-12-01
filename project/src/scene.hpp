@@ -18,8 +18,8 @@
 #include "engine/shadow.hpp"
 #include "engine/camera.hpp"
 #include "engine/framebuffer.hpp"
-#include "utilities.hpp"
 #include "chess/chess.hpp"
+#include <GL/freeglut.h>
 
 class Scene {
 public:
@@ -80,6 +80,14 @@ public:
 	std::array<Shape*, 64> squares_;
 	float off_rank_white = -8.0;
 	float off_rank_black = -8.0;
+
+	int selected_id = -1;
+
+	// Zmienne do kontroli stanu myszy
+	int _mouse_buttonState = GLUT_UP;
+	int _mouse_left_click_state = GLUT_UP;
+	int _mouse_buttonX;
+	int _mouse_buttonY;
 };
 
 #endif
