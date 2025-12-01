@@ -2,16 +2,9 @@
 #define PIPELINE_HPP
 
 #include <GL/glew.h>
-#include <GL/freeglut.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
 #include <iostream>
 #include <string>
-
-#include "utilities.hpp"
-
+#include <fstream>
 
 // Graphical pipeline class
 class Pipeline {
@@ -25,5 +18,12 @@ public:
 //private:
 	GLuint id_;
 };
+
+void LinkAndValidateProgram(GLuint);
+void CheckForErrors_Program(GLuint, GLenum);
+GLuint LoadShader(GLuint, const char*);
+void CheckForErrors_Shader(GLuint);
+unsigned long getFileLength(std::ifstream&);
+GLchar* LoadShaderFile(const char*);
 
 #endif

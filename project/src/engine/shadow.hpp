@@ -12,6 +12,7 @@
 #include "mesh.hpp"
 
 #include "utilities.hpp"
+#include "pipeline.hpp"
 
 
 class DepthMap {
