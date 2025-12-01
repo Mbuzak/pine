@@ -61,8 +61,6 @@ void Initialize() {
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	scene.Setup();
-
-	_select = false;
 }
 
 void Reshape(int width, int height) {
@@ -70,7 +68,7 @@ void Reshape(int width, int height) {
 	Window_Height = height;
 
 	glViewport(0, 0, width, height);
-	_projection_matrix = glm::perspectiveFov(glm::radians(60.0f), (float)width, (float)height, 0.1f, 200.f);
+	scene.camera_.perspective = glm::perspectiveFov(glm::radians(60.0f), (float)width, (float)height, 0.1f, 200.f);
 }
 
 void Animation(int frame) {
@@ -199,7 +197,7 @@ void MouseMotion(int x, int y) {
 			glReadPixels(x, Window_Height - y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-			glm::vec3 point = glm::unProject(glm::vec3(x, Window_Height - y, depth), _view_matrix, _projection_matrix, glm::vec4(0, 0, Window_Width, Window_Height));
+			glm::vec3 point = glm::unProject(glm::vec3(x, Window_Height - y, depth), scene.camera_.view, scene.camera_.perspective, glm::vec4(0, 0, Window_Width, Window_Height));
 			//std::cout << "Worldspace: (" << point.x << ", " << point.y << ", " << point.z << "); Screen: (" << x << ", " << y << ")\n";
 
 			//scene.game_->get_pieces()[selected_id]->position_.x = point.x;

@@ -90,7 +90,7 @@ void Scene::Display() {
 void Scene::RenderToTexture() {
 	glUseProgram(program_default);
 
-	glUniformMatrix4fv(glGetUniformLocation(program_default, "matProj"), 1, GL_FALSE, glm::value_ptr(_projection_matrix));
+	glUniformMatrix4fv(glGetUniformLocation(program_default, "matProj"), 1, GL_FALSE, glm::value_ptr(camera_.perspective));
 	glUniform1i(glGetUniformLocation(program_default, "isLight"), false);
 
 	background_[1]->Display(program_default);
@@ -124,17 +124,15 @@ void Scene::RenderShadowMapOfDirectionalLight() {
 
 void Scene::RenderSkybox() {
 	glUseProgram(sbp);
-
-	skybox_->Draw(sbp, _projection_matrix, _view_matrix);
+	skybox_->Draw(sbp, camera_.perspective, camera_.view);
 }
 
 void Scene::RenderShapes() {
 	glUseProgram(program_default);
-
 	SendLight();
 	sun_->SendUniform(program_default);
 
-	glUniformMatrix4fv(glGetUniformLocation(program_default, "matProj"), 1, GL_FALSE, glm::value_ptr(_projection_matrix));
+	glUniformMatrix4fv(glGetUniformLocation(program_default, "matProj"), 1, GL_FALSE, glm::value_ptr(camera_.perspective));
 	glUniform1i(glGetUniformLocation(program_default, "isLight"), false);
 
 	// send camera
