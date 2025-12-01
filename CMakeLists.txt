@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 3.15)
-project(pine VERSION 1.0)
-set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_STANDARD_REQUIRED True)
-add_subdirectory(src)
+
+project(OpenGL VERSION 1.0)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+set(BIN_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN_FOLDER})
+
+add_subdirectory(project)
