@@ -1,6 +1,5 @@
 #include "mesh.hpp"
 
-
 Shape::Shape(Model *model):
 model_(model), position_(glm::vec3{0.0, 0.0, 0.0}),
 angle_(glm::vec3{0.0, 0.0, 0.0}), texture_(nullptr) {
