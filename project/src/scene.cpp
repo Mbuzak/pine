@@ -280,3 +280,76 @@ glm::vec3 Scene::IndexToPosition(int id) {
 	return position;
 }
 
+void Scene::select_piece(int wx, int wy, int x, int y) {
+	GLbyte color[4];
+	GLfloat depth;
+	GLuint stencil;
+
+	glReadPixels(x, wy - y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, color);
+	glReadPixels(x, wy - y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+	glReadPixels(x, wy - y, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &stencil);
+
+	printf("\nColor: %d %d %d\n", (unsigned char)color[0], (unsigned char)color[1], (unsigned char)color[2]);
+	printf("Depth: %f\n", depth);
+	printf("Stencil: %d\n", stencil);
+
+	selected_id = stencil - 1;
+
+	if (selected_id >= 0) {
+		if (get_pieces()[selected_id]->is_active == false) {
+			selected_id = -1;
+		}
+	}
+
+	if (selected_id >= 0) {
+		std::string field = get_pieces()[selected_id]->get_field();
+		//std::cout << "Field: " << field << "\n";
+		int field_id = (field[0] - 'a') + 8 * ('8' - field[1]);
+		std::cout << "Field id: " << field_id << "\n";
+
+		for (int &value: chess->LegalMoves(field_id)) {
+			//std::cout << value << "\n";
+			active_fields.push_back(value);
+		}
+
+		std::cout << "\nPos: (" << get_pieces()[selected_id]->position_.x << ", " <<
+			get_pieces()[selected_id]->position_.y << ", " <<
+			get_pieces()[selected_id]->position_.z << ")\n";
+	}
+}
+
+void Scene::move_piece() {
+	if (selected_id < 0) {
+		return;
+	}
+
+	std::string field = get_pieces()[selected_id]->get_field();
+	
+	int rank = 4 + (int)((get_pieces()[selected_id]->position_.z + 22.5) / 2.25) - 10;
+	int file = 4 + (int)((get_pieces()[selected_id]->position_.x + 22.5) / 2.25) - 10;
+
+	//std::cout << "rank: " << rank << ", file: " << file << "\n";
+	//std::cout << (char)('a' + file) << (char)('8' - rank) << "\n";
+
+	std::string new_field = std::string() + (char)('a' + file) + (char)('8' - rank);
+
+	// new position
+	if (field != new_field) {
+		chschr::Move move((field + new_field).c_str());
+		if (chess->perform(move)) {
+			get_pieces()[selected_id]->update_position();
+
+			std::string remove_field = get_pieces()[selected_id]->get_field();
+
+			for (Piece *piece: get_pieces()) {
+				if (piece->get_field() == remove_field && piece != get_pieces()[selected_id] && piece->is_active) {
+					DisactivatePiece(*piece);
+				}
+			}
+		}
+		get_pieces()[selected_id]->update_world_position();
+	}
+
+	active_fields.clear();
+	selected_id = -1;
+}

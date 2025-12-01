@@ -51,10 +51,8 @@ inline void SpecialKeys(int key, int x, int y) {
 // Funkcja wywolywana podczas ruchu rolki myszy
 inline void mouseWheel(int button, int dir, int x, int y) {
 	if (dir > 0) {
-		// Zoom in
 		scene.camera_.pos.z += 0.5f;
 	} else {
-		// Zoom out
 		scene.camera_.pos.z -= 0.5f;
 	}
 
@@ -81,9 +79,6 @@ void Initialize() {
 	positive pass stencil and depth test */
 	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
-	// ------------------------------------------------------------
-	// Ustawienie domyslnego odsuniecia kamery od polozenia (0,0,0)
-	// ------------------------------------------------------------
 	scene.camera_.pos = {0.0, -3.0, -22.0};
 	scene.camera_.rot = {0.3, -1.57};
 
@@ -115,82 +110,10 @@ void MouseButton(int button, int state, int x, int y) {
 		scene._mouse_left_click_state = state;
 
 		if (state == GLUT_DOWN)	{
-			GLbyte color[4];
-			//GLfloat depth;
-			GLuint stencil;
-
-			glReadPixels(x, Window_Height - y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, color);
-			glReadPixels(x, Window_Height - y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
-			glReadPixels(x, Window_Height - y, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &stencil);
-
-			printf("\nColor: %d %d %d\n", (unsigned char)color[0], (unsigned char)color[1], (unsigned char)color[2]);
-			printf("Depth: %f\n", depth);
-			printf("Stencil: %d\n", stencil);
-
-			scene.selected_id = stencil - 1;
-
-			if (scene.selected_id >= 0) {
-				if (scene.get_pieces()[scene.selected_id]->is_active == false) {
-					scene.selected_id = -1;
-				}
-			}
-
-			if (scene.selected_id >= 0) {
-				std::string field = scene.get_pieces()[scene.selected_id]->get_field();
-				//std::cout << "Field: " << field << "\n";
-				int field_id = (field[0] - 'a') + 8 * ('8' - field[1]);
-				std::cout << "Field id: " << field_id << "\n";
-
-				for (int &value: scene.chess->LegalMoves(field_id)) {
-					//std::cout << value << "\n";
-					scene.active_fields.push_back(value);
-				}
-
-				std::cout << "\nPos: (" << scene.get_pieces()[scene.selected_id]->position_.x << ", " <<
-					scene.get_pieces()[scene.selected_id]->position_.y << ", " <<
-					scene.get_pieces()[scene.selected_id]->position_.z << ")\n";
-			}
+			scene.select_piece(Window_Width, Window_Height, x, y);
 		}
 		else if (state == GLUT_UP) {
-			if (scene.selected_id >= 0) {
-				std::string field = scene.get_pieces()[scene.selected_id]->get_field();
-				
-				int rank, file;
-
-				rank = 4 + (int)((scene.get_pieces()[scene.selected_id]->position_.z + 22.5) / 2.25) - 10;
-				file = 4 + (int)((scene.get_pieces()[scene.selected_id]->position_.x + 22.5) / 2.25) - 10;
-
-				//std::cout << "rank: " << rank << ", file: " << file << "\n";
-				//std::cout << (char)('a' + file) << (char)('8' - rank) << "\n";
-
-				std::string new_field = std::string() + (char)('a' + file) + (char)('8' - rank);
-				
-
-				// new position
-				if (field != new_field) {
-					chschr::Move move((field + new_field).c_str());
-					if (scene.chess->perform(move)) {
-						scene.get_pieces()[scene.selected_id]->update_position();
-
-						std::string remove_field = scene.get_pieces()[scene.selected_id]->get_field();
-
-						for (Piece *piece: scene.get_pieces()) {
-							if (piece->get_field() == remove_field && piece != scene.get_pieces()[scene.selected_id] && piece->is_active) {
-
-								scene.DisactivatePiece(*piece);
-							}
-						}
-
-						scene.get_pieces()[scene.selected_id]->update_world_position();
-					}
-					else {
-						scene.get_pieces()[scene.selected_id]->update_world_position();
-					}
-				}
-
-				scene.active_fields.clear();
-				scene.selected_id = -1;
-			}
+			scene.move_piece();
 		}
 	}
 	else if (button == GLUT_RIGHT_BUTTON) {
@@ -222,16 +145,12 @@ void MouseMotion(int x, int y) {
 
 	if (scene._mouse_left_click_state == GLUT_DOWN) {
 		if (scene.selected_id >= 0) {
-
 			glBindFramebuffer(GL_FRAMEBUFFER, scene.fbo.id);
 			glReadPixels(x, Window_Height - y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 			glm::vec3 point = glm::unProject(glm::vec3(x, Window_Height - y, depth), scene.camera_.view, scene.camera_.perspective, glm::vec4(0, 0, Window_Width, Window_Height));
 			//std::cout << "Worldspace: (" << point.x << ", " << point.y << ", " << point.z << "); Screen: (" << x << ", " << y << ")\n";
-
-			//scene.get_pieces()[scene.selected_id]->position_.x = point.x;
-			//scene.get_pieces()[scene.selected_id]->position_.z = point.z;
 
 			scene.UpdatePieceWorldPosition(scene.selected_id, point.x, point.z);
 		}

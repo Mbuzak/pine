@@ -88,6 +88,9 @@ public:
 	int _mouse_left_click_state = GLUT_UP;
 	int _mouse_buttonX;
 	int _mouse_buttonY;
+
+	void select_piece(int wx, int wy, int x, int y);
+	void move_piece();
 };
 
 #endif
