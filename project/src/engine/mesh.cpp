@@ -1,14 +1,14 @@
 #include "mesh.hpp"
 
 Shape::Shape(Model *model):
-model_(model), position_(glm::vec3{0.0, 0.0, 0.0}),
-angle_(glm::vec3{0.0, 0.0, 0.0}), texture_(nullptr) {
+model_(model), pos(glm::vec3{0.0, 0.0, 0.0}),
+rot(glm::vec3{0.0, 0.0, 0.0}), texture_(nullptr) {
 	material_ = Material{glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.70f, 0.27f, 0.08f), glm::vec3(0.25f, 0.13f, 0.08f), 1.0f};
 }
 
 Shape::Shape(Model *model, glm::vec3 position):
 Shape(model) {
-	position_ = position;
+	pos = position;
 }
 
 Shape::Shape(Model *model, glm::vec3 position, Texture *texture):
@@ -28,10 +28,10 @@ bool Shape::HasTexture() {
 glm::mat4 Shape::CalculateMatModel(int value) {
 	glm::mat4 model(1.0);
 
-	model = glm::translate(model, position_);
-	model = glm::rotate(model, angle_.x, glm::vec3(1.0, 0.0, 0.0));
-	model = glm::rotate(model, angle_.y, glm::vec3(0.0, 1.0, 0.0));
-	model = glm::rotate(model, angle_.z, glm::vec3(0.0, 0.0, 1.0));
+	model = glm::translate(model, pos);
+	model = glm::rotate(model, rot.x, glm::vec3(1.0, 0.0, 0.0));
+	model = glm::rotate(model, rot.y, glm::vec3(0.0, 1.0, 0.0));
+	model = glm::rotate(model, rot.z, glm::vec3(0.0, 0.0, 1.0));
 
 	if (value == 0)
 		return model;
@@ -109,18 +109,18 @@ void Piece::update_field(std::string field) {
 }
 
 void Piece::update_world_position() {
-	position_.x = (field_[0] - 'a' - 4) * 2.25 + 1.12;
-	position_.z = ('8' - field_[1] - 4) * 2.25 + 1.12;
+	pos.x = (field_[0] - 'a' - 4) * 2.25 + 1.12;
+	pos.z = ('8' - field_[1] - 4) * 2.25 + 1.12;
 
 	// std::cout << field_ << "\n";
-	// std::cout << position_.x << " " << position_.y << " " << position_.z << "\n";
+	// std::cout << pos.x << " " << pos.y << " " << pos.z << "\n";
 }
 
 void Piece::update_position() {
 	int rank, file;
 
-	rank = 4 + (int)((position_.z + 22.5) / 2.25) - 10;
-	file = 4 + (int)((position_.x + 22.5) / 2.25) - 10;
+	rank = 4 + (int)((pos.z + 22.5) / 2.25) - 10;
+	file = 4 + (int)((pos.x + 22.5) / 2.25) - 10;
 
 	int field_id = rank * 8 + file;
 	std::cout << "Update!\n" << "rank: " << rank << ", file: " << file << "\n";

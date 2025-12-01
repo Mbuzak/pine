@@ -1,12 +1,10 @@
 #ifndef DIRECTION_HPP
 #define DIRECTION_HPP
 
-
 namespace chschr
 {
 
-struct Direction
-{
+struct Direction {
     int x, y;
 };
 

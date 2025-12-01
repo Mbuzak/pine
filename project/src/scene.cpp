@@ -1,7 +1,6 @@
 #include "scene.hpp"
 
 Scene::Scene() {
-	skybox_ = new Skybox();
 	chess = new chschr::Chess();
 }
 
@@ -23,8 +22,8 @@ void Scene::Setup() {
 	}
 
 	// Camera
-	camera_.pos = {0.0, -3.0, -22.0};
-	camera_.rot = {0.3, -1.57};
+	camera.pos = {0.0, -3.0, -22.0};
+	camera.rot = {0.3, -1.57};
 
 	// --- Shapes ---
 	background_.push_back(new Shape(models_.at("ground"), glm::vec3{0.0, -0.1, 0.0}, textures_.at("grass")));
@@ -38,7 +37,7 @@ void Scene::Setup() {
 	lamps_[2] = new Lamp(models_.at("sphere"), glm::vec3(-9.0, 1.0, 9.0), glm::vec3(0.2, 0.9, 0.5));
 	lamps_[3] = new Lamp(models_.at("sphere"), glm::vec3(-9.0, 1.0, -9.0), glm::vec3(0.2, 0.3, 0.5));
 
-	skybox_->CreateVAO();
+	skybox.CreateVAO();
 
 	dir_shadow_map.Init(sun_->direction);
 
@@ -67,7 +66,7 @@ void Scene::Display() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	camera_.Update();
+	camera.Update();
 
 	RenderSkybox();
 	//RenderLights();
@@ -80,7 +79,7 @@ void Scene::Display() {
 void Scene::RenderToTexture() {
 	glUseProgram(program_default);
 
-	glUniformMatrix4fv(glGetUniformLocation(program_default, "matProj"), 1, GL_FALSE, glm::value_ptr(camera_.perspective));
+	glUniformMatrix4fv(glGetUniformLocation(program_default, "matProj"), 1, GL_FALSE, glm::value_ptr(camera.perspective));
 	glUniform1i(glGetUniformLocation(program_default, "isLight"), false);
 
 	background_[1]->Display(program_default);
@@ -114,7 +113,7 @@ void Scene::RenderShadowMapOfDirectionalLight() {
 
 void Scene::RenderSkybox() {
 	glUseProgram(sbp);
-	skybox_->Draw(sbp, camera_.perspective, camera_.view);
+	skybox.Draw(sbp, camera.perspective, camera.view);
 }
 
 void Scene::RenderShapes() {
@@ -122,11 +121,11 @@ void Scene::RenderShapes() {
 	SendLight();
 	sun_->SendUniform(program_default);
 
-	glUniformMatrix4fv(glGetUniformLocation(program_default, "matProj"), 1, GL_FALSE, glm::value_ptr(camera_.perspective));
+	glUniformMatrix4fv(glGetUniformLocation(program_default, "matProj"), 1, GL_FALSE, glm::value_ptr(camera.perspective));
 	glUniform1i(glGetUniformLocation(program_default, "isLight"), false);
 
 	// send camera
-	camera_.SendUniform(program_default);
+	camera.SendUniform(program_default);
 
 	// potok graficzny mapy cieni ?
 	glUniformMatrix4fv(glGetUniformLocation(program_default, "lightProj"), 1, GL_FALSE, glm::value_ptr(lightProj));
@@ -180,7 +179,7 @@ void Scene::Init() {
 		Piece *piece = new Piece(i, models_.at(name), textures_.at(colour));
 		piece->colour = colour;
 		if (colour == "white") {
-			piece->angle_.y = 3.2;
+			piece->rot.y = 3.2;
 		}
 
 		pieces_.push_back(piece);
@@ -211,31 +210,31 @@ void Scene::Display(GLuint program_id) {
 }
 
 void Scene::UpdatePieceWorldPosition(int id, float x, float z) {
-	get_pieces()[id]->position_.x = x;
-	get_pieces()[id]->position_.z = z;
+	get_pieces()[id]->pos.x = x;
+	get_pieces()[id]->pos.z = z;
 }
 
 void Scene::DisactivatePiece(Piece &piece) {
 	if (piece.colour == "white") {
 		if (off_rank_white < 8.0) {
-			piece.position_.x = 12.0;
-			piece.position_.z = off_rank_white;
+			piece.pos.x = 12.0;
+			piece.pos.z = off_rank_white;
 		}
 		else {
-			piece.position_.x = 14.0;
-			piece.position_.z = off_rank_white - 16.0;
+			piece.pos.x = 14.0;
+			piece.pos.z = off_rank_white - 16.0;
 		}
 		
 		off_rank_white += 2.0;
 	}
 	else {
 		if (off_rank_black < 8.0) {
-			piece.position_.x = -12.0;
-			piece.position_.z = off_rank_black;
+			piece.pos.x = -12.0;
+			piece.pos.z = off_rank_black;
 		}
 		else {
-			piece.position_.x = -14.0;
-			piece.position_.z = off_rank_black - 16.0;
+			piece.pos.x = -14.0;
+			piece.pos.z = off_rank_black - 16.0;
 		}
 		off_rank_black += 2.0;
 	}
@@ -285,9 +284,9 @@ void Scene::select_piece(int wx, int wy, int x, int y) {
 			active_fields.push_back(value);
 		}
 
-		std::cout << "\nPos: (" << get_pieces()[selected_id]->position_.x << ", " <<
-			get_pieces()[selected_id]->position_.y << ", " <<
-			get_pieces()[selected_id]->position_.z << ")\n";
+		std::cout << "\nPos: (" << get_pieces()[selected_id]->pos.x << ", " <<
+			get_pieces()[selected_id]->pos.y << ", " <<
+			get_pieces()[selected_id]->pos.z << ")\n";
 	}
 }
 
@@ -298,8 +297,8 @@ void Scene::move_piece() {
 
 	std::string field = get_pieces()[selected_id]->get_field();
 	
-	int rank = 4 + (int)((get_pieces()[selected_id]->position_.z + 22.5) / 2.25) - 10;
-	int file = 4 + (int)((get_pieces()[selected_id]->position_.x + 22.5) / 2.25) - 10;
+	int rank = 4 + (int)((get_pieces()[selected_id]->pos.z + 22.5) / 2.25) - 10;
+	int file = 4 + (int)((get_pieces()[selected_id]->pos.x + 22.5) / 2.25) - 10;
 
 	//std::cout << "rank: " << rank << ", file: " << file << "\n";
 	//std::cout << (char)('a' + file) << (char)('8' - rank) << "\n";
@@ -328,9 +327,9 @@ void Scene::move_piece() {
 }
 
 void Scene::rotate(int x, int y) {
-	camera_.rot.y += 2*(x - _mouse_buttonX)/(float)width;
+	camera.rot.y += 2*(x - _mouse_buttonX)/(float)width;
 	_mouse_buttonX = x;
-	camera_.rot.x -= 2*(_mouse_buttonY - y)/(float)height;
+	camera.rot.x -= 2*(_mouse_buttonY - y)/(float)height;
 	_mouse_buttonY = y;
 	glutPostRedisplay();
 }

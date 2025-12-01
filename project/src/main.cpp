@@ -29,16 +29,16 @@ float Time = 0.0;
 inline void SpecialKeys(int key, int x, int y) {
 	switch (key) {
 	case GLUT_KEY_LEFT:
-		scene.camera_.pos.x -= 0.2f;
+		scene.camera.pos.x -= 0.2f;
 		break;
 	case GLUT_KEY_RIGHT:
-		scene.camera_.pos.x += 0.2f;
+		scene.camera.pos.x += 0.2f;
 		break;
 	case GLUT_KEY_UP:
-		scene.camera_.pos.y += 0.2f;
+		scene.camera.pos.y += 0.2f;
 		break;
 	case GLUT_KEY_DOWN:
-		scene.camera_.pos.y -= 0.2f;
+		scene.camera.pos.y -= 0.2f;
 		break;
 	}
 
@@ -48,9 +48,9 @@ inline void SpecialKeys(int key, int x, int y) {
 // Funkcja wywolywana podczas ruchu rolki myszy
 inline void mouseWheel(int button, int dir, int x, int y) {
 	if (dir > 0) {
-		scene.camera_.pos.z += 0.5f;
+		scene.camera.pos.z += 0.5f;
 	} else {
-		scene.camera_.pos.z -= 0.5f;
+		scene.camera.pos.z -= 0.5f;
 	}
 
   glutPostRedisplay();
@@ -87,7 +87,7 @@ void Reshape(int width, int height) {
 	scene.height = height;
 
 	glViewport(0, 0, width, height);
-	scene.camera_.perspective = glm::perspectiveFov(glm::radians(60.0f), (float)width, (float)height, 0.1f, 200.f);
+	scene.camera.perspective = glm::perspectiveFov(glm::radians(60.0f), (float)width, (float)height, 0.1f, 200.f);
 }
 
 void Animation(int frame) {
@@ -119,10 +119,10 @@ void MouseButton(int button, int state, int x, int y) {
 		}
 	}
 	else if (button == 3) {
-		scene.camera_.pos.z += 0.5;
+		scene.camera.pos.z += 0.5;
 	}
 	else if (button == 4) {
-		scene.camera_.pos.z -= 0.5;
+		scene.camera.pos.z -= 0.5;
 	}
 
 	glutPostRedisplay();
@@ -139,7 +139,7 @@ void MouseMotion(int x, int y) {
 			glReadPixels(x, scene.height - y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-			glm::vec3 point = glm::unProject(glm::vec3(x, scene.height - y, depth), scene.camera_.view, scene.camera_.perspective, glm::vec4(0, 0, scene.width, scene.height));
+			glm::vec3 point = glm::unProject(glm::vec3(x, scene.height - y, depth), scene.camera.view, scene.camera.perspective, glm::vec4(0, 0, scene.width, scene.height));
 			//std::cout << "Worldspace: (" << point.x << ", " << point.y << ", " << point.z << "); Screen: (" << x << ", " << y << ")\n";
 
 			scene.UpdatePieceWorldPosition(scene.selected_id, point.x, point.z);

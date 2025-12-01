@@ -1,9 +1,6 @@
-set(SOURCES main.cpp scene.cpp)
-
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(${PROJECT_NAME} main.cpp scene.cpp)
 
 add_subdirectory(chess)
-
 add_subdirectory(engine)
 
 function(copy_folder name)

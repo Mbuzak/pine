@@ -10,42 +10,42 @@
 
 class Light {
 public:
-  Light() = default;
-  Light(glm::vec3 diffuse, glm::vec3 specular);
+	Light() = default;
+	Light(glm::vec3 diffuse, glm::vec3 specular);
 
 public:
-  glm::vec3 ambient;
-  glm::vec3 diffuse;
-  glm::vec3 specular;
+	glm::vec3 ambient;
+	glm::vec3 diffuse;
+	glm::vec3 specular;
 };
 
 
 // Lamp class represents point light
 class Lamp: public Light {
 public:
-  Lamp(Model *model, glm::vec3 position, glm::vec3 diffuse);
-  Lamp(Model* model, glm::vec3 position, glm::vec3 diffuse, glm::vec3 specular, glm::vec3 attenuation);
+	Lamp(Model *model, glm::vec3 position, glm::vec3 diffuse);
+	Lamp(Model* model, glm::vec3 position, glm::vec3 diffuse, glm::vec3 specular, glm::vec3 attenuation);
 
-  glm::mat4 CalculateMatModel();
-  void Display(GLuint program_id);
+	glm::mat4 CalculateMatModel();
+	void Display(GLuint program_id);
 
 public:
-  glm::vec3 position;
-  glm::vec3 attenuation;
+	glm::vec3 position;
+	glm::vec3 attenuation;
 
-  Model* model = nullptr;
+	Model* model = nullptr;
 };
 
 
 // Sun class represents directional lighting
 class Sun: public Light {
 public:
-  Sun(glm::vec3 direction);
+	Sun(glm::vec3 direction);
 
-  void SendUniform(GLuint program_id);
+	void SendUniform(GLuint program_id);
 
 public:
-  glm::vec3 direction;
+	glm::vec3 direction;
 };
 
 #endif

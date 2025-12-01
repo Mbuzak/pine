@@ -9,7 +9,6 @@
 #include <vector>
 #include <array>
 #include <map>
-#include <filesystem>
 #include "engine/model.hpp"
 #include "engine/mesh.hpp"
 #include "engine/light.hpp"
@@ -34,8 +33,8 @@ public:
 	GLuint sbp;
 	GLuint program_default;
 
-	Skybox *skybox_ = nullptr;
-	Camera camera_;
+	Skybox skybox;
+	Camera camera;
 
 	std::map<std::string, Model*> models_;
 	std::map<std::string, Texture*> textures_;
