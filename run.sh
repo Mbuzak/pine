@@ -1,3 +1,3 @@
 #!/bin/bash
 cmake --build build
-cd bin && ./OpenGL
+./build/src/OpenGL

@@ -1,3 +1,6 @@
 # Build
 build/
 bin/
+
+# 3rd party libraries
+libs/
