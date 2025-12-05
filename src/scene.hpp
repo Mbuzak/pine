@@ -10,7 +10,7 @@
 #include "engine/model.hpp"
 #include "engine/mesh.hpp"
 #include "engine/light.hpp"
-#include "engine/pipeline.hpp"
+#include "engine/shader.hpp"
 #include "engine/texture.hpp"
 #include "engine/shadow.hpp"
 #include "engine/camera.hpp"
@@ -22,6 +22,7 @@
 #define __CHECK_FOR_ERRORS 	{GLenum errCode; if ((errCode = glGetError()) != GL_NO_ERROR) printf("Error (%d): %s in file %s at line %d !\n", errCode, gluErrorString(errCode), __FILE__,  __LINE__);}
 
 void uniform_vec3f_send(GLuint, const char*, const glm::vec3&);
+void uniform_mat4fv_send(GLuint, const char*, const glm::mat4&);
 
 class Scene {
 public:
@@ -40,7 +41,7 @@ public:
 	Camera camera;
 
 	std::map<std::string, Model*> models_;
-	std::map<std::string, Texture*> textures_;
+	std::map<std::string, GLuint> textures;
 
 	// --- meshes ---
 	Sun *sun_ = nullptr;

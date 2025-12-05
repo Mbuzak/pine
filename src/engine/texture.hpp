@@ -3,21 +3,9 @@
 
 #include <string.h>
 #include <GL/glew.h>
-
 #include <iostream>
 
 #define ALPHA_CHANNEL 4
-
-
-// Visible mesh texture
-class Texture {
-public:
-  Texture(const char *file);
-  void Send(GLuint programID);
-
-private:
-  GLuint id_;
-};
 
 GLuint texture_2d_init(const char*);
 GLuint texture_cube_map_init();

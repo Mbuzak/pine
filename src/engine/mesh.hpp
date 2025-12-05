@@ -12,7 +12,6 @@
 #include "material.hpp"
 #include "texture.hpp"
 #include "model.hpp"
-#include "obj_loader.hpp"
 
 #define STANDARD 0
 #define OUTLINE 1
@@ -22,7 +21,7 @@ class Shape {
 public:
 	Shape(Model *model);
 	Shape(Model *model, glm::vec3 position);
-	Shape(Model *model, glm::vec3 position, Texture *texture);
+	Shape(Model *model, glm::vec3 position, GLuint texture);
 	Shape(Model *model, glm::vec3 position, Material &material);
 
 	bool HasTexture();
@@ -35,13 +34,13 @@ public:
 	glm::vec3 pos;
 	glm::vec3 rot;
 	Material material_;
-	Texture *texture_;
+	GLuint texture_;
 	Model *model_ = nullptr;
 };
 
 class Piece: public Shape {
 public:
-	Piece(int field_id, Model *model, Texture* texture);
+	Piece(int field_id, Model *model, GLuint texture);
 
 	std::string get_field();
 

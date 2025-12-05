@@ -3,7 +3,7 @@
 
 #include <GL/glew.h>
 #include "model.hpp"
-#include "pipeline.hpp"
+#include "shader.hpp"
 #include "camera.hpp"
 #include "texture.hpp"
 

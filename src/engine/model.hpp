@@ -8,8 +8,6 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "material.hpp"
-#include "texture.hpp"
 #include "obj_loader.hpp"
 
 // Skybox model on scene

@@ -2,7 +2,7 @@
 
 Shape::Shape(Model *model):
 model_(model), pos(glm::vec3{0.0, 0.0, 0.0}),
-rot(glm::vec3{0.0, 0.0, 0.0}), texture_(nullptr) {
+rot(glm::vec3{0.0, 0.0, 0.0}), texture_(-1) {
 	material_ = Material{glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.70f, 0.27f, 0.08f), glm::vec3(0.25f, 0.13f, 0.08f), 1.0f};
 }
 
@@ -11,7 +11,7 @@ Shape(model) {
 	pos = position;
 }
 
-Shape::Shape(Model *model, glm::vec3 position, Texture *texture):
+Shape::Shape(Model *model, glm::vec3 position, GLuint texture):
 Shape(model, position) {
 	texture_ = texture;
 }
@@ -22,7 +22,7 @@ Shape(model, position) {
 }
 
 bool Shape::HasTexture() {
-	return texture_ != nullptr;
+	return texture_ != -1;
 }
 
 glm::mat4 Shape::CalculateMatModel(int value) {
@@ -54,7 +54,7 @@ void Shape::Display(GLuint programID, int value) {
 	glUniform1i(glGetUniformLocation(programID, "hasTex"), HasTexture());
 
 	if (HasTexture())
-		texture_->Send(programID);
+		texture_2d_send(programID, texture_);
 
 	model_->Draw();
 }
@@ -89,7 +89,7 @@ void Shape::SendMaterial(GLuint programID) {
 }
 
 
-Piece::Piece(int field_id, Model *model, Texture* texture):
+Piece::Piece(int field_id, Model *model, GLuint texture):
 Shape(model, glm::vec3(0.0, 0.1, 0.0), texture) {
 	field_.push_back((char)'a' + (field_id % 8));
 	field_.push_back((char)'8' - (field_id / 8));

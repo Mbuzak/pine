@@ -5,6 +5,10 @@ void uniform_vec3f_send(GLuint program, const char* name, const glm::vec3& vec) 
 	glUniform3fv(glGetUniformLocation(program, name), 1, glm::value_ptr(vec));
 }
 
+void uniform_mat4fv_send(GLuint program_id, const char* name, const glm::mat4& matrix) {
+	glUniformMatrix4fv(glGetUniformLocation(program_id, name), 1, GL_FALSE, glm::value_ptr(matrix));
+}
+
 Scene::Scene() {
 	chess = new chschr::Chess();
 }
@@ -30,14 +34,14 @@ void Scene::Setup() {
 	// Load models
 	std::vector<std::string> model_names = {"square", "pawn", "knight", "bishop", "rook", "king", "queen", "chessboard", "ground", "sphere"};
 	for (std::string &name: model_names) {
-		models_.insert(std::pair<std::string, Model*>(name, new Model(name)));
+		models_.insert({name, new Model(name)});
 	}
 	
 	// Load textures
 	std::vector<std::string> texture_names = {"white", "black", "chessboard", "grass"};
 	for (std::string &name: texture_names) {
 		std::string file = name + ".jpg";
-		textures_.insert(std::pair<std::string, Texture*>(name, new Texture(file.c_str())));
+		textures.insert({name, texture_2d_init(file.c_str())});
 	}
 
 	// Camera
@@ -45,8 +49,8 @@ void Scene::Setup() {
 	camera.rot = {0.3, -1.57};
 
 	// --- Shapes ---
-	background_.push_back(new Shape(models_.at("ground"), glm::vec3{0.0, -0.1, 0.0}, textures_.at("grass")));
-	background_.push_back(new Shape(models_.at("chessboard"), glm::vec3{0.0, 0.0, 0.0}, textures_.at("chessboard")));
+	background_.push_back(new Shape(models_.at("ground"), glm::vec3{0.0, -0.1, 0.0}, textures.at("grass")));
+	background_.push_back(new Shape(models_.at("chessboard"), glm::vec3{0.0, 0.0, 0.0}, textures.at("chessboard")));
 
 	// --- Lights ---
 	sun_ = new Sun(glm::vec3(1.0, -2.0, 2.0));
@@ -74,7 +78,7 @@ void Scene::Setup() {
 		if (name == "x")
 			continue;
 
-		Piece *piece = new Piece(i, models_.at(name), textures_.at(colour));
+		Piece *piece = new Piece(i, models_.at(name), textures.at(colour));
 		piece->colour = colour;
 		if (colour == "white") {
 			piece->rot.y = 3.2;

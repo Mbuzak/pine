@@ -1,4 +1,4 @@
-#include "pipeline.hpp"
+#include "shader.hpp"
 
 GLuint program_init(std::string path) {
 	GLuint program_id = glCreateProgram();

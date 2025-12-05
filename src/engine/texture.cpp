@@ -5,10 +5,6 @@
 GLuint texture_2d_init(const char* file) {
 	GLuint id;
 
-	return id;
-}
-
-Texture::Texture(const char *file) {
 	// Load from file
 	char path[64] = "textures/";
 	strcat(path, file);
@@ -22,8 +18,8 @@ Texture::Texture(const char *file) {
 	}
 	
 	// Bind texture
-	glGenTextures(1, &id_);
-	glBindTexture(GL_TEXTURE_2D, id_);
+	glGenTextures(1, &id);
+	glBindTexture(GL_TEXTURE_2D, id);
 	
 	if (n == ALPHA_CHANNEL)
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture);
@@ -35,12 +31,8 @@ Texture::Texture(const char *file) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-}
 
-void Texture::Send(GLuint programID) {
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, id_);
-	glUniform1i(glGetUniformLocation(programID, "uTexture"), 0);
+	return id;
 }
 
 GLuint texture_cube_map_init() {
@@ -80,6 +72,12 @@ GLuint texture_cube_map_init() {
 	stbi_set_flip_vertically_on_load(true);
 
 	return id;
+}
+
+void texture_2d_send(GLuint program_id, GLuint texture_id) {
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture_id);
+	glUniform1i(glGetUniformLocation(program_id, "uTexture"), 0);
 }
 
 void texture_cube_map_send(GLuint program_id, GLuint texture_id) {

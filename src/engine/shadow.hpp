@@ -7,7 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
 #include "mesh.hpp"
-#include "pipeline.hpp"
+#include "shader.hpp"
 
 // Shadow map of direction or point light
 class ShadowMap {
