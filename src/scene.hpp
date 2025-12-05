@@ -17,7 +17,6 @@
 #include "engine/framebuffer.hpp"
 #include "engine/renderer.hpp"
 #include "chess/chess.hpp"
-#include <GL/freeglut.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -70,7 +69,6 @@ public:
 	std::vector<Piece*> get_pieces();
 
 	void display(GLuint program_id);
-	void UpdatePieceWorldPosition(int id, float x, float z);
 	void DisactivatePiece(Piece &piece);
 
 	chschr::Chess* chess;

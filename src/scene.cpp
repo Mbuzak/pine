@@ -120,11 +120,9 @@ void Scene::display() {
 				if (_mouse_left_click_state == 1) {
 					motion(e.motion.x, e.motion.y);
 				}
-
 			}
 			else if (e.type == SDL_MOUSEWHEEL) {
 				camera.pos.z += 0.5 * e.wheel.y;
-
 			}
 			else if (e.type == SDL_MOUSEBUTTONDOWN) {
 				if (e.button.button == SDL_BUTTON_LEFT) {
@@ -144,10 +142,8 @@ void Scene::display() {
 				}
 				if (e.button.button == SDL_BUTTON_RIGHT) {
 					_mouse_buttonState = 0;
-
 				}
 			}
-
 		}
 
 	__CHECK_FOR_ERRORS
@@ -174,7 +170,6 @@ void Scene::display() {
 	glUseProgram(0);
 
 	SDL_GL_SwapWindow(d.window);
-	//glutSwapBuffers();
 	}
 }
 
@@ -259,12 +254,6 @@ void Scene::display(GLuint program_id) {
 	if (selected_id >= 0) {
 		pieces_[selected_id]->DisplayOutline(program_id, selected_id);
 	}
-
-}
-
-void Scene::UpdatePieceWorldPosition(int id, float x, float z) {
-	get_pieces()[id]->pos.x = x;
-	get_pieces()[id]->pos.z = z;
 }
 
 void Scene::DisactivatePiece(Piece &piece) {
@@ -384,7 +373,6 @@ void Scene::rotate(int x, int y) {
 	_mouse_buttonX = x;
 	camera.rot.x -= 2*(_mouse_buttonY - y)/(float)height;
 	_mouse_buttonY = y;
-	//glutPostRedisplay();
 }
 
 void Scene::motion(int x, int y) {
@@ -400,7 +388,9 @@ void Scene::motion(int x, int y) {
 	glm::vec3 point = glm::unProject(glm::vec3(x, height - y, depth), camera.view, camera.perspective, glm::vec4(0, 0, width, height));
 	//std::cout << "Worldspace: (" << point.x << ", " << point.y << ", " << point.z << "); Screen: (" << x << ", " << y << ")\n";
 
-	UpdatePieceWorldPosition(selected_id, point.x, point.z);
+	// Update piece world position
+	get_pieces()[selected_id]->pos.x = point.x;
+	get_pieces()[selected_id]->pos.z = point.z;
 }
 
 void Scene::reshape(int w, int h) {
