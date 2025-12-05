@@ -1,5 +1,9 @@
 #include "scene.hpp"
 
+void uniform_vec3f_send(GLuint program, const char* name, const glm::vec3& vec) {
+	glUniform3fv(glGetUniformLocation(program, name), 1, glm::value_ptr(vec));
+}
+
 Scene::Scene() {
 	chess = new chschr::Chess();
 }
@@ -41,9 +45,29 @@ void Scene::Setup() {
 
 	dir_shadow_map.Init(sun_->direction);
 
-	Init();
-
 	fbo.init();
+
+	for (int i = 0; i < squares_.size(); i++) {
+		squares_[i] = new Shape(models_.at("square"), IndexToPosition(i));
+		if (((i % 8) + (i / 8)) % 2 == 0) {
+			squares_[i]->material_.ambient = glm::vec3(0.5);
+		}
+	}
+
+	for (int i = 0; i < chess->mBoard.size(); i++) {
+		std::string name = chess->pieceName.at(chess->mBoard[i]);
+		std::string colour = (chess->isWhite(i / 8, i % 8)) ? "white" : "black";
+
+		if (name == "x")
+			continue;
+
+		Piece *piece = new Piece(i, models_.at(name), textures_.at(colour));
+		piece->colour = colour;
+		if (colour == "white") {
+			piece->rot.y = 3.2;
+		}
+		pieces_.push_back(piece);
+	}
 
 	printf("\n---Skróty klawiszowe---\n\n");
 	printf("RPM - obrót sceny\n");
@@ -52,17 +76,15 @@ void Scene::Setup() {
 }
 
 void Scene::Display() {
-	RenderShadowMapOfDirectionalLight();
+	dir_shadow_map.Render(get_pieces());
 
-
-	glViewport(0, 0, glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
+	glViewport(0, 0, width, height);
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo.id);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	RenderToTexture();
 
-
-	glViewport(0, 0, glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
+	glViewport(0, 0, width, height);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
@@ -78,37 +100,22 @@ void Scene::Display() {
 
 void Scene::RenderToTexture() {
 	glUseProgram(program_default);
-
 	glUniformMatrix4fv(glGetUniformLocation(program_default, "matProj"), 1, GL_FALSE, glm::value_ptr(camera.perspective));
 	glUniform1i(glGetUniformLocation(program_default, "isLight"), false);
-
 	background_[1]->Display(program_default);
-
 	glUseProgram(0);
 }
 
-void Scene::SendLight() {
-	GLint idProgram;
-	glGetIntegerv(GL_CURRENT_PROGRAM, &idProgram);
-
+void Scene::SendLight(GLuint program) {
 	// point lights
 	for (int i = 0; i < lamps_.size(); i++) {
-		std::string ambient = "lights[" + std::to_string(i) + "].ambient";
-		std::string diffuse = "lights[" + std::to_string(i) + "].diffuse";
-		std::string specular = "lights[" + std::to_string(i) + "].specular";
-		std::string attenuation = "lights[" + std::to_string(i) + "].attenuation";
-		std::string position = "lights[" + std::to_string(i) + "].position";
+		std::string name = "lights[" + std::to_string(i) + "].";
 
-		glUniform3fv(glGetUniformLocation(idProgram, ambient.c_str()), 1, glm::value_ptr(lamps_[i]->ambient));
-		glUniform3fv(glGetUniformLocation(idProgram, diffuse.c_str()), 1, glm::value_ptr(lamps_[i]->diffuse));
-		glUniform3fv(glGetUniformLocation(idProgram, specular.c_str()), 1, glm::value_ptr(lamps_[i]->specular));
-		glUniform3fv(glGetUniformLocation(idProgram, attenuation.c_str()), 1, glm::value_ptr(lamps_[i]->attenuation));
-		glUniform3fv(glGetUniformLocation(idProgram, position.c_str()), 1, glm::value_ptr(lamps_[i]->position));
+		uniform_vec3f_send(program, (name + "ambient").c_str(), lamps_[i]->ambient);
+		uniform_vec3f_send(program, (name + "specular").c_str(), lamps_[i]->specular);
+		uniform_vec3f_send(program, (name + "attenuation").c_str(), lamps_[i]->attenuation);
+		uniform_vec3f_send(program, (name + "position").c_str(), lamps_[i]->position);
 	}
-}
-
-void Scene::RenderShadowMapOfDirectionalLight() {
-	dir_shadow_map.Render(get_pieces());
 }
 
 void Scene::RenderSkybox() {
@@ -118,13 +125,12 @@ void Scene::RenderSkybox() {
 
 void Scene::RenderShapes() {
 	glUseProgram(program_default);
-	SendLight();
+	SendLight(program_default);
 	sun_->SendUniform(program_default);
 
 	glUniformMatrix4fv(glGetUniformLocation(program_default, "matProj"), 1, GL_FALSE, glm::value_ptr(camera.perspective));
 	glUniform1i(glGetUniformLocation(program_default, "isLight"), false);
 
-	// send camera
 	camera.SendUniform(program_default);
 
 	// potok graficzny mapy cieni ?
@@ -155,35 +161,6 @@ void Scene::RenderLights() {
 // game
 std::vector<Piece*> Scene::get_pieces() {
 	return pieces_;
-}
-
-void Scene::Init() {
-	for (int i = 0; i < squares_.size(); i++) {
-		squares_[i] = new Shape(models_.at("square"), IndexToPosition(i));
-		if (((i % 8) + (i / 8)) % 2 == 0) {
-			squares_[i]->material_.ambient.r = 0.5;
-			squares_[i]->material_.ambient.g = 0.5;
-			squares_[i]->material_.ambient.b = 0.5;
-		}
-	}
-
-	std::string colour;
-	for (int i = 0; i < chess->mBoard.size(); i++) {
-		std::string name = chess->pieceName.at(chess->mBoard[i]);
-		if (chess->isWhite(i / 8, i % 8)) colour = "white";
-		else colour = "black";
-
-		if (name == "x")
-			continue;
-
-		Piece *piece = new Piece(i, models_.at(name), textures_.at(colour));
-		piece->colour = colour;
-		if (colour == "white") {
-			piece->rot.y = 3.2;
-		}
-
-		pieces_.push_back(piece);
-	}
 }
 
 void Scene::Display(GLuint program_id) {

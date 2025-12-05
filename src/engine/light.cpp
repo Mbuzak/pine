@@ -1,9 +1,7 @@
 #include "light.hpp"
 
-
 Lamp::Lamp(Model *model, glm::vec3 position, glm::vec3 diffuse) {
 	this->model = model;
-
 	this->position = position;
 	this->ambient = glm::vec3(0.1);
 	this->diffuse = diffuse;
@@ -12,20 +10,16 @@ Lamp::Lamp(Model *model, glm::vec3 position, glm::vec3 diffuse) {
 }
 
 Lamp::Lamp(Model* model, glm::vec3 position, glm::vec3 diffuse, glm::vec3 specular, glm::vec3 attenuation) {
-  this->model = model;
-
+	this->model = model;
 	this->position = position;
-  this->ambient = glm::vec3(0.1);
+	this->ambient = glm::vec3(0.1);
 	this->diffuse = diffuse;
 	this->specular = specular;
 	this->attenuation = attenuation;
 }
 
 glm::mat4 Lamp::CalculateMatModel() {
-	glm::mat4 model(1.0);
-
-	model = glm::translate(model, position);
-
+	glm::mat4 model = glm::translate(glm::mat4(1.0f), position);
 	return model;
 }
 
@@ -47,8 +41,8 @@ Sun::Sun(glm::vec3 direction) {
 }
 
 void Sun::SendUniform(GLuint program_id) {
-  glUniform3fv(glGetUniformLocation(program_id, "sun.ambient"), 1, glm::value_ptr(ambient));
-  glUniform3fv(glGetUniformLocation(program_id, "sun.diffuse"), 1, glm::value_ptr(diffuse));
-  glUniform3fv(glGetUniformLocation(program_id, "sun.specular"), 1, glm::value_ptr(specular));
-  glUniform3fv(glGetUniformLocation(program_id, "sun.direction"), 1, glm::value_ptr(direction));
+	glUniform3fv(glGetUniformLocation(program_id, "sun.ambient"), 1, glm::value_ptr(ambient));
+	glUniform3fv(glGetUniformLocation(program_id, "sun.diffuse"), 1, glm::value_ptr(diffuse));
+	glUniform3fv(glGetUniformLocation(program_id, "sun.specular"), 1, glm::value_ptr(specular));
+	glUniform3fv(glGetUniformLocation(program_id, "sun.direction"), 1, glm::value_ptr(direction));
 }

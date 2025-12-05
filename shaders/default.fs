@@ -2,12 +2,8 @@
 
 #define NUMBER_OF_LIGHTS 4
 
-#define POINT_LIGHT 0
-#define DIRECTION_LIGHT 1
-
 #define PHONG_REFLECTION_LIGHT false
 #define BLINN_PHONG_REFLECTION_LIGHT true
-
 
 struct Lamp {
 	vec3 ambient;
@@ -17,7 +13,6 @@ struct Lamp {
 	vec3 position;
 };
 
-
 struct Sun {
 	vec3 ambient;
 	vec3 diffuse;
@@ -25,14 +20,12 @@ struct Sun {
 	vec3 direction;
 };
 
-
 struct Material {
 	vec3 ambient;
 	vec3 diffuse;
 	vec3 specular;
 	float shininess;
 };
-
 
 in VertexData {
 	vec4 position;
@@ -108,124 +101,94 @@ float calcDirectionalShadow() {
 	return (shadow / 9.0);
 }
 
-vec3 calculate_ambient(vec3 light_ambient, vec3 material_ambient) {
-	vec3 ambient_part = light_ambient * material_ambient;
-
-	return ambient_part;
-}
-
-vec3 calculate_sun_light_vector(vec3 light_direction) {
-	return -light_direction;
-}
-
-vec3 calculate_lamp_light_vector(vec3 light_position) {
-	return normalize(light_position - in_data.position.xyz);
-}
-
 vec3 calculate_diffuse(vec3 light_diffuse, vec3 material_diffuse, vec3 light_vector) {
-	float diff = max(dot(in_data.normal, light_vector), 0);
-	vec3 diffuse_part = diff *light_diffuse * material_diffuse;
-
-	return diffuse_part;
+	float diffuse_factor = max(dot(in_data.normal, light_vector), 0);
+	return diffuse_factor * light_diffuse * material_diffuse;
 }
 
 float calculate_phong_reflection_light(float material_shininess, vec3 L, vec3 E) {
 	vec3 R = reflect(-E, in_data.normal);
-	float reflection = pow(max(dot(R, L), 0), material_shininess);
-
-	return reflection;
+	return pow(max(dot(R, L), 0), material_shininess);
 }
 
 float calculate_blinn_phong_reflection_light(float material_shininess, vec3 L, vec3 E) {
 	vec3 H = normalize(L + E);
-	float reflection = pow(max(dot(H, in_data.normal), 0), material_shininess);
-
-	return reflection;
+	return pow(max(dot(H, in_data.normal), 0), material_shininess);
 }
 
 vec3 calculate_specular(Material material, vec3 light_specular, vec3 L, bool reflection_type) {
 	vec3 E = normalize(cameraPos - in_data.position.xyz);
-	float reflection = 1.0;
+	float reflection;
 
 	if (reflection_type == PHONG_REFLECTION_LIGHT)
 		reflection = calculate_phong_reflection_light(material.shininess, L, E);
 	else
 		reflection = calculate_blinn_phong_reflection_light(material.shininess, L, E);
 
-	vec3 specular_part = reflection * light_specular * material.specular;
-
-	return specular_part;
+	return reflection * light_specular * material.specular;
 }
 
 vec3 calculate_sun(Sun light, Material material) {
-	vec3 ambient_part = calculate_ambient(light.ambient, material.ambient);
+	vec3 ambient = light.ambient * material.ambient;
 
-	vec3 L = calculate_sun_light_vector(light.direction);
-	vec3 diffuse_part = calculate_diffuse(light.diffuse, material.diffuse, L);
+	// directional light vector
+	vec3 L = -light.direction;
+	
+	vec3 diffuse = calculate_diffuse(light.diffuse, material.diffuse, L);
 
-	vec3 specular_part = calculate_specular(material, light.specular, L, PHONG_REFLECTION_LIGHT);
+	vec3 specular = calculate_specular(material, light.specular, L, PHONG_REFLECTION_LIGHT);
 
-	vec3 light_coef = ambient_part + diffuse_part + specular_part;
-
-	return light_coef;
+	return ambient + diffuse + specular;
 }
 
 vec3 calculate_lamp(Lamp light, Material material) {
-	vec3 ambient_part = calculate_ambient(light.ambient, material.ambient);
+	vec3 ambient = light.ambient * material.ambient;
 
-	vec3 L = calculate_lamp_light_vector(light.position);
-	vec3 diffuse_part = calculate_diffuse(light.diffuse, material.diffuse, L);
+	// point light vector
+	vec3 L = normalize(light.position - in_data.position.xyz);
+	
+	vec3 diffuse = calculate_diffuse(light.diffuse, material.diffuse, L);
 
-	vec3 specular_part = calculate_specular(material, light.specular, L, PHONG_REFLECTION_LIGHT);
+	vec3 specular = calculate_specular(material, light.specular, L, PHONG_REFLECTION_LIGHT);
 
 	float LV = distance(in_data.position.xyz, light.position);
 	float latt = 1 / (light.attenuation.x + light.attenuation.y * LV + light.attenuation.z * LV * LV);
-	vec3 light_coef = ambient_part + latt * (diffuse_part + specular_part);
-
-	return light_coef;
+	return ambient + latt * (diffuse + specular);
 }
-
 
 void main() {
 	if (isLight) {
 		outColor = vec4(lightModelColor, 1.0);
+		return;
+	}
+
+	if (selected == 1) {
+		outColor = vec4(0.02, 0.02, 0.35, 1.0);
+		return;
+	}
+
+	vec3 Color = vec3(0.1);
+
+	if (hasTex) {
+		vec4 texColor = texture(uTexture, in_data.uv);
+		Color += texColor.xyz;
 	}
 	else {
-		vec3 Color = vec3(0.1);
-
-		if (hasTex) {
-			vec4 texColor = texture(uTexture, in_data.uv);
-			Color += texColor.xyz;
-		}
-		else {
-			Color += my_material.ambient;
-		}
-
-		if (active_field) {
-			Color = vec3(0.2, length(in_data.position), 0.2);
-		}
-
-		vec3 light_part = vec3(0.0);
-
-		light_part += calculate_sun(sun, my_material);
-
-		for (int i = 0; i < NUMBER_OF_LIGHTS; i++) {
-			//light_part += calculate_lamp(lights[i], my_material);
-		}
-
-		// Cienie
-		float shadowPart = calcDirectionalShadow();
-
-		vec3 fragColor = vec3(0.1, 1.0, 0.1);
-
-		// Obliczanie koloru ostatecznego
-		vec3 finalColor = (sun.ambient + (1 - shadowPart) * light_part) * Color;
-
-		outColor = vec4(finalColor, 1.0);
-
-		if (selected == 1) {
-			//outColor = vec4(finalColor, 1.0) * vec4(0.2, 0.2, 0.9, 1.0);
-			outColor = vec4(0.02, 0.02, 0.35, 1.0);
-		}
+		Color += my_material.ambient;
 	}
+
+	if (active_field) {
+		Color = vec3(0.2, length(in_data.position), 0.2);
+	}
+
+	vec3 light_coef = calculate_sun(sun, my_material);
+	for (int i = 0; i < NUMBER_OF_LIGHTS; i++) {
+		//light_coef += calculate_lamp(lights[i], my_material);
+	}
+
+	float shadow = calcDirectionalShadow();
+
+	vec3 finalColor = (sun.ambient + (1 - shadow) * light_coef) * Color;
+
+	outColor = vec4(finalColor, 1.0);
 }

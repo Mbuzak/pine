@@ -20,6 +20,8 @@
 #include "chess/chess.hpp"
 #include <GL/freeglut.h>
 
+void uniform_vec3f_send(GLuint, const char*, const glm::vec3&);
+
 class Scene {
 public:
 	Scene();
@@ -27,7 +29,7 @@ public:
 	void Setup();
 	void Display();
 
-	void SendLight();
+	void SendLight(GLuint);
 
 //private:
 	GLuint sbp;
@@ -49,10 +51,7 @@ public:
 	Framebuffer fbo;
 
 private:
-	void RenderShadowMapOfDirectionalLight();
-
 	void RenderToTexture();
-
 	void RenderSkybox();
 	void RenderShapes();
 	void RenderLights();
@@ -60,11 +59,8 @@ private:
 public:
 	std::vector<Piece*> get_pieces();
 
-	void Init();
 	void Display(GLuint program_id);
-
 	void UpdatePieceWorldPosition(int id, float x, float z);
-
 	void DisactivatePiece(Piece &piece);
 
 	chschr::Chess* chess;
@@ -76,7 +72,6 @@ public:
 	std::array<Shape*, 64> squares_;
 	float off_rank_white = -8.0;
 	float off_rank_black = -8.0;
-
 	int selected_id = -1;
 
 	// Zmienne do kontroli stanu myszy

@@ -2,9 +2,9 @@
 
 // Input
 // Atrybuty wierzcholkow z VAO
-layout( location = 0 ) in vec4 inPosition;
-layout( location = 1 ) in vec2 inUV;
-layout( location = 2 ) in vec3 inNormal;
+layout (location = 0) in vec4 inPosition;
+layout (location = 1) in vec2 inUV;
+layout (location = 2) in vec3 inNormal;
 
 out VertexData {
 	vec4 position;
@@ -24,7 +24,6 @@ uniform mat3 matNormal;
 
 uniform mat4 lightProj;
 uniform mat4 lightView;
-
 
 void main() {
 	out_data.position = matModel * inPosition;

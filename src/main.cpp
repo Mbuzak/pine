@@ -97,8 +97,6 @@ void Animation(int frame) {
 	glutTimerFunc(1000/60, Animation, 0);
 }
 
-GLfloat depth;
-
 void MouseButton(int button, int state, int x, int y) {
 	if (button == GLUT_LEFT_BUTTON) {
 		scene._mouse_left_click_state = state;
@@ -136,6 +134,7 @@ void MouseMotion(int x, int y) {
 	if (scene._mouse_left_click_state == GLUT_DOWN) {
 		if (scene.selected_id >= 0) {
 			glBindFramebuffer(GL_FRAMEBUFFER, scene.fbo.id);
+			GLfloat depth;
 			glReadPixels(x, scene.height - y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
