@@ -19,6 +19,14 @@
 #include "chess/chess.hpp"
 #include <GL/freeglut.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include "engine/display.h"
+#ifdef __cplusplus
+}
+#endif
+
 #define __CHECK_FOR_ERRORS 	{GLenum errCode; if ((errCode = glGetError()) != GL_NO_ERROR) printf("Error (%d): %s in file %s at line %d !\n", errCode, gluErrorString(errCode), __FILE__,  __LINE__);}
 
 void uniform_vec3f_send(GLuint, const char*, const glm::vec3&);
@@ -29,10 +37,11 @@ public:
 	Scene();
 
 	void Setup();
-	void Display();
+	void display();
 
 	void SendLight(GLuint);
 
+	Display d;
 	RendererSkybox renderer_skybox;
 
 //private:
@@ -60,7 +69,7 @@ private:
 public:
 	std::vector<Piece*> get_pieces();
 
-	void Display(GLuint program_id);
+	void display(GLuint program_id);
 	void UpdatePieceWorldPosition(int id, float x, float z);
 	void DisactivatePiece(Piece &piece);
 
@@ -76,8 +85,8 @@ public:
 	int selected_id = -1;
 
 	// Zmienne do kontroli stanu myszy
-	int _mouse_buttonState = GLUT_UP;
-	int _mouse_left_click_state = GLUT_UP;
+	int _mouse_buttonState = 0;
+	int _mouse_left_click_state = 0;
 	int _mouse_buttonX;
 	int _mouse_buttonY;
 

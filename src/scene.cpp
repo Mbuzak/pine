@@ -10,6 +10,7 @@ void uniform_mat4fv_send(GLuint program_id, const char* name, const glm::mat4& m
 }
 
 Scene::Scene() {
+	d = display_init(800, 600, "pine");
 	chess = new chschr::Chess();
 }
 
@@ -27,6 +28,8 @@ void Scene::Setup() {
 
 	stbi_set_flip_vertically_on_load(true);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	reshape(width, height);
 
 	program_default = program_init("default");
 	renderer_skybox.init();
@@ -92,7 +95,61 @@ void Scene::Setup() {
 	printf("Scroll - przybliżanie/oddalanie sceny\n\n");
 }
 
-void Scene::Display() {
+void Scene::display() {
+	while (1) {
+		SDL_Event e;
+		while (SDL_PollEvent(&e) != 0) {
+			if (e.type == SDL_QUIT) {
+				exit(0);
+			}
+			else if (e.type == SDL_WINDOWEVENT) {
+				if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
+				reshape(e.window.data1, e.window.data2);
+				}
+			}
+			else if (e.type == SDL_KEYUP) {
+
+			}
+			else if (e.type == SDL_KEYDOWN) {
+			}
+			else if (e.type == SDL_MOUSEMOTION) {
+				if (_mouse_buttonState == 1) {
+					rotate(e.motion.x, e.motion.y);
+				}
+
+				if (_mouse_left_click_state == 1) {
+					motion(e.motion.x, e.motion.y);
+				}
+
+			}
+			else if (e.type == SDL_MOUSEWHEEL) {
+				camera.pos.z += 0.5 * e.wheel.y;
+
+			}
+			else if (e.type == SDL_MOUSEBUTTONDOWN) {
+				if (e.button.button == SDL_BUTTON_LEFT) {
+					_mouse_left_click_state = 1;
+					select_piece(width, height, e.button.x, e.button.y);
+				}
+				if (e.button.button == SDL_BUTTON_RIGHT) {
+					_mouse_buttonState = 1;
+					_mouse_buttonX = e.button.x;
+					_mouse_buttonY = e.button.y;
+				}
+			}
+			else if (e.type == SDL_MOUSEBUTTONUP) {
+				if (e.button.button == SDL_BUTTON_LEFT) {
+					_mouse_left_click_state = 0;
+					move_piece();
+				}
+				if (e.button.button == SDL_BUTTON_RIGHT) {
+					_mouse_buttonState = 0;
+
+				}
+			}
+
+		}
+
 	__CHECK_FOR_ERRORS
 
 	dir_shadow_map.Render(get_pieces());
@@ -116,7 +173,9 @@ void Scene::Display() {
 
 	glUseProgram(0);
 
-	glutSwapBuffers();
+	SDL_GL_SwapWindow(d.window);
+	//glutSwapBuffers();
+	}
 }
 
 void Scene::RenderToTexture() {
@@ -161,7 +220,7 @@ void Scene::RenderShapes() {
 	for (Shape *shape : background_)
 		shape->Display(program_default);
 	
-	Display(program_default);
+	display(program_default);
 }
 
 void Scene::RenderLights() {
@@ -179,7 +238,7 @@ std::vector<Piece*> Scene::get_pieces() {
 	return pieces_;
 }
 
-void Scene::Display(GLuint program_id) {
+void Scene::display(GLuint program_id) {
 	for (int &value: active_fields) {
 		//std::cout << value << "\n";
 		glUniform1i(glGetUniformLocation(program_id, "active_field"), true);
@@ -200,6 +259,7 @@ void Scene::Display(GLuint program_id) {
 	if (selected_id >= 0) {
 		pieces_[selected_id]->DisplayOutline(program_id, selected_id);
 	}
+
 }
 
 void Scene::UpdatePieceWorldPosition(int id, float x, float z) {
@@ -324,7 +384,7 @@ void Scene::rotate(int x, int y) {
 	_mouse_buttonX = x;
 	camera.rot.x -= 2*(_mouse_buttonY - y)/(float)height;
 	_mouse_buttonY = y;
-	glutPostRedisplay();
+	//glutPostRedisplay();
 }
 
 void Scene::motion(int x, int y) {
