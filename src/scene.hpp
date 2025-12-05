@@ -1,9 +1,7 @@
 #ifndef SCENE_HPP
 #define SCENE_HPP
 
-#include <time.h>
 #include <stdlib.h>
-#include <string.h>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -17,8 +15,11 @@
 #include "engine/shadow.hpp"
 #include "engine/camera.hpp"
 #include "engine/framebuffer.hpp"
+#include "engine/renderer.hpp"
 #include "chess/chess.hpp"
 #include <GL/freeglut.h>
+
+#define __CHECK_FOR_ERRORS 	{GLenum errCode; if ((errCode = glGetError()) != GL_NO_ERROR) printf("Error (%d): %s in file %s at line %d !\n", errCode, gluErrorString(errCode), __FILE__,  __LINE__);}
 
 void uniform_vec3f_send(GLuint, const char*, const glm::vec3&);
 
@@ -31,11 +32,11 @@ public:
 
 	void SendLight(GLuint);
 
+	RendererSkybox renderer_skybox;
+
 //private:
-	GLuint sbp;
 	GLuint program_default;
 
-	Skybox skybox;
 	Camera camera;
 
 	std::map<std::string, Model*> models_;
@@ -52,7 +53,6 @@ public:
 
 private:
 	void RenderToTexture();
-	void RenderSkybox();
 	void RenderShapes();
 	void RenderLights();
 
@@ -82,6 +82,8 @@ public:
 
 	void select_piece(int wx, int wy, int x, int y);
 	void move_piece();
+	void motion(int x, int y);
+	void reshape(int, int);
 
 	// Rotate camera
 	void rotate(int, int);

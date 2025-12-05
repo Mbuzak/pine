@@ -1,4 +1,5 @@
 #include "scene.hpp"
+#include "stb_image.h"
 
 void uniform_vec3f_send(GLuint program, const char* name, const glm::vec3& vec) {
 	glUniform3fv(glGetUniformLocation(program, name), 1, glm::value_ptr(vec));
@@ -9,8 +10,22 @@ Scene::Scene() {
 }
 
 void Scene::Setup() {
+	// Ustawienia globalne
+	glEnable(GL_DEPTH_TEST);
+	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+
+	glEnable(GL_STENCIL_TEST);
+	glClearStencil(0);
+
+	/* Value of stencil buffer will be replaced only in case of
+	positive pass stencil and depth test */
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
+	stbi_set_flip_vertically_on_load(true);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
 	program_default = program_init("default");
-	sbp = program_init("skybox");
+	renderer_skybox.init();
 
 	// Load models
 	std::vector<std::string> model_names = {"square", "pawn", "knight", "bishop", "rook", "king", "queen", "chessboard", "ground", "sphere"};
@@ -40,8 +55,6 @@ void Scene::Setup() {
 	lamps_[1] = new Lamp(models_.at("sphere"), glm::vec3(9.0, 1.0, -9.0), glm::vec3(0.4, 0.4, 0.6));
 	lamps_[2] = new Lamp(models_.at("sphere"), glm::vec3(-9.0, 1.0, 9.0), glm::vec3(0.2, 0.9, 0.5));
 	lamps_[3] = new Lamp(models_.at("sphere"), glm::vec3(-9.0, 1.0, -9.0), glm::vec3(0.2, 0.3, 0.5));
-
-	skybox.CreateVAO();
 
 	dir_shadow_map.Init(sun_->direction);
 
@@ -76,6 +89,8 @@ void Scene::Setup() {
 }
 
 void Scene::Display() {
+	__CHECK_FOR_ERRORS
+
 	dir_shadow_map.Render(get_pieces());
 
 	glViewport(0, 0, width, height);
@@ -90,12 +105,14 @@ void Scene::Display() {
 
 	camera.Update();
 
-	RenderSkybox();
+	renderer_skybox.render(&camera);
 	//RenderLights();
 
 	RenderShapes();
 
 	glUseProgram(0);
+
+	glutSwapBuffers();
 }
 
 void Scene::RenderToTexture() {
@@ -116,11 +133,6 @@ void Scene::SendLight(GLuint program) {
 		uniform_vec3f_send(program, (name + "attenuation").c_str(), lamps_[i]->attenuation);
 		uniform_vec3f_send(program, (name + "position").c_str(), lamps_[i]->position);
 	}
-}
-
-void Scene::RenderSkybox() {
-	glUseProgram(sbp);
-	skybox.Draw(sbp, camera.perspective, camera.view);
 }
 
 void Scene::RenderShapes() {
@@ -309,4 +321,28 @@ void Scene::rotate(int x, int y) {
 	camera.rot.x -= 2*(_mouse_buttonY - y)/(float)height;
 	_mouse_buttonY = y;
 	glutPostRedisplay();
+}
+
+void Scene::motion(int x, int y) {
+	if (selected_id < 0) {
+		return;
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo.id);
+	GLfloat depth;
+	glReadPixels(x, height - y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glm::vec3 point = glm::unProject(glm::vec3(x, height - y, depth), camera.view, camera.perspective, glm::vec4(0, 0, width, height));
+	//std::cout << "Worldspace: (" << point.x << ", " << point.y << ", " << point.z << "); Screen: (" << x << ", " << y << ")\n";
+
+	UpdatePieceWorldPosition(selected_id, point.x, point.z);
+}
+
+void Scene::reshape(int w, int h) {
+	width = w;
+	height = h;
+
+	glViewport(0, 0, width, height);
+	camera.perspective = glm::perspectiveFov(glm::radians(60.0f), (float)width, (float)height, 0.1f, 200.f);
 }
