@@ -4,9 +4,7 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-
-#include "model.hpp"
-
+#include "entity.hpp"
 
 class Light {
 public:

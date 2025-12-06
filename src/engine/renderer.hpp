@@ -2,7 +2,7 @@
 #define PINE_RENDERER
 
 #include <GL/glew.h>
-#include "model.hpp"
+#include "mesh.hpp"
 #include "shader.hpp"
 #include "camera.hpp"
 #include "texture.hpp"

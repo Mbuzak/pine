@@ -7,8 +7,8 @@
 #include <vector>
 #include <array>
 #include <map>
-#include "engine/model.hpp"
 #include "engine/mesh.hpp"
+#include "engine/entity.hpp"
 #include "engine/light.hpp"
 #include "engine/shader.hpp"
 #include "engine/texture.hpp"
