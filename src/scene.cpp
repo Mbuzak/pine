@@ -32,10 +32,9 @@ void Scene::Setup() {
 	// Load models
 	std::vector<std::string> model_names = {"square", "pawn", "knight", "bishop", "rook", "king", "queen", "chessboard", "ground", "sphere"};
 	for (std::string &name: model_names) {
-		models_.insert({name, new Model(name)});
-	}
-	for (std::string &name: model_names) {
-		meshes.insert({name, mesh_texture_init(name)});
+		Mesh* mesh = new Mesh();
+		mesh_texture_init(mesh, name);
+		meshes.insert({name, mesh});
 	}
 	
 	// Load textures
@@ -46,22 +45,22 @@ void Scene::Setup() {
 	}
 
 	// --- Shapes ---
-	background_.push_back(new Shape(models_.at("ground"), glm::vec3{0.0, -0.1, 0.0}, textures.at("grass")));
-	background_.push_back(new Shape(models_.at("chessboard"), glm::vec3{0.0, 0.0, 0.0}, textures.at("chessboard")));
+	background_.push_back(new Shape(meshes.at("ground"), glm::vec3{0.0, -0.1, 0.0}, textures.at("grass")));
+	background_.push_back(new Shape(meshes.at("chessboard"), glm::vec3{0.0, 0.0, 0.0}, textures.at("chessboard")));
 
 	// --- Lights ---
 	sun_ = new Sun(glm::vec3(1.0, -2.0, 2.0));
 
-	lamps_[0] = new Lamp(models_.at("sphere"), glm::vec3(9.0, 1.0, 9.0), glm::vec3(5.2, 0.3, 0.5));
-	lamps_[1] = new Lamp(models_.at("sphere"), glm::vec3(9.0, 1.0, -9.0), glm::vec3(0.4, 0.4, 0.6));
-	lamps_[2] = new Lamp(models_.at("sphere"), glm::vec3(-9.0, 1.0, 9.0), glm::vec3(0.2, 0.9, 0.5));
-	lamps_[3] = new Lamp(models_.at("sphere"), glm::vec3(-9.0, 1.0, -9.0), glm::vec3(0.2, 0.3, 0.5));
+	lamps_[0] = new Lamp(meshes.at("sphere"), glm::vec3(9.0, 1.0, 9.0), glm::vec3(5.2, 0.3, 0.5));
+	lamps_[1] = new Lamp(meshes.at("sphere"), glm::vec3(9.0, 1.0, -9.0), glm::vec3(0.4, 0.4, 0.6));
+	lamps_[2] = new Lamp(meshes.at("sphere"), glm::vec3(-9.0, 1.0, 9.0), glm::vec3(0.2, 0.9, 0.5));
+	lamps_[3] = new Lamp(meshes.at("sphere"), glm::vec3(-9.0, 1.0, -9.0), glm::vec3(0.2, 0.3, 0.5));
 
 	dir_shadow_map.Init(sun_->direction);
 	fbo.init();
 
 	for (int i = 0; i < squares_.size(); i++) {
-		squares_[i] = new Shape(models_.at("square"), IndexToPosition(i));
+		squares_[i] = new Shape(meshes.at("square"), IndexToPosition(i));
 		if (((i % 8) + (i / 8)) % 2 == 0) {
 			squares_[i]->material_.ambient = glm::vec3(0.5);
 		}
@@ -74,7 +73,7 @@ void Scene::Setup() {
 		if (name == "x")
 			continue;
 
-		Piece *piece = new Piece(i, models_.at(name), textures.at(colour), &meshes.at(name));
+		Piece *piece = new Piece(i, meshes.at(name), textures.at(colour));
 		piece->colour = colour;
 		if (colour == "white") {
 			piece->rot.y = 3.2;
@@ -208,7 +207,7 @@ void Scene::RenderShapes(GLuint program_id) {
 	glUseProgram(program_id);
 	for (int i = 0; i < pieces_.size(); ++i) {
 		glStencilFunc(GL_ALWAYS, i + 1, 0xFF);
-		pieces_[i]->render(program_id);
+		pieces_[i]->Display(program_id);
 	}
 
 	if (selected_id >= 0) {

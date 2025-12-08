@@ -1,5 +1,5 @@
-#ifndef LIGHT_HPP
-#define LIGHT_HPP
+#ifndef PINE_LIGHT
+#define PINE_LIGHT
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
@@ -22,19 +22,18 @@ public:
 // Lamp class represents point light
 class Lamp: public Light {
 public:
-	Lamp(Model *model, glm::vec3 position, glm::vec3 diffuse);
-	Lamp(Model* model, glm::vec3 position, glm::vec3 diffuse, glm::vec3 specular, glm::vec3 attenuation);
+	Lamp(Mesh*, glm::vec3, glm::vec3);
+	Lamp(Mesh*, glm::vec3, glm::vec3, glm::vec3, glm::vec3);
 
 	glm::mat4 CalculateMatModel();
-	void Display(GLuint program_id);
+	void Display(GLuint);
 
 public:
 	glm::vec3 position;
 	glm::vec3 attenuation;
 
-	Model* model = nullptr;
+	Mesh* mesh = nullptr;
 };
-
 
 // Sun class represents directional lighting
 class Sun: public Light {

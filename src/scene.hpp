@@ -1,5 +1,5 @@
-#ifndef SCENE_HPP
-#define SCENE_HPP
+#ifndef PINE_SCENE
+#define PINE_SCENE
 
 #include <stdlib.h>
 #include <iostream>
@@ -45,9 +45,8 @@ public:
 
 	Camera camera;
 
-	std::map<std::string, Model*> models_;
+	std::map<std::string, Mesh*> meshes;
 	std::map<std::string, GLuint> textures;
-	std::map<std::string, Mesh> meshes;
 
 	// --- meshes ---
 	Sun *sun_ = nullptr;

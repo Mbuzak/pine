@@ -1,7 +1,7 @@
 #include "light.hpp"
 
-Lamp::Lamp(Model *model, glm::vec3 position, glm::vec3 diffuse) {
-	this->model = model;
+Lamp::Lamp(Mesh* mesh, glm::vec3 position, glm::vec3 diffuse) {
+	this->mesh = mesh;
 	this->position = position;
 	this->ambient = glm::vec3(0.1);
 	this->diffuse = diffuse;
@@ -9,8 +9,8 @@ Lamp::Lamp(Model *model, glm::vec3 position, glm::vec3 diffuse) {
 	this->attenuation = glm::vec3(0.1);
 }
 
-Lamp::Lamp(Model* model, glm::vec3 position, glm::vec3 diffuse, glm::vec3 specular, glm::vec3 attenuation) {
-	this->model = model;
+Lamp::Lamp(Mesh* mesh, glm::vec3 position, glm::vec3 diffuse, glm::vec3 specular, glm::vec3 attenuation) {
+	this->mesh = mesh;
 	this->position = position;
 	this->ambient = glm::vec3(0.1);
 	this->diffuse = diffuse;
@@ -30,7 +30,7 @@ void Lamp::Display(GLuint program_id) {
 	glm::mat3 matNormal = glm::transpose(glm::inverse(mat_model));
 	glUniformMatrix3fv(glGetUniformLocation(program_id, "matNormal"), 1, GL_FALSE, glm::value_ptr(matNormal));
 
-	model->Draw();
+	mesh_raw_draw(mesh);
 }
 
 Sun::Sun(glm::vec3 direction) {

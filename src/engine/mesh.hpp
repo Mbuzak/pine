@@ -33,28 +33,10 @@ struct Mesh {
 	int type;
 };
 
-Mesh mesh_raw_init();
-Mesh mesh_colorful_init();
-Mesh mesh_texture_init(std::string);
+int mesh_raw_init(Mesh*);
+int mesh_texture_init(Mesh*, std::string);
 
 void mesh_raw_draw(Mesh*);
-void mesh_colorful_draw(Mesh*);
 void mesh_texture_draw(Mesh*);
-
-// Visible model on scene
-class Model {
-public:
-	Model(std::string);
-
-	void Draw();
-
-private:
-	GLuint vao;
-	GLuint vbos[3];
-
-	std::vector<glm::vec3> vertices;
-	std::vector<glm::vec2> uvs;
-	std::vector<glm::vec3> normals;
-};
 
 #endif

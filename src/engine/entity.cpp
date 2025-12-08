@@ -1,23 +1,25 @@
 #include "entity.hpp"
 
-Shape::Shape(Model *model):
-model_(model), pos(glm::vec3{0.0, 0.0, 0.0}),
-rot(glm::vec3{0.0, 0.0, 0.0}), texture_(-1) {
+Shape::Shape(Mesh *mesh) {
+	this->pos = glm::vec3(0.0);
+	this->rot = glm::vec3(0.0);
+	this->mesh = mesh;
+	this->texture_ = -1;
 	material_ = Material{glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.70f, 0.27f, 0.08f), glm::vec3(0.25f, 0.13f, 0.08f), 1.0f};
 }
 
-Shape::Shape(Model *model, glm::vec3 position):
-Shape(model) {
+Shape::Shape(Mesh *mesh, glm::vec3 position):
+Shape(mesh) {
 	pos = position;
 }
 
-Shape::Shape(Model *model, glm::vec3 position, GLuint texture):
-Shape(model, position) {
+Shape::Shape(Mesh *mesh, glm::vec3 position, GLuint texture):
+Shape(mesh, position) {
 	texture_ = texture;
 }
 
-Shape::Shape(Model *model, glm::vec3 position, Material &material):
-Shape(model, position) {
+Shape::Shape(Mesh *mesh, glm::vec3 position, Material &material):
+Shape(mesh, position) {
 	material_ = material;
 }
 
@@ -41,24 +43,6 @@ glm::mat4 Shape::CalculateMatModel(int value) {
 	return model;
 }
 
-void Shape::render(GLuint programID) {
-	glm::mat4 model = CalculateMatModel();
-	uniform_mat4f_send(programID, "matModel", model);
-
-	glm::mat3 matNormal = glm::transpose(glm::inverse(model));
-	glUniformMatrix3fv(glGetUniformLocation(programID, "matNormal"), 1, GL_FALSE, glm::value_ptr(matNormal));
-
-	SendMaterial(programID, "my_material.");
-
-	glUniform1i(glGetUniformLocation(programID, "hasTex"), HasTexture());
-
-	if (HasTexture())
-		texture_2d_send(programID, texture_);
-
-	//model_->Draw();
-	mesh_texture_draw(mesh);
-}
-
 void Shape::Display(GLuint programID, int value) {
 	glm::mat4 model = CalculateMatModel(value);
 	uniform_mat4f_send(programID, "matModel", model);
@@ -73,7 +57,7 @@ void Shape::Display(GLuint programID, int value) {
 	if (HasTexture())
 		texture_2d_send(programID, texture_);
 
-	model_->Draw();
+	mesh_texture_draw(mesh);
 }
 
 void Shape::DisplayOutline(GLuint program_id, int selected_id) {
@@ -106,9 +90,8 @@ void Shape::SendMaterial(GLuint programID, std::string name) {
 }
 
 
-Piece::Piece(int field_id, Model *model, GLuint texture, Mesh* mesh):
-Shape(model, glm::vec3(0.0, 0.1, 0.0), texture) {
-	this->mesh = mesh;
+Piece::Piece(int field_id, Mesh *mesh, GLuint texture):
+Shape(mesh, glm::vec3(0.0, 0.1, 0.0), texture) {
 	field_.push_back((char)'a' + (field_id % 8));
 	field_.push_back((char)'8' - (field_id / 8));
 

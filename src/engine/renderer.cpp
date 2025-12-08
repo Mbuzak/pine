@@ -6,7 +6,7 @@ RendererSkybox::~RendererSkybox() {
 
 void RendererSkybox::init() {
 	program_id = program_init("skybox");
-	mesh = mesh_raw_init();
+	mesh_raw_init(&mesh);
 
 	texture_id = texture_cube_map_init();
 }

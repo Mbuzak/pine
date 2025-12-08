@@ -20,10 +20,10 @@
 // Visible object on scene
 class Shape {
 public:
-	Shape(Model*);
-	Shape(Model*, glm::vec3);
-	Shape(Model*, glm::vec3, GLuint);
-	Shape(Model*, glm::vec3, Material&);
+	Shape(Mesh*);
+	Shape(Mesh*, glm::vec3);
+	Shape(Mesh*, glm::vec3, GLuint);
+	Shape(Mesh*, glm::vec3, Material&);
 
 	bool HasTexture();
 	glm::mat4 CalculateMatModel(int value = 0);
@@ -31,19 +31,17 @@ public:
 	void Display(GLuint programID, int value = STANDARD);
 	void DisplayOutline(GLuint, int);
 	void SendMaterial(GLuint, std::string);
-	void render(GLuint);
 
 	glm::vec3 pos;
 	glm::vec3 rot;
 	Material material_;
 	GLuint texture_;
-	Model *model_ = nullptr;
-	Mesh* mesh;
+	Mesh *mesh = nullptr;
 };
 
 class Piece: public Shape {
 public:
-	Piece(int, Model*, GLuint, Mesh*);
+	Piece(int, Mesh*, GLuint);
 
 	std::string get_field();
 
