@@ -21,13 +21,12 @@ void Scene::Setup() {
 	stbi_set_flip_vertically_on_load(true);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
+	camera.init({0.0, -3.0, -22.0}, {0.3, -1.57});
 	reshape(width, height);
 
 	program_default = program_init("default");
 	program_color = program_init("color");
 	renderer_skybox.init();
-
-	camera.init({0.0, -3.0, -22.0}, {0.3, -1.57});
 
 	// Load models
 	std::vector<std::string> model_names = {"square", "pawn", "knight", "bishop", "rook", "king", "queen", "chessboard", "ground", "sphere"};
@@ -375,5 +374,5 @@ void Scene::reshape(int w, int h) {
 	height = h;
 
 	glViewport(0, 0, width, height);
-	camera.perspective = glm::perspectiveFov(glm::radians(60.0f), (float)width, (float)height, 0.1f, 200.f);
+	camera.update_perspective(width / (float)height);
 }
