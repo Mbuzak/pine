@@ -31,17 +31,19 @@ public:
 	void Display(GLuint programID, int value = STANDARD);
 	void DisplayOutline(GLuint, int);
 	void SendMaterial(GLuint, std::string);
+	void render(GLuint);
 
 	glm::vec3 pos;
 	glm::vec3 rot;
 	Material material_;
 	GLuint texture_;
 	Model *model_ = nullptr;
+	Mesh* mesh;
 };
 
 class Piece: public Shape {
 public:
-	Piece(int, Model*, GLuint);
+	Piece(int, Model*, GLuint, Mesh*);
 
 	std::string get_field();
 

@@ -1,5 +1,5 @@
-#ifndef MODEL_HPP
-#define MODEL_HPP
+#ifndef PINE_MESH
+#define PINE_MESH
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
@@ -10,22 +10,36 @@
 #include <vector>
 #include "obj_loader.hpp"
 
-// Skybox model on scene
-class Skybox {
-public:
-	void init();
-	void draw();
+#define MESH_RAW 1
+#define MESH_TEXTURE 2
 
-private:
-	enum Buffer {
-		POSITIONS,
-		INDICES,
-		COUNT
-	};
-
-	GLuint vao;
-	GLuint vbos[COUNT];
+enum MeshRawBuffer {
+	MESH_RAW_POSITIONS,
+	MESH_RAW_INDICES,
+	MESH_RAW_COUNT
 };
+
+enum MeshTextureBuffer {
+	MESH_TEXTURE_POSITIONS,
+	MESH_TEXTURE_UV_COORDS,
+	MESH_TEXTURE_NORMALS,
+	MESH_TEXTURE_COUNT
+};
+
+struct Mesh {
+	GLuint vao;
+	GLuint* vbos;
+	int size;
+	int type;
+};
+
+Mesh mesh_raw_init();
+Mesh mesh_colorful_init();
+Mesh mesh_texture_init(std::string);
+
+void mesh_raw_draw(Mesh*);
+void mesh_colorful_draw(Mesh*);
+void mesh_texture_draw(Mesh*);
 
 // Visible model on scene
 class Model {

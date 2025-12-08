@@ -17,7 +17,7 @@ public:
 private:
 	GLuint program_id;
 	GLuint texture_id;
-	Skybox skybox;
+	Mesh mesh;
 };
 
 #endif

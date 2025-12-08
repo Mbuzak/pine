@@ -41,6 +41,24 @@ glm::mat4 Shape::CalculateMatModel(int value) {
 	return model;
 }
 
+void Shape::render(GLuint programID) {
+	glm::mat4 model = CalculateMatModel();
+	uniform_mat4f_send(programID, "matModel", model);
+
+	glm::mat3 matNormal = glm::transpose(glm::inverse(model));
+	glUniformMatrix3fv(glGetUniformLocation(programID, "matNormal"), 1, GL_FALSE, glm::value_ptr(matNormal));
+
+	SendMaterial(programID, "my_material.");
+
+	glUniform1i(glGetUniformLocation(programID, "hasTex"), HasTexture());
+
+	if (HasTexture())
+		texture_2d_send(programID, texture_);
+
+	//model_->Draw();
+	mesh_texture_draw(mesh);
+}
+
 void Shape::Display(GLuint programID, int value) {
 	glm::mat4 model = CalculateMatModel(value);
 	uniform_mat4f_send(programID, "matModel", model);
@@ -88,8 +106,9 @@ void Shape::SendMaterial(GLuint programID, std::string name) {
 }
 
 
-Piece::Piece(int field_id, Model *model, GLuint texture):
+Piece::Piece(int field_id, Model *model, GLuint texture, Mesh* mesh):
 Shape(model, glm::vec3(0.0, 0.1, 0.0), texture) {
+	this->mesh = mesh;
 	field_.push_back((char)'a' + (field_id % 8));
 	field_.push_back((char)'8' - (field_id / 8));
 

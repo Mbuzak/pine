@@ -34,6 +34,9 @@ void Scene::Setup() {
 	for (std::string &name: model_names) {
 		models_.insert({name, new Model(name)});
 	}
+	for (std::string &name: model_names) {
+		meshes.insert({name, mesh_texture_init(name)});
+	}
 	
 	// Load textures
 	std::vector<std::string> texture_names = {"white", "black", "chessboard", "grass"};
@@ -71,7 +74,7 @@ void Scene::Setup() {
 		if (name == "x")
 			continue;
 
-		Piece *piece = new Piece(i, models_.at(name), textures.at(colour));
+		Piece *piece = new Piece(i, models_.at(name), textures.at(colour), &meshes.at(name));
 		piece->colour = colour;
 		if (colour == "white") {
 			piece->rot.y = 3.2;
@@ -205,7 +208,7 @@ void Scene::RenderShapes(GLuint program_id) {
 	glUseProgram(program_id);
 	for (int i = 0; i < pieces_.size(); ++i) {
 		glStencilFunc(GL_ALWAYS, i + 1, 0xFF);
-		pieces_[i]->Display(program_id);
+		pieces_[i]->render(program_id);
 	}
 
 	if (selected_id >= 0) {

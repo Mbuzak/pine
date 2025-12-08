@@ -47,6 +47,7 @@ public:
 
 	std::map<std::string, Model*> models_;
 	std::map<std::string, GLuint> textures;
+	std::map<std::string, Mesh> meshes;
 
 	// --- meshes ---
 	Sun *sun_ = nullptr;

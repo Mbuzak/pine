@@ -6,7 +6,8 @@ RendererSkybox::~RendererSkybox() {
 
 void RendererSkybox::init() {
 	program_id = program_init("skybox");
-	skybox.init();
+	mesh = mesh_raw_init();
+
 	texture_id = texture_cube_map_init();
 }
 
@@ -17,6 +18,6 @@ void RendererSkybox::render(Camera* camera) {
 
 	texture_cube_map_send(program_id, texture_id);
 
-	skybox.draw();
+	mesh_raw_draw(&mesh);
 	glUseProgram(0);
 }
