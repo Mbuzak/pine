@@ -45,19 +45,10 @@ uniform vec3 cameraPos;
 uniform sampler2D uTexture;
 uniform bool hasTex;
 
-uniform int selected = 0;
-
-// model
-uniform bool isLight;
-uniform vec3 lightModelColor;
-
-uniform bool active_field;
-
 uniform Sun sun;
 uniform Lamp lights[NUMBER_OF_LIGHTS];
 uniform Material my_material;
 
-// Kolor ostateczny
 out vec4 outColor;
 
 // ---------------------------------------------------------------------------
@@ -157,28 +148,13 @@ vec3 calculate_lamp(Lamp light, Material material) {
 }
 
 void main() {
-	if (isLight) {
-		outColor = vec4(lightModelColor, 1.0);
-		return;
-	}
-
-	if (selected == 1) {
-		outColor = vec4(0.02, 0.02, 0.35, 1.0);
-		return;
-	}
-
-	vec3 Color = vec3(0.1);
-
+	vec3 Color;
 	if (hasTex) {
 		vec4 texColor = texture(uTexture, in_data.uv);
-		Color += texColor.xyz;
+		Color = texColor.xyz;
 	}
 	else {
-		Color += my_material.ambient;
-	}
-
-	if (active_field) {
-		Color = vec3(0.2, length(in_data.position), 0.2);
+		Color = my_material.ambient;
 	}
 
 	vec3 light_coef = calculate_sun(sun, my_material);

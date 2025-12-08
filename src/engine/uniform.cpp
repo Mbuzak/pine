@@ -4,7 +4,7 @@ void uniform_int_send(GLuint program_id, const char* name, GLint value) {
 	glUniform1i(glGetUniformLocation(program_id, name), value);
 }
 
-void uniform_vec3f_send(GLuint program_id, const char* name, glm::vec3& value) {
+void uniform_vec3f_send(GLuint program_id, const char* name, glm::vec3 value) {
 	glUniform3fv(glGetUniformLocation(program_id, name), 1, glm::value_ptr(value));
 }
 

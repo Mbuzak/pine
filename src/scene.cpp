@@ -24,6 +24,7 @@ void Scene::Setup() {
 	reshape(width, height);
 
 	program_default = program_init("default");
+	program_color = program_init("color");
 	renderer_skybox.init();
 
 	camera.init({0.0, -3.0, -22.0}, {0.3, -1.57});
@@ -163,7 +164,6 @@ void Scene::display() {
 void Scene::RenderToTexture() {
 	glUseProgram(program_default);
 	uniform_mat4f_send(program_default, "matProj", camera.perspective);
-	glUniform1i(glGetUniformLocation(program_default, "isLight"), false);
 	background_[1]->Display(program_default);
 	glUseProgram(0);
 }
@@ -179,7 +179,6 @@ void Scene::RenderShapes(GLuint program_id) {
 	uniform_light_directional_send(program_id, "sun.", sun_);
 
 	uniform_mat4f_send(program_id, "matProj", camera.perspective);
-	uniform_int_send(program_id, "isLight", false);
 
 	camera.SendUniform(program_id);
 
@@ -195,36 +194,34 @@ void Scene::RenderShapes(GLuint program_id) {
 	for (Shape *shape : background_)
 		shape->Display(program_id);
 	
+	glUseProgram(program_color);
+	camera.SendUniform(program_color);
+	uniform_mat4f_send(program_color, "matProj", camera.perspective);
+	uniform_vec3f_send(program_color, "color", glm::vec3{0.2, 0.8, 0.2});
 	for (int &value: active_fields) {
-		//std::cout << value << "\n";
-		glUniform1i(glGetUniformLocation(program_id, "active_field"), true);
-		squares_[value]->Display(program_id);
-		glUniform1i(glGetUniformLocation(program_id, "active_field"), false);
+		squares_[value]->Display(program_color);
 	}
 
-	for (int i = 0; i < squares_.size(); i++) {
-		squares_[i]->Display(program_id);
-	}
-
+	glUseProgram(program_id);
 	for (int i = 0; i < pieces_.size(); ++i) {
 		glStencilFunc(GL_ALWAYS, i + 1, 0xFF);
-
 		pieces_[i]->Display(program_id);
 	}
 
 	if (selected_id >= 0) {
-		pieces_[selected_id]->DisplayOutline(program_id, selected_id);
+		glUseProgram(program_color);
+		uniform_vec3f_send(program_color, "color", glm::vec3{0.0, 0.0, 0.35});
+		pieces_[selected_id]->DisplayOutline(program_color, selected_id);
 	}
 
 	glUseProgram(0);
 }
 
 void Scene::RenderLights() {
-	glUseProgram(program_default);
-	glUniform1i(glGetUniformLocation(program_default, "isLight"), true);
+	glUseProgram(program_color);
 
 	for (int i = 0; i < 4; i++) {
-		glUniform3fv(glGetUniformLocation( program_default, "lightModelColor" ), 1, &lamps_[i]->diffuse[0]);
+		uniform_vec3f_send(program_default, "color", lamps_[i]->diffuse);
 		lamps_[i]->Display(program_default);
 	}
 }

@@ -41,6 +41,7 @@ public:
 
 //private:
 	GLuint program_default;
+	GLuint program_color;
 
 	Camera camera;
 
