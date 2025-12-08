@@ -14,7 +14,7 @@ void ShadowMap::Init(glm::vec3 direction) {
 	// Create texture
 	glGenTextures(1, &texture_id);
 	glBindTexture(GL_TEXTURE_2D, texture_id);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width_, height_, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -39,7 +39,7 @@ void ShadowMap::Init(glm::vec3 direction) {
 
 void ShadowMap::Render(std::vector<Piece*> pieces) {
 	// Render texture from light poisiton
-	glViewport(0, 0, width_, height_);
+	glViewport(0, 0, width, height);
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo_id);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -51,7 +51,7 @@ void ShadowMap::Render(std::vector<Piece*> pieces) {
 	// Render shapes
 	for (Shape *piece: pieces) {
 		glUniformMatrix4fv(glGetUniformLocation(program_id, "matModel"), 1, GL_FALSE, glm::value_ptr(piece->CalculateMatModel()));
-		piece->model_->Draw();
+		mesh_texture_draw(piece->mesh);
 	}
 
 	glUseProgram(0);

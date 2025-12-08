@@ -1,60 +1,42 @@
-#ifndef MESH_HPP
-#define MESH_HPP
+#ifndef PINE_MESH
+#define PINE_MESH
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include <string.h>
 #include <iostream>
 #include <string>
-#include <memory>
 #include <vector>
-#include "material.hpp"
-#include "texture.hpp"
-#include "model.hpp"
 
-#define STANDARD 0
-#define OUTLINE 1
+#define MESH_RAW 1
+#define MESH_TEXTURE 2
 
-// Visible object on scene
-class Shape {
-public:
-	Shape(Model *model);
-	Shape(Model *model, glm::vec3 position);
-	Shape(Model *model, glm::vec3 position, GLuint texture);
-	Shape(Model *model, glm::vec3 position, Material &material);
-
-	bool HasTexture();
-	glm::mat4 CalculateMatModel(int value = 0);
-	glm::mat4 ScaledMatModel(float x, float y, float z);
-	void Display(GLuint programID, int value = STANDARD);
-	void DisplayOutline(GLuint program_id, int);
-	void SendMaterial(GLuint programID);
-
-	glm::vec3 pos;
-	glm::vec3 rot;
-	Material material_;
-	GLuint texture_;
-	Model *model_ = nullptr;
+enum MeshRawBuffer {
+	MESH_RAW_POSITIONS,
+	MESH_RAW_INDICES,
+	MESH_RAW_COUNT
 };
 
-class Piece: public Shape {
-public:
-	Piece(int field_id, Model *model, GLuint texture);
-
-	std::string get_field();
-
-	void update_field(std::string field);
-	void update_world_position();
-
-	//void update_position(float x, float z);
-	void update_position();
-
-	bool is_active = true;
-	std::string colour;
-
-private:
-	std::string field_;
+enum MeshTextureBuffer {
+	MESH_TEXTURE_POSITIONS,
+	MESH_TEXTURE_UV_COORDS,
+	MESH_TEXTURE_NORMALS,
+	MESH_TEXTURE_COUNT
 };
+
+struct Mesh {
+	GLuint vao;
+	GLuint* vbos;
+	int size;
+	int type;
+};
+
+int mesh_raw_init(Mesh*);
+int mesh_texture_init(Mesh*, std::string);
+
+void mesh_raw_draw(Mesh*);
+void mesh_texture_draw(Mesh*);
+
+bool load_obj(const char*, std::vector<glm::vec3>&, std::vector<glm::vec2>&, std::vector<glm::vec3>&);
 
 #endif

@@ -1,132 +1,196 @@
 #include "mesh.hpp"
+#include "stb_image.h"
 
-Shape::Shape(Model *model):
-model_(model), pos(glm::vec3{0.0, 0.0, 0.0}),
-rot(glm::vec3{0.0, 0.0, 0.0}), texture_(-1) {
-	material_ = Material{glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.70f, 0.27f, 0.08f), glm::vec3(0.25f, 0.13f, 0.08f), 1.0f};
-}
+int mesh_raw_init(Mesh* mesh) {
+	mesh->type = MESH_RAW;
+	mesh->size = 36;
 
-Shape::Shape(Model *model, glm::vec3 position):
-Shape(model) {
-	pos = position;
-}
+	GLfloat positions[8*3] = {
+		1.0f, 1.0f, 1.0f,   // 0
+		-1.0f, 1.0f, 1.0f,  // 1
+		-1.0f, -1.0f, 1.0f, // 2
+		1.0f, -1.0f, 1.0f,  // 3
+		1.0f, 1.0f, -1.0f,  // 4
+		-1.0f, 1.0f, -1.0f, // 5
+		-1.0f, -1.0f, -1.0f,// 6
+		1.0f, -1.0f, -1.0f  // 7
+	};
 
-Shape::Shape(Model *model, glm::vec3 position, GLuint texture):
-Shape(model, position) {
-	texture_ = texture;
-}
+	GLuint indices[12*3] = {
+		5, 0, 1, 5, 4, 0,
+		2, 0, 3, 2, 1, 0,
+		7, 0, 4, 7, 3, 0,
+		3, 6, 2, 3, 7, 6,
+		1, 2, 6, 1, 6, 5,
+		4, 5, 6, 4, 6, 7
+	};
 
-Shape::Shape(Model *model, glm::vec3 position, Material &material):
-Shape(model, position) {
-	material_ = material;
-}
+	glGenVertexArrays(1, &mesh->vao);
+	glBindVertexArray(mesh->vao);
 
-bool Shape::HasTexture() {
-	return texture_ != -1;
-}
+	mesh->vbos = new GLuint[MESH_RAW_COUNT];
+	glGenBuffers(MESH_RAW_COUNT, mesh->vbos);
 
-glm::mat4 Shape::CalculateMatModel(int value) {
-	glm::mat4 model(1.0);
+	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbos[MESH_RAW_POSITIONS]);
+	glBufferData(GL_ARRAY_BUFFER, 8*3*sizeof(GLfloat), positions, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(0);
 
-	model = glm::translate(model, pos);
-	model = glm::rotate(model, rot.x, glm::vec3(1.0, 0.0, 0.0));
-	model = glm::rotate(model, rot.y, glm::vec3(0.0, 1.0, 0.0));
-	model = glm::rotate(model, rot.z, glm::vec3(0.0, 0.0, 1.0));
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->vbos[MESH_RAW_INDICES]);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->size * sizeof(GLuint), indices, GL_STATIC_DRAW);
 
-	if (value == 0)
-		return model;
+	glBindVertexArray(0);
 	
-	model = glm::scale(model, glm::vec3(1.35, 1.04, 1.35));
-
-	return model;
+	return 0;
 }
 
-void Shape::Display(GLuint programID, int value) {
-	glm::mat4 model = CalculateMatModel(value);
+int mesh_texture_init(Mesh* mesh, std::string filename) {
+	mesh->type = MESH_TEXTURE;
 
-	glUniformMatrix4fv(glGetUniformLocation(programID, "matModel"), 1, GL_FALSE, glm::value_ptr(model));
+	std::string path = "models/" + filename + ".obj";
+	std::vector<glm::vec3> vertices;
+	std::vector<glm::vec2> uvs;
+	std::vector<glm::vec3> normals;
+	if (!load_obj(path.c_str(), vertices, uvs, normals)) {
+		std::cout << "Error: Mesh path: " << path << " not exists!\n";
+		exit(0);
+	}
+	mesh->size = vertices.size();
 
-	glm::mat3 matNormal = glm::transpose(glm::inverse(model));
-	glUniformMatrix3fv(glGetUniformLocation(programID, "matNormal"), 1, GL_FALSE, glm::value_ptr(matNormal));
+	// Create VAO
+	glGenVertexArrays(1, &mesh->vao);
+	glBindVertexArray(mesh->vao);
 
-	SendMaterial(programID);
+	mesh->vbos = new GLuint[MESH_TEXTURE_COUNT];
+	glGenBuffers(MESH_TEXTURE_COUNT, mesh->vbos);
 
-	glUniform1i(glGetUniformLocation(programID, "hasTex"), HasTexture());
+	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbos[MESH_TEXTURE_POSITIONS]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(0);
 
-	if (HasTexture())
-		texture_2d_send(programID, texture_);
+	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbos[MESH_TEXTURE_UV_COORDS]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * uvs.size(), &uvs[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(1);
 
-	model_->Draw();
+	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbos[MESH_TEXTURE_NORMALS]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * normals.size(), &normals[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(2);
+
+	glBindVertexArray(0);
+
+	return 0;
 }
 
-void Shape::DisplayOutline(GLuint program_id, int selected_id) {
-	// Wylaczenie zapisu do bufora szablonowego
-	glStencilMask(0x00);
-
-	// Ustwianie funkcji testujacej
-	// Obiekt bedzie rysowany tylko tam, gdzie stencil buffer nie jest rowny 1
-	glStencilFunc(GL_NOTEQUAL, selected_id + 1, 0xFF);
-
-	// Obliczenie nowej macierzy modelu (przeskalowanie obiektu)
-	glUniform1i(glGetUniformLocation(program_id, "selected"), 1);
-	glDisable(GL_DEPTH_TEST);
-	Display(program_id, OUTLINE);
-	glEnable(GL_DEPTH_TEST);
-	glUniform1i(glGetUniformLocation(program_id, "selected"), 0);
-
-	// Ponowne wlaczenie zapisu do bufora szablonowego
-	// W szczegolnosci na potrzeby czyszczenia bufora
-	// poleceniem glClear()
-	glStencilMask(0xFF);
-	glStencilFunc(GL_ALWAYS, 0, 0xFF);
+void mesh_raw_draw(Mesh* mesh) {
+	glBindVertexArray(mesh->vao);
+	glDrawElements(GL_TRIANGLES, mesh->size, GL_UNSIGNED_INT, NULL);
+	glBindVertexArray(0);
 }
 
-void Shape::SendMaterial(GLuint programID) {
-	glUniform3fv(glGetUniformLocation(programID, "my_material.ambient"), 1, glm::value_ptr(material_.ambient));
-	glUniform3fv(glGetUniformLocation(programID, "my_material.diffuse"), 1, glm::value_ptr(material_.diffuse));
-	glUniform3fv(glGetUniformLocation(programID, "my_material.specular"), 1, glm::value_ptr(material_.specular));
-	glUniform1f(glGetUniformLocation(programID, "my_material.shininess"), material_.shininess);
+void mesh_texture_draw(Mesh* mesh) {
+	glBindVertexArray(mesh->vao);
+	glDrawArrays(GL_TRIANGLES, 0, mesh->size);
+	glBindVertexArray(0);
 }
 
+bool load_obj(const char* path, std::vector<glm::vec3>& out_vertices,
+	std::vector<glm::vec2>& out_uvs, std::vector<glm::vec3>& out_normals) {
+	printf("Loading OBJ file %s ... ", path);
 
-Piece::Piece(int field_id, Model *model, GLuint texture):
-Shape(model, glm::vec3(0.0, 0.1, 0.0), texture) {
-	field_.push_back((char)'a' + (field_id % 8));
-	field_.push_back((char)'8' - (field_id / 8));
+	std::vector<unsigned int> vertexIndices, uvIndices, normalIndices;
+	std::vector<glm::vec3> temp_vertices;
+	std::vector<glm::vec2> temp_uvs;
+	std::vector<glm::vec3> temp_normals;
 
-	// std::cout << field_ << "\n";
+	FILE* file = fopen(path, "r");
+	if(file == NULL){
+		printf("can't open the file.\n");
+		return false;
+	}
 
-	update_world_position();
-}
+	while (1) {
+		char lineHeader[128];
 
-std::string Piece::get_field() {
-	return field_;
-}
+		// read the first word of the line
+		int res = fscanf(file, "%s", lineHeader);
 
-void Piece::update_field(std::string field) {
-	field_ = field;
-	update_world_position();
-}
+		if (res == EOF)
+			break;
 
-void Piece::update_world_position() {
-	pos.x = (field_[0] - 'a' - 4) * 2.25 + 1.12;
-	pos.z = ('8' - field_[1] - 4) * 2.25 + 1.12;
+		// read vertex coordinates
+		if (strcmp(lineHeader, "v") == 0) {
+			glm::vec3 vertex;
+			fscanf(file, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z);
+			temp_vertices.push_back(vertex);
+		}
+		// read texture coordinates
+		else if (strcmp(lineHeader, "vt") == 0) {
+			glm::vec2 uv;
+			fscanf(file, "%f %f\n", &uv.x, &uv.y);
+			// Invert V coordinate since we will only use DDS texture,
+			// which are inverted. Remove if you want to use TGA or BMP loaders.
+			// uv.y = -uv.y;
+			temp_uvs.push_back(uv);
+		}
+		// read normal vectors
+		else if (strcmp(lineHeader, "vn") == 0) {
+			glm::vec3 normal;
+			fscanf(file, "%f %f %f\n", &normal.x, &normal.y, &normal.z);
+			temp_normals.push_back(normal);
+		}
+		// read faces (triangles)
+		else if (strcmp(lineHeader, "f") == 0) {
+			std::string vertex1, vertex2, vertex3;
+			unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
+			int matches = fscanf(file, "%d/%d/%d %d/%d/%d %d/%d/%d\n", &vertexIndex[0], &uvIndex[0], &normalIndex[0],
+									&vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2], &normalIndex[2]);
 
-	// std::cout << field_ << "\n";
-	// std::cout << pos.x << " " << pos.y << " " << pos.z << "\n";
-}
+			if (matches != 9) {
+				printf("\nFile can't be read by our simple parser. ");
+				printf("Try exporting with other options and make sure you export normals and uvs.\n");
+				fclose(file);
+				return false;
+			}
 
-void Piece::update_position() {
-	int rank, file;
+			// Create new triangle
+			vertexIndices.push_back(vertexIndex[0]);
+			vertexIndices.push_back(vertexIndex[1]);
+			vertexIndices.push_back(vertexIndex[2]);
+			uvIndices    .push_back(uvIndex[0]);
+			uvIndices    .push_back(uvIndex[1]);
+			uvIndices    .push_back(uvIndex[2]);
+			normalIndices.push_back(normalIndex[0]);
+			normalIndices.push_back(normalIndex[1]);
+			normalIndices.push_back(normalIndex[2]);
+		}
+		else {
+			// Probably a comment, eat up the rest of the line
+			char stupidBuffer[1000];
+			fgets(stupidBuffer, 1000, file);
+		}
+	}
 
-	rank = 4 + (int)((pos.z + 22.5) / 2.25) - 10;
-	file = 4 + (int)((pos.x + 22.5) / 2.25) - 10;
+	// For each vertex of each triangle
+	for(unsigned int i=0; i<vertexIndices.size(); i++){
+		// Get the indices of its attributes
+		unsigned int vertexIndex = vertexIndices[i];
+		unsigned int uvIndex = uvIndices[i];
+		unsigned int normalIndex = normalIndices[i];
 
-	int field_id = rank * 8 + file;
-	std::cout << "Update!\n" << "rank: " << rank << ", file: " << file << "\n";
-	std::cout << "field_id: " << field_id << "\n";
+		// Get the attributes thanks to the index
+		glm::vec3 vertex = temp_vertices[ vertexIndex-1 ];
+		glm::vec2 uv = temp_uvs[ uvIndex-1 ];
+		glm::vec3 normal = temp_normals[ normalIndex-1 ];
 
-	std::cout << (char)('a' + file) << (char)('8' - rank) << "\n";
-
-	field_ = std::string() + (char)('a' + file) + (char)('8' - rank);
+		// Put the attributes in buffers
+		out_vertices.push_back(vertex);
+		out_uvs     .push_back(uv);
+		out_normals .push_back(normal);
+	}
+	fclose(file);
+	printf(" done.\n");
+	return true;
 }

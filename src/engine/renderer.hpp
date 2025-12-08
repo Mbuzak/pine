@@ -2,10 +2,17 @@
 #define PINE_RENDERER
 
 #include <GL/glew.h>
-#include "model.hpp"
-#include "shader.hpp"
+#include "mesh.hpp"
 #include "camera.hpp"
 #include "texture.hpp"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include "shader.h"
+#ifdef __cplusplus
+}
+#endif
 
 class RendererSkybox {
 public:
@@ -17,7 +24,7 @@ public:
 private:
 	GLuint program_id;
 	GLuint texture_id;
-	Skybox skybox;
+	Mesh mesh;
 };
 
 #endif

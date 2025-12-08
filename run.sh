@@ -1,3 +1,3 @@
 #!/bin/bash
 cmake --build build
-./build/src/OpenGL
+./build/src/pine

@@ -1,5 +1,5 @@
-#ifndef SCENE_HPP
-#define SCENE_HPP
+#ifndef PINE_SCENE
+#define PINE_SCENE
 
 #include <stdlib.h>
 #include <iostream>
@@ -7,29 +7,27 @@
 #include <vector>
 #include <array>
 #include <map>
-#include "engine/model.hpp"
 #include "engine/mesh.hpp"
+#include "engine/entity.hpp"
 #include "engine/light.hpp"
-#include "engine/shader.hpp"
 #include "engine/texture.hpp"
 #include "engine/shadow.hpp"
 #include "engine/camera.hpp"
 #include "engine/framebuffer.hpp"
 #include "engine/renderer.hpp"
+#include "engine/uniform.hpp"
 #include "chess/chess.hpp"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+#include "engine/shader.h"
 #include "engine/display.h"
 #ifdef __cplusplus
 }
 #endif
 
 #define __CHECK_FOR_ERRORS 	{GLenum errCode; if ((errCode = glGetError()) != GL_NO_ERROR) printf("Error (%d): %s in file %s at line %d !\n", errCode, gluErrorString(errCode), __FILE__,  __LINE__);}
-
-void uniform_vec3f_send(GLuint, const char*, const glm::vec3&);
-void uniform_mat4fv_send(GLuint, const char*, const glm::mat4&);
 
 class Scene {
 public:
@@ -38,17 +36,16 @@ public:
 	void Setup();
 	void display();
 
-	void SendLight(GLuint);
-
 	Display d;
 	RendererSkybox renderer_skybox;
 
 //private:
 	GLuint program_default;
+	GLuint program_color;
 
 	Camera camera;
 
-	std::map<std::string, Model*> models_;
+	std::map<std::string, Mesh*> meshes;
 	std::map<std::string, GLuint> textures;
 
 	// --- meshes ---
@@ -62,13 +59,12 @@ public:
 
 private:
 	void RenderToTexture();
-	void RenderShapes();
+	void RenderShapes(GLuint);
 	void RenderLights();
 
 public:
 	std::vector<Piece*> get_pieces();
 
-	void display(GLuint program_id);
 	void DisactivatePiece(Piece &piece);
 
 	chschr::Chess* chess;

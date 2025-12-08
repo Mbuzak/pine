@@ -1,14 +1,6 @@
 #include "scene.hpp"
 #include "stb_image.h"
 
-void uniform_vec3f_send(GLuint program, const char* name, const glm::vec3& vec) {
-	glUniform3fv(glGetUniformLocation(program, name), 1, glm::value_ptr(vec));
-}
-
-void uniform_mat4fv_send(GLuint program_id, const char* name, const glm::mat4& matrix) {
-	glUniformMatrix4fv(glGetUniformLocation(program_id, name), 1, GL_FALSE, glm::value_ptr(matrix));
-}
-
 Scene::Scene() {
 	d = display_init(800, 600, "pine");
 	chess = new chschr::Chess();
@@ -32,12 +24,17 @@ void Scene::Setup() {
 	reshape(width, height);
 
 	program_default = program_init("default");
+	program_color = program_init("color");
 	renderer_skybox.init();
+
+	camera.init({0.0, -3.0, -22.0}, {0.3, -1.57});
 
 	// Load models
 	std::vector<std::string> model_names = {"square", "pawn", "knight", "bishop", "rook", "king", "queen", "chessboard", "ground", "sphere"};
 	for (std::string &name: model_names) {
-		models_.insert({name, new Model(name)});
+		Mesh* mesh = new Mesh();
+		mesh_texture_init(mesh, name);
+		meshes.insert({name, mesh});
 	}
 	
 	// Load textures
@@ -47,28 +44,23 @@ void Scene::Setup() {
 		textures.insert({name, texture_2d_init(file.c_str())});
 	}
 
-	// Camera
-	camera.pos = {0.0, -3.0, -22.0};
-	camera.rot = {0.3, -1.57};
-
 	// --- Shapes ---
-	background_.push_back(new Shape(models_.at("ground"), glm::vec3{0.0, -0.1, 0.0}, textures.at("grass")));
-	background_.push_back(new Shape(models_.at("chessboard"), glm::vec3{0.0, 0.0, 0.0}, textures.at("chessboard")));
+	background_.push_back(new Shape(meshes.at("ground"), glm::vec3{0.0, -0.1, 0.0}, textures.at("grass")));
+	background_.push_back(new Shape(meshes.at("chessboard"), glm::vec3{0.0, 0.0, 0.0}, textures.at("chessboard")));
 
 	// --- Lights ---
 	sun_ = new Sun(glm::vec3(1.0, -2.0, 2.0));
 
-	lamps_[0] = new Lamp(models_.at("sphere"), glm::vec3(9.0, 1.0, 9.0), glm::vec3(5.2, 0.3, 0.5));
-	lamps_[1] = new Lamp(models_.at("sphere"), glm::vec3(9.0, 1.0, -9.0), glm::vec3(0.4, 0.4, 0.6));
-	lamps_[2] = new Lamp(models_.at("sphere"), glm::vec3(-9.0, 1.0, 9.0), glm::vec3(0.2, 0.9, 0.5));
-	lamps_[3] = new Lamp(models_.at("sphere"), glm::vec3(-9.0, 1.0, -9.0), glm::vec3(0.2, 0.3, 0.5));
+	lamps_[0] = new Lamp(meshes.at("sphere"), glm::vec3(9.0, 1.0, 9.0), glm::vec3(5.2, 0.3, 0.5));
+	lamps_[1] = new Lamp(meshes.at("sphere"), glm::vec3(9.0, 1.0, -9.0), glm::vec3(0.4, 0.4, 0.6));
+	lamps_[2] = new Lamp(meshes.at("sphere"), glm::vec3(-9.0, 1.0, 9.0), glm::vec3(0.2, 0.9, 0.5));
+	lamps_[3] = new Lamp(meshes.at("sphere"), glm::vec3(-9.0, 1.0, -9.0), glm::vec3(0.2, 0.3, 0.5));
 
 	dir_shadow_map.Init(sun_->direction);
-
 	fbo.init();
 
 	for (int i = 0; i < squares_.size(); i++) {
-		squares_[i] = new Shape(models_.at("square"), IndexToPosition(i));
+		squares_[i] = new Shape(meshes.at("square"), IndexToPosition(i));
 		if (((i % 8) + (i / 8)) % 2 == 0) {
 			squares_[i]->material_.ambient = glm::vec3(0.5);
 		}
@@ -81,7 +73,7 @@ void Scene::Setup() {
 		if (name == "x")
 			continue;
 
-		Piece *piece = new Piece(i, models_.at(name), textures.at(colour));
+		Piece *piece = new Piece(i, meshes.at(name), textures.at(colour));
 		piece->colour = colour;
 		if (colour == "white") {
 			piece->rot.y = 3.2;
@@ -165,9 +157,7 @@ void Scene::display() {
 	renderer_skybox.render(&camera);
 	//RenderLights();
 
-	RenderShapes();
-
-	glUseProgram(0);
+	RenderShapes(program_default);
 
 	SDL_GL_SwapWindow(d.window);
 	}
@@ -175,55 +165,65 @@ void Scene::display() {
 
 void Scene::RenderToTexture() {
 	glUseProgram(program_default);
-	glUniformMatrix4fv(glGetUniformLocation(program_default, "matProj"), 1, GL_FALSE, glm::value_ptr(camera.perspective));
-	glUniform1i(glGetUniformLocation(program_default, "isLight"), false);
+	uniform_mat4f_send(program_default, "matProj", camera.perspective);
 	background_[1]->Display(program_default);
 	glUseProgram(0);
 }
 
-void Scene::SendLight(GLuint program) {
-	// point lights
+void Scene::RenderShapes(GLuint program_id) {
+	glUseProgram(program_id);
+
+	// Send light
 	for (int i = 0; i < lamps_.size(); i++) {
 		std::string name = "lights[" + std::to_string(i) + "].";
-
-		uniform_vec3f_send(program, (name + "ambient").c_str(), lamps_[i]->ambient);
-		uniform_vec3f_send(program, (name + "specular").c_str(), lamps_[i]->specular);
-		uniform_vec3f_send(program, (name + "attenuation").c_str(), lamps_[i]->attenuation);
-		uniform_vec3f_send(program, (name + "position").c_str(), lamps_[i]->position);
+		uniform_light_point_send(program_id, name, lamps_[i]);
 	}
-}
+	uniform_light_directional_send(program_id, "sun.", sun_);
 
-void Scene::RenderShapes() {
-	glUseProgram(program_default);
-	SendLight(program_default);
-	sun_->SendUniform(program_default);
+	uniform_mat4f_send(program_id, "matProj", camera.perspective);
 
-	glUniformMatrix4fv(glGetUniformLocation(program_default, "matProj"), 1, GL_FALSE, glm::value_ptr(camera.perspective));
-	glUniform1i(glGetUniformLocation(program_default, "isLight"), false);
-
-	camera.SendUniform(program_default);
+	camera.SendUniform(program_id);
 
 	// potok graficzny mapy cieni ?
-	glUniformMatrix4fv(glGetUniformLocation(program_default, "lightProj"), 1, GL_FALSE, glm::value_ptr(lightProj));
-	glUniformMatrix4fv(glGetUniformLocation(program_default, "lightView"), 1, GL_FALSE, glm::value_ptr(lightView));
+	uniform_mat4f_send(program_id, "lightProj", dir_shadow_map.lightProj);
+	uniform_mat4f_send(program_id, "lightView", dir_shadow_map.lightView);
 
-	dir_shadow_map.SendTexture(program_default);
+	dir_shadow_map.SendTexture(program_id);
 
 	// rysowanie obiektów nie-selekcyjnych (identyfikator 0)
 	glStencilFunc(GL_ALWAYS, 0, 0xFF);
 
 	for (Shape *shape : background_)
-		shape->Display(program_default);
+		shape->Display(program_id);
 	
-	display(program_default);
+	glUseProgram(program_color);
+	camera.SendUniform(program_color);
+	uniform_mat4f_send(program_color, "matProj", camera.perspective);
+	uniform_vec3f_send(program_color, "color", glm::vec3{0.2, 0.8, 0.2});
+	for (int &value: active_fields) {
+		squares_[value]->Display(program_color);
+	}
+
+	glUseProgram(program_id);
+	for (int i = 0; i < pieces_.size(); ++i) {
+		glStencilFunc(GL_ALWAYS, i + 1, 0xFF);
+		pieces_[i]->Display(program_id);
+	}
+
+	if (selected_id >= 0) {
+		glUseProgram(program_color);
+		uniform_vec3f_send(program_color, "color", glm::vec3{0.0, 0.0, 0.35});
+		pieces_[selected_id]->DisplayOutline(program_color, selected_id);
+	}
+
+	glUseProgram(0);
 }
 
 void Scene::RenderLights() {
-	glUseProgram(program_default);
-	glUniform1i(glGetUniformLocation(program_default, "isLight"), true);
+	glUseProgram(program_color);
 
 	for (int i = 0; i < 4; i++) {
-		glUniform3fv(glGetUniformLocation( program_default, "lightModelColor" ), 1, &lamps_[i]->diffuse[0]);
+		uniform_vec3f_send(program_default, "color", lamps_[i]->diffuse);
 		lamps_[i]->Display(program_default);
 	}
 }
@@ -231,29 +231,6 @@ void Scene::RenderLights() {
 // game
 std::vector<Piece*> Scene::get_pieces() {
 	return pieces_;
-}
-
-void Scene::display(GLuint program_id) {
-	for (int &value: active_fields) {
-		//std::cout << value << "\n";
-		glUniform1i(glGetUniformLocation(program_id, "active_field"), true);
-		squares_[value]->Display(program_id);
-		glUniform1i(glGetUniformLocation(program_id, "active_field"), false);
-	}
-
-	for (int i = 0; i < squares_.size(); i++) {
-		squares_[i]->Display(program_id);
-	}
-
-	for (int i = 0; i < pieces_.size(); ++i) {
-		glStencilFunc(GL_ALWAYS, i + 1, 0xFF);
-
-		pieces_[i]->Display(program_id);
-	}
-
-	if (selected_id >= 0) {
-		pieces_[selected_id]->DisplayOutline(program_id, selected_id);
-	}
 }
 
 void Scene::DisactivatePiece(Piece &piece) {

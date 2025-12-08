@@ -1,18 +1,24 @@
-#ifndef SHADOW_HPP
-#define SHADOW_HPP
+#ifndef PINE_SHADOW
+#define PINE_SHADOW
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
-#include "mesh.hpp"
-#include "shader.hpp"
+#include "entity.hpp"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include "shader.h"
+#ifdef __cplusplus
+}
+#endif
 
 // Shadow map of direction or point light
 class ShadowMap {
 public:
-	// Initialize essential components
 	void Init(glm::vec3);
 
 	// Render shapes to depth map
@@ -21,21 +27,22 @@ public:
 	void SendTexture(GLuint);
 
 public:
-	const unsigned int width_ = 1024;
-	const unsigned int height_ = 1024;
+	const unsigned int width = 1024;
+	const unsigned int height = 1024;
 
 	GLuint program_id;
 	GLuint fbo_id;
 	GLuint texture_id;
+
+	// Parametry swiatla kierunkowego, ale znacznie lepiej ubrac
+	// to w strukture, ktora uzywalismy podczas zajec z oswietlenia
+	//inline glm::vec3 Light_Direction;
+	glm::vec3 Light_Position;
+
+	// Macierze rzutowania dla kamery patrzacej z punktu widzenia oswietlenia
+	glm::mat4 lightProj;
+	glm::mat4 lightView;
 };
 
-// Parametry swiatla kierunkowego, ale znacznie lepiej ubrac
-// to w strukture, ktora uzywalismy podczas zajec z oswietlenia
-//inline glm::vec3 Light_Direction;
-inline glm::vec3 Light_Position;
-
-// Macierze rzutowania dla kamery patrzacej z punktu widzenia oswietlenia
-inline glm::mat4 lightProj;
-inline glm::mat4 lightView;
 
 #endif

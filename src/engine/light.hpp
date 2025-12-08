@@ -1,12 +1,11 @@
-#ifndef LIGHT_HPP
-#define LIGHT_HPP
+#ifndef PINE_LIGHT
+#define PINE_LIGHT
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-
-#include "model.hpp"
-
+#include "entity.hpp"
+#include "uniform.hpp"
 
 class Light {
 public:
@@ -23,29 +22,29 @@ public:
 // Lamp class represents point light
 class Lamp: public Light {
 public:
-	Lamp(Model *model, glm::vec3 position, glm::vec3 diffuse);
-	Lamp(Model* model, glm::vec3 position, glm::vec3 diffuse, glm::vec3 specular, glm::vec3 attenuation);
+	Lamp(Mesh*, glm::vec3, glm::vec3);
+	Lamp(Mesh*, glm::vec3, glm::vec3, glm::vec3, glm::vec3);
 
 	glm::mat4 CalculateMatModel();
-	void Display(GLuint program_id);
+	void Display(GLuint);
 
 public:
 	glm::vec3 position;
 	glm::vec3 attenuation;
 
-	Model* model = nullptr;
+	Mesh* mesh = nullptr;
 };
-
 
 // Sun class represents directional lighting
 class Sun: public Light {
 public:
 	Sun(glm::vec3 direction);
 
-	void SendUniform(GLuint program_id);
-
 public:
 	glm::vec3 direction;
 };
+
+void uniform_light_point_send(GLuint, std::string, Lamp*);
+void uniform_light_directional_send(GLuint, std::string, Sun*);
 
 #endif
