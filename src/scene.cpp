@@ -57,7 +57,7 @@ void Scene::Setup() {
 	lamps_[3] = new Lamp(meshes.at("sphere"), glm::vec3(-9.0, 1.0, -9.0), glm::vec3(0.2, 0.3, 0.5));
 
 	dir_shadow_map.Init(sun_->direction);
-	fbo.init();
+	fbo_init(&fbo);
 
 	for (int i = 0; i < squares_.size(); i++) {
 		squares_[i] = new Shape(meshes.at("square"), IndexToPosition(i));

@@ -13,7 +13,6 @@
 #include "engine/texture.hpp"
 #include "engine/shadow.hpp"
 #include "engine/camera.hpp"
-#include "engine/framebuffer.hpp"
 #include "engine/renderer.hpp"
 #include "engine/uniform.hpp"
 #include "chess/chess.hpp"
@@ -23,6 +22,7 @@ extern "C" {
 #endif
 #include "engine/shader.h"
 #include "engine/display.h"
+#include "engine/fbo.h"
 #ifdef __cplusplus
 }
 #endif
