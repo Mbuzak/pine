@@ -3,9 +3,16 @@
 
 #include <GL/glew.h>
 #include "mesh.hpp"
-#include "shader.hpp"
 #include "camera.hpp"
 #include "texture.hpp"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include "shader.h"
+#ifdef __cplusplus
+}
+#endif
 
 class RendererSkybox {
 public:

@@ -7,7 +7,14 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
 #include "entity.hpp"
-#include "shader.hpp"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include "shader.h"
+#ifdef __cplusplus
+}
+#endif
 
 // Shadow map of direction or point light
 class ShadowMap {

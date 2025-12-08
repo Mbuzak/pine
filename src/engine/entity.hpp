@@ -13,6 +13,7 @@
 #include "texture.hpp"
 #include "mesh.hpp"
 #include "uniform.hpp"
+#include "material.hpp"
 
 #define STANDARD 0
 #define OUTLINE 1
@@ -30,7 +31,6 @@ public:
 	glm::mat4 ScaledMatModel(float, float, float);
 	void Display(GLuint programID, int value = STANDARD);
 	void DisplayOutline(GLuint, int);
-	void SendMaterial(GLuint, std::string);
 
 	glm::vec3 pos;
 	glm::vec3 rot;
