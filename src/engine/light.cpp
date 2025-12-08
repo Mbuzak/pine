@@ -40,9 +40,16 @@ Sun::Sun(glm::vec3 direction) {
 	this->specular = glm::vec3(0.1);
 }
 
-void Sun::SendUniform(GLuint program_id) {
-	glUniform3fv(glGetUniformLocation(program_id, "sun.ambient"), 1, glm::value_ptr(ambient));
-	glUniform3fv(glGetUniformLocation(program_id, "sun.diffuse"), 1, glm::value_ptr(diffuse));
-	glUniform3fv(glGetUniformLocation(program_id, "sun.specular"), 1, glm::value_ptr(specular));
-	glUniform3fv(glGetUniformLocation(program_id, "sun.direction"), 1, glm::value_ptr(direction));
+void uniform_light_point_send(GLuint program_id, std::string name, Lamp* light) {
+	uniform_vec3f_send(program_id, (name + "ambient").c_str(), light->ambient);
+	uniform_vec3f_send(program_id, (name + "specular").c_str(), light->specular);
+	uniform_vec3f_send(program_id, (name + "attenuation").c_str(), light->attenuation);
+	uniform_vec3f_send(program_id, (name + "position").c_str(), light->position);
+}
+
+void uniform_light_directional_send(GLuint program_id, std::string name, Sun* light) {
+	uniform_vec3f_send(program_id, (name + "ambient").c_str(), light->ambient);
+	uniform_vec3f_send(program_id, (name + "diffuse").c_str(), light->diffuse);
+	uniform_vec3f_send(program_id, (name + "specular").c_str(), light->specular);
+	uniform_vec3f_send(program_id, (name + "direction").c_str(), light->direction);
 }

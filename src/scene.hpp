@@ -16,6 +16,7 @@
 #include "engine/camera.hpp"
 #include "engine/framebuffer.hpp"
 #include "engine/renderer.hpp"
+#include "engine/uniform.hpp"
 #include "chess/chess.hpp"
 
 #ifdef __cplusplus
@@ -28,17 +29,12 @@ extern "C" {
 
 #define __CHECK_FOR_ERRORS 	{GLenum errCode; if ((errCode = glGetError()) != GL_NO_ERROR) printf("Error (%d): %s in file %s at line %d !\n", errCode, gluErrorString(errCode), __FILE__,  __LINE__);}
 
-void uniform_vec3f_send(GLuint, const char*, const glm::vec3&);
-void uniform_mat4fv_send(GLuint, const char*, const glm::mat4&);
-
 class Scene {
 public:
 	Scene();
 
 	void Setup();
 	void display();
-
-	void SendLight(GLuint);
 
 	Display d;
 	RendererSkybox renderer_skybox;
@@ -62,13 +58,12 @@ public:
 
 private:
 	void RenderToTexture();
-	void RenderShapes();
+	void RenderShapes(GLuint);
 	void RenderLights();
 
 public:
 	std::vector<Piece*> get_pieces();
 
-	void display(GLuint program_id);
 	void DisactivatePiece(Piece &piece);
 
 	chschr::Chess* chess;

@@ -43,13 +43,12 @@ glm::mat4 Shape::CalculateMatModel(int value) {
 
 void Shape::Display(GLuint programID, int value) {
 	glm::mat4 model = CalculateMatModel(value);
-
-	glUniformMatrix4fv(glGetUniformLocation(programID, "matModel"), 1, GL_FALSE, glm::value_ptr(model));
+	uniform_mat4f_send(programID, "matModel", model);
 
 	glm::mat3 matNormal = glm::transpose(glm::inverse(model));
 	glUniformMatrix3fv(glGetUniformLocation(programID, "matNormal"), 1, GL_FALSE, glm::value_ptr(matNormal));
 
-	SendMaterial(programID);
+	SendMaterial(programID, "my_material.");
 
 	glUniform1i(glGetUniformLocation(programID, "hasTex"), HasTexture());
 
@@ -81,11 +80,11 @@ void Shape::DisplayOutline(GLuint program_id, int selected_id) {
 	glStencilFunc(GL_ALWAYS, 0, 0xFF);
 }
 
-void Shape::SendMaterial(GLuint programID) {
-	glUniform3fv(glGetUniformLocation(programID, "my_material.ambient"), 1, glm::value_ptr(material_.ambient));
-	glUniform3fv(glGetUniformLocation(programID, "my_material.diffuse"), 1, glm::value_ptr(material_.diffuse));
-	glUniform3fv(glGetUniformLocation(programID, "my_material.specular"), 1, glm::value_ptr(material_.specular));
-	glUniform1f(glGetUniformLocation(programID, "my_material.shininess"), material_.shininess);
+void Shape::SendMaterial(GLuint programID, std::string name) {
+	uniform_vec3f_send(programID, (name + "ambient").c_str(), material_.ambient);
+	uniform_vec3f_send(programID, (name + "diffuse").c_str(), material_.diffuse);
+	uniform_vec3f_send(programID, (name + "specular").c_str(), material_.specular);
+	glUniform1f(glGetUniformLocation(programID, (name + "shininess").c_str()), material_.shininess);
 }
 
 

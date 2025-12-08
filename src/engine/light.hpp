@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "entity.hpp"
+#include "uniform.hpp"
 
 class Light {
 public:
@@ -40,10 +41,11 @@ class Sun: public Light {
 public:
 	Sun(glm::vec3 direction);
 
-	void SendUniform(GLuint program_id);
-
 public:
 	glm::vec3 direction;
 };
+
+void uniform_light_point_send(GLuint, std::string, Lamp*);
+void uniform_light_directional_send(GLuint, std::string, Sun*);
 
 #endif

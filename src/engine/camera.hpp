@@ -8,15 +8,15 @@
 
 class Camera {
 public:
+	void init(glm::vec3, glm::vec2);
 	void Update();
 	void SendUniform(GLuint);
 
 	glm::mat4 perspective;
 	glm::mat4 view;
 
-	// Zmienne kontrolujace polozenie i orientacje kamery
-	glm::vec2 rot;
 	glm::vec3 pos;
+	glm::vec2 rot;
 
 	glm::mat4 UpdateViewMatrix();
 
