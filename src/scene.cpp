@@ -36,18 +36,18 @@ void Scene::Setup() {
 	}
 
 	// --- Shapes ---
-	background_.push_back(new Shape(meshes.at("ground"), glm::vec3{0.0, -0.1, 0.0}, textures.at("grass")));
-	background_.push_back(new Shape(meshes.at("chessboard"), glm::vec3{0.0, 0.0, 0.0}, textures.at("chessboard")));
+	background_.push_back(new Shape(meshes.at("ground"), {0.0, -0.1, 0.0}, textures.at("grass")));
+	background_.push_back(new Shape(meshes.at("chessboard"), {0.0, 0.0, 0.0}, textures.at("chessboard")));
 
 	// --- Lights ---
-	sun_ = new Sun(glm::vec3(1.0, -2.0, 2.0));
+	sun = sun_init({1.0, -2.0, 2.0});
 
-	lamps_[0] = new Lamp(meshes.at("sphere"), glm::vec3(9.0, 1.0, 9.0), glm::vec3(5.2, 0.3, 0.5));
-	lamps_[1] = new Lamp(meshes.at("sphere"), glm::vec3(9.0, 1.0, -9.0), glm::vec3(0.4, 0.4, 0.6));
-	lamps_[2] = new Lamp(meshes.at("sphere"), glm::vec3(-9.0, 1.0, 9.0), glm::vec3(0.2, 0.9, 0.5));
-	lamps_[3] = new Lamp(meshes.at("sphere"), glm::vec3(-9.0, 1.0, -9.0), glm::vec3(0.2, 0.3, 0.5));
+	lamps_[0] = new Lamp(meshes.at("sphere"), {9.0, 1.0, 9.0}, {5.2, 0.3, 0.5});
+	lamps_[1] = new Lamp(meshes.at("sphere"), {9.0, 1.0, -9.0}, {0.4, 0.4, 0.6});
+	lamps_[2] = new Lamp(meshes.at("sphere"), {-9.0, 1.0, 9.0}, {0.2, 0.9, 0.5});
+	lamps_[3] = new Lamp(meshes.at("sphere"), {-9.0, 1.0, -9.0}, {0.2, 0.3, 0.5});
 
-	dir_shadow_map.Init(sun_->direction);
+	dir_shadow_map.Init(sun.direction);
 	fbo_init(&fbo);
 
 	for (int i = 0; i < squares_.size(); i++) {
@@ -175,7 +175,7 @@ void Scene::RenderShapes(GLuint program_id) {
 		std::string name = "lights[" + std::to_string(i) + "].";
 		uniform_light_point_send(program_id, name, lamps_[i]);
 	}
-	uniform_light_directional_send(program_id, "sun.", sun_);
+	uniform_light_directional_send(program_id, "sun.", &sun);
 	uniform_mat4f_send(program_id, "matProj", camera.perspective);
 	camera.SendUniform(program_id);
 
@@ -194,7 +194,7 @@ void Scene::RenderShapes(GLuint program_id) {
 	glUseProgram(program_color);
 	camera.SendUniform(program_color);
 	uniform_mat4f_send(program_color, "matProj", camera.perspective);
-	uniform_vec3f_send(program_color, "color", glm::vec3{0.2, 0.8, 0.2});
+	uniform_vec3f_send(program_color, "color", {0.2, 0.8, 0.2});
 	for (int &value: active_fields) {
 		squares_[value]->Display(program_color);
 	}
@@ -207,7 +207,7 @@ void Scene::RenderShapes(GLuint program_id) {
 
 	if (selected_id >= 0) {
 		glUseProgram(program_color);
-		uniform_vec3f_send(program_color, "color", glm::vec3{0.0, 0.0, 0.35});
+		uniform_vec3f_send(program_color, "color", {0.0, 0.0, 0.35});
 		pieces_[selected_id]->DisplayOutline(program_color, selected_id);
 	}
 
