@@ -13,7 +13,6 @@
 #include "engine/texture.hpp"
 #include "engine/shadow.hpp"
 #include "engine/camera.hpp"
-#include "engine/framebuffer.hpp"
 #include "engine/renderer.hpp"
 #include "engine/uniform.hpp"
 #include "chess/chess.hpp"
@@ -23,6 +22,8 @@ extern "C" {
 #endif
 #include "engine/shader.h"
 #include "engine/display.h"
+#include "engine/fbo.h"
+#include "engine/controller.h"
 #ifdef __cplusplus
 }
 #endif
@@ -33,66 +34,54 @@ class Scene {
 public:
 	Scene();
 
-	void Setup();
-	void display();
 
 	Display d;
 	RendererSkybox renderer_skybox;
 
-//private:
 	GLuint program_default;
 	GLuint program_color;
 
 	Camera camera;
+	Controller controller;
 
 	std::map<std::string, Mesh*> meshes;
 	std::map<std::string, GLuint> textures;
 
-	// --- meshes ---
-	Sun *sun_ = nullptr;
+	Sun sun;
 	std::array<Lamp*, 4> lamps_;
-
 	std::vector<Shape*> background_;
+	std::vector<Piece*> pieces_;
+	std::array<Shape*, 64> squares_;
 
 	ShadowMap dir_shadow_map;
 	Framebuffer fbo;
+
+	chschr::Chess* chess;
+	std::vector<int> active_fields;
+
+	float off_rank_white = -8.0;
+	float off_rank_black = -8.0;
+	int selected_id = -1;
 
 private:
 	void RenderToTexture();
 	void RenderShapes(GLuint);
 	void RenderLights();
 
-public:
-	std::vector<Piece*> get_pieces();
-
-	void DisactivatePiece(Piece &piece);
-
-	chschr::Chess* chess;
-	std::vector<int> active_fields;
-
-	glm::vec3 IndexToPosition(int id);
-
-	std::vector<Piece*> pieces_;
-	std::array<Shape*, 64> squares_;
-	float off_rank_white = -8.0;
-	float off_rank_black = -8.0;
-	int selected_id = -1;
-
-	// Zmienne do kontroli stanu myszy
-	int _mouse_buttonState = 0;
-	int _mouse_left_click_state = 0;
-	int _mouse_buttonX;
-	int _mouse_buttonY;
-
+	int events_handle();
 	void select_piece(int wx, int wy, int x, int y);
 	void move_piece();
 	void motion(int x, int y);
 	void reshape(int, int);
-
-	// Rotate camera
 	void rotate(int, int);
 
-	int width = 800, height = 600;
+public:
+	void Setup();
+	void display();
+
+	std::vector<Piece*> get_pieces();
+	glm::vec3 IndexToPosition(int id);
+	void DisactivatePiece(Piece &piece);
 };
 
 #endif

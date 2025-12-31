@@ -9,15 +9,6 @@ Lamp::Lamp(Mesh* mesh, glm::vec3 position, glm::vec3 diffuse) {
 	this->attenuation = glm::vec3(0.1);
 }
 
-Lamp::Lamp(Mesh* mesh, glm::vec3 position, glm::vec3 diffuse, glm::vec3 specular, glm::vec3 attenuation) {
-	this->mesh = mesh;
-	this->position = position;
-	this->ambient = glm::vec3(0.1);
-	this->diffuse = diffuse;
-	this->specular = specular;
-	this->attenuation = attenuation;
-}
-
 glm::mat4 Lamp::CalculateMatModel() {
 	glm::mat4 model = glm::translate(glm::mat4(1.0f), position);
 	return model;
@@ -33,11 +24,14 @@ void Lamp::Display(GLuint program_id) {
 	mesh_raw_draw(mesh);
 }
 
-Sun::Sun(glm::vec3 direction) {
-	this->direction = direction;
-	this->ambient = glm::vec3(0.4);
-	this->diffuse = glm::vec3(0.2, 0.2, 0.5);
-	this->specular = glm::vec3(0.1);
+Sun sun_init(glm::vec3 dir) {
+	Sun sun;
+	sun.direction = dir;
+	sun.ambient = glm::vec3(0.4);
+	sun.diffuse = glm::vec3(0.2, 0.2, 0.5);
+	sun.specular = glm::vec3(0.1);
+
+	return sun;
 }
 
 void uniform_light_point_send(GLuint program_id, std::string name, Lamp* light) {

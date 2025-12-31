@@ -7,42 +7,31 @@
 #include "entity.hpp"
 #include "uniform.hpp"
 
-class Light {
-public:
-	Light() = default;
-	Light(glm::vec3 diffuse, glm::vec3 specular);
-
-public:
-	glm::vec3 ambient;
-	glm::vec3 diffuse;
-	glm::vec3 specular;
-};
-
-
 // Lamp class represents point light
-class Lamp: public Light {
-public:
+struct Lamp {
 	Lamp(Mesh*, glm::vec3, glm::vec3);
-	Lamp(Mesh*, glm::vec3, glm::vec3, glm::vec3, glm::vec3);
 
 	glm::mat4 CalculateMatModel();
 	void Display(GLuint);
 
-public:
 	glm::vec3 position;
 	glm::vec3 attenuation;
+	glm::vec3 ambient;
+	glm::vec3 diffuse;
+	glm::vec3 specular;
 
 	Mesh* mesh = nullptr;
 };
 
 // Sun class represents directional lighting
-class Sun: public Light {
-public:
-	Sun(glm::vec3 direction);
-
-public:
+struct Sun {
 	glm::vec3 direction;
+	glm::vec3 ambient;
+	glm::vec3 diffuse;
+	glm::vec3 specular;
 };
+
+Sun sun_init(glm::vec3);
 
 void uniform_light_point_send(GLuint, std::string, Lamp*);
 void uniform_light_directional_send(GLuint, std::string, Sun*);

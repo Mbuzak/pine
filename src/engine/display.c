@@ -2,6 +2,8 @@
 
 Display display_init(unsigned int width, unsigned int height, const char* name) {
 	Display display;
+	display.width = width;
+	display.height = height;
 	
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		printf("[error] Init SDL failed!\n");
@@ -35,10 +37,14 @@ Display display_init(unsigned int width, unsigned int height, const char* name) 
 		exit(1);
 	}
 
-	/*glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);
 	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 	glEnable(GL_STENCIL_TEST);
-	glClearStencil(0);*/
+	glClearStencil(0);
+
+	/* Value of stencil buffer will be replaced only in case of
+	positive pass stencil and depth test */
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
 	return display;
 }

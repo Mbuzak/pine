@@ -3,6 +3,9 @@
 void Camera::init(glm::vec3 pos, glm::vec2 rot) {
 	this->pos = pos;
 	this->rot = rot;
+	this->fov = 60.0f;
+	this->near_plane = 0.1f;
+	this->far_plane = 200.0f;
 }
 
 void Camera::Update() {
@@ -51,6 +54,10 @@ glm::vec3 ExtractCameraPos(const glm::mat4 & a_modelView) {
   float denom = dot(n1, n2n3);
 
   return top / -denom;
+}
+
+void Camera::update_perspective(float aspect_ratio) {
+	perspective = glm::perspective(glm::radians(fov), aspect_ratio, near_plane, far_plane);
 }
 
 // Funkcja zwraca macierz widoku dla kamery
