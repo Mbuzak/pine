@@ -23,6 +23,7 @@ extern "C" {
 #include "engine/shader.h"
 #include "engine/display.h"
 #include "engine/fbo.h"
+#include "engine/controller.h"
 #ifdef __cplusplus
 }
 #endif
@@ -79,10 +80,7 @@ public:
 	float off_rank_black = -8.0;
 	int selected_id = -1;
 
-	// Zmienne do kontroli stanu myszy
-	int _mouse_buttonState = 0;
-	int _mouse_left_click_state = 0;
-	SDL_Point mouse_pos;
+	Controller controller;
 
 	void select_piece(int wx, int wy, int x, int y);
 	void move_piece();
@@ -91,8 +89,6 @@ public:
 
 	// Rotate camera
 	void rotate(int, int);
-
-	int width = 800, height = 600;
 };
 
 #endif

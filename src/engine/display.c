@@ -2,6 +2,8 @@
 
 Display display_init(unsigned int width, unsigned int height, const char* name) {
 	Display display;
+	display.width = width;
+	display.height = height;
 	
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		printf("[error] Init SDL failed!\n");

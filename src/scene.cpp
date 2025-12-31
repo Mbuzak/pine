@@ -4,6 +4,9 @@
 Scene::Scene() {
 	d = display_init(800, 600, "pine");
 	chess = new chschr::Chess();
+
+	controller.mouse_button_left = 0;
+	controller.mouse_button_right = 0;
 }
 
 void Scene::Setup() {
@@ -11,7 +14,7 @@ void Scene::Setup() {
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	camera.init({0.0, -3.0, -22.0}, {0.3, -1.57});
-	reshape(width, height);
+	reshape(d.width, d.height);
 
 	program_default = program_init("default");
 	program_color = program_init("color");
@@ -91,11 +94,11 @@ int Scene::events_handle() {
 		case SDL_KEYUP:
 		case SDL_KEYDOWN:
 		case SDL_MOUSEMOTION:
-			if (_mouse_buttonState == 1) {
+			if (controller.mouse_button_right == 1) {
 				rotate(e.motion.x, e.motion.y);
 			}
 
-			if (_mouse_left_click_state == 1) {
+			if (controller.mouse_button_left == 1) {
 				motion(e.motion.x, e.motion.y);
 			}
 			break;
@@ -104,22 +107,23 @@ int Scene::events_handle() {
 			break;
 		case SDL_MOUSEBUTTONDOWN:
 			if (e.button.button == SDL_BUTTON_LEFT) {
-				_mouse_left_click_state = 1;
-				select_piece(width, height, e.button.x, e.button.y);
+				controller.mouse_button_left = 1;
+				select_piece(d.width, d.height, e.button.x, e.button.y);
 			}
 			if (e.button.button == SDL_BUTTON_RIGHT) {
-				_mouse_buttonState = 1;
-				mouse_pos.x = e.button.x;
-				mouse_pos.y = e.button.y;
+				controller.mouse_button_right = 1;
+				controller.mouse_pos.x = e.button.x;
+				controller.mouse_pos.y = e.button.y;
 			}
 			break;
 		case SDL_MOUSEBUTTONUP:
 			if (e.button.button == SDL_BUTTON_LEFT) {
-				_mouse_left_click_state = 0;
+				controller.mouse_button_left = 0;
 				move_piece();
 			}
+
 			if (e.button.button == SDL_BUTTON_RIGHT) {
-				_mouse_buttonState = 0;
+				controller.mouse_button_right = 0;
 			}
 			break;
 		default:
@@ -134,15 +138,15 @@ void Scene::display() {
 	while (events_handle() != 1) {
 		__CHECK_FOR_ERRORS
 
-		dir_shadow_map.Render(get_pieces());
+		dir_shadow_map.Render(pieces_);
 
-		glViewport(0, 0, width, height);
+		glViewport(0, 0, d.width, d.height);
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo.id);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		RenderToTexture();
 
-		glViewport(0, 0, width, height);
+		glViewport(0, 0, d.width, d.height);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
@@ -278,13 +282,13 @@ void Scene::select_piece(int wx, int wy, int x, int y) {
 	selected_id = stencil - 1;
 
 	if (selected_id >= 0) {
-		if (get_pieces()[selected_id]->is_active == false) {
+		if (pieces_[selected_id]->is_active == false) {
 			selected_id = -1;
 		}
 	}
 
 	if (selected_id >= 0) {
-		std::string field = get_pieces()[selected_id]->get_field();
+		std::string field = pieces_[selected_id]->get_field();
 		//std::cout << "Field: " << field << "\n";
 		int field_id = (field[0] - 'a') + 8 * ('8' - field[1]);
 		std::cout << "Field id: " << field_id << "\n";
@@ -294,9 +298,9 @@ void Scene::select_piece(int wx, int wy, int x, int y) {
 			active_fields.push_back(value);
 		}
 
-		std::cout << "\nPos: (" << get_pieces()[selected_id]->pos.x << ", " <<
-			get_pieces()[selected_id]->pos.y << ", " <<
-			get_pieces()[selected_id]->pos.z << ")\n";
+		std::cout << "\nPos: (" << pieces_[selected_id]->pos.x << ", " <<
+			pieces_[selected_id]->pos.y << ", " <<
+			pieces_[selected_id]->pos.z << ")\n";
 	}
 }
 
@@ -305,10 +309,10 @@ void Scene::move_piece() {
 		return;
 	}
 
-	std::string field = get_pieces()[selected_id]->get_field();
+	std::string field = pieces_[selected_id]->get_field();
 	
-	int rank = 4 + (int)((get_pieces()[selected_id]->pos.z + 22.5) / 2.25) - 10;
-	int file = 4 + (int)((get_pieces()[selected_id]->pos.x + 22.5) / 2.25) - 10;
+	int rank = 4 + (int)((pieces_[selected_id]->pos.z + 22.5) / 2.25) - 10;
+	int file = 4 + (int)((pieces_[selected_id]->pos.x + 22.5) / 2.25) - 10;
 
 	//std::cout << "rank: " << rank << ", file: " << file << "\n";
 	//std::cout << (char)('a' + file) << (char)('8' - rank) << "\n";
@@ -319,17 +323,17 @@ void Scene::move_piece() {
 	if (field != new_field) {
 		chschr::Move move((field + new_field).c_str());
 		if (chess->perform(move)) {
-			get_pieces()[selected_id]->update_position();
+			pieces_[selected_id]->update_position();
 
-			std::string remove_field = get_pieces()[selected_id]->get_field();
+			std::string remove_field = pieces_[selected_id]->get_field();
 
-			for (Piece *piece: get_pieces()) {
-				if (piece->get_field() == remove_field && piece != get_pieces()[selected_id] && piece->is_active) {
+			for (Piece *piece: pieces_) {
+				if (piece->get_field() == remove_field && piece != pieces_[selected_id] && piece->is_active) {
 					DisactivatePiece(*piece);
 				}
 			}
 		}
-		get_pieces()[selected_id]->update_world_position();
+		pieces_[selected_id]->update_world_position();
 	}
 
 	active_fields.clear();
@@ -337,10 +341,10 @@ void Scene::move_piece() {
 }
 
 void Scene::rotate(int x, int y) {
-	camera.rot.y += 2*(x - mouse_pos.x)/(float)width;
-	mouse_pos.x = x;
-	camera.rot.x -= 2*(mouse_pos.y - y)/(float)height;
-	mouse_pos.y = y;
+	camera.rot.y += 2 * (x - controller.mouse_pos.x) / (float)d.width;
+	controller.mouse_pos.x = x;
+	camera.rot.x -= 2 * (controller.mouse_pos.y - y) / (float)d.height;
+	controller.mouse_pos.y = y;
 }
 
 void Scene::motion(int x, int y) {
@@ -350,10 +354,10 @@ void Scene::motion(int x, int y) {
 
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo.id);
 	GLfloat depth;
-	glReadPixels(x, height - y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+	glReadPixels(x, d.height - y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	glm::vec3 point = glm::unProject(glm::vec3(x, height - y, depth), camera.view, camera.perspective, glm::vec4(0, 0, width, height));
+	glm::vec3 point = glm::unProject(glm::vec3(x, d.height - y, depth), camera.view, camera.perspective, glm::vec4(0, 0, d.width, d.height));
 	//std::cout << "Worldspace: (" << point.x << ", " << point.y << ", " << point.z << "); Screen: (" << x << ", " << y << ")\n";
 
 	// Update piece world position
@@ -362,9 +366,9 @@ void Scene::motion(int x, int y) {
 }
 
 void Scene::reshape(int w, int h) {
-	width = w;
-	height = h;
+	d.width = w;
+	d.height = h;
 
-	glViewport(0, 0, width, height);
-	camera.update_perspective(width / (float)height);
+	glViewport(0, 0, d.width, d.height);
+	camera.update_perspective(d.width / (float)d.height);
 }
