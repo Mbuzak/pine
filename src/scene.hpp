@@ -34,6 +34,7 @@ class Scene {
 public:
 	Scene();
 
+
 	Display d;
 	RendererSkybox renderer_skybox;
 
@@ -63,14 +64,11 @@ public:
 	int selected_id = -1;
 
 private:
-	void Setup();
-	int events_handle();
-	void display();
-
 	void RenderToTexture();
 	void RenderShapes(GLuint);
 	void RenderLights();
 
+	int events_handle();
 	void select_piece(int wx, int wy, int x, int y);
 	void move_piece();
 	void motion(int x, int y);
@@ -78,6 +76,9 @@ private:
 	void rotate(int, int);
 
 public:
+	void Setup();
+	void display();
+
 	std::vector<Piece*> get_pieces();
 	glm::vec3 IndexToPosition(int id);
 	void DisactivatePiece(Piece &piece);
