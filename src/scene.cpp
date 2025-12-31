@@ -7,17 +7,6 @@ Scene::Scene() {
 }
 
 void Scene::Setup() {
-	// Ustawienia globalne
-	glEnable(GL_DEPTH_TEST);
-	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
-
-	glEnable(GL_STENCIL_TEST);
-	glClearStencil(0);
-
-	/* Value of stencil buffer will be replaced only in case of
-	positive pass stencil and depth test */
-	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-
 	stbi_set_flip_vertically_on_load(true);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -86,79 +75,84 @@ void Scene::Setup() {
 	printf("Scroll - przybliżanie/oddalanie sceny\n\n");
 }
 
-void Scene::display() {
-	while (1) {
-		SDL_Event e;
-		while (SDL_PollEvent(&e) != 0) {
-			if (e.type == SDL_QUIT) {
-				exit(0);
-			}
-			else if (e.type == SDL_WINDOWEVENT) {
-				if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
+int Scene::events_handle() {
+	SDL_Event e;
+	int quit = 0;
+	while (SDL_PollEvent(&e) != 0) {
+		switch (e.type) {
+		case SDL_QUIT:
+			quit = 1;
+			break;
+		case SDL_WINDOWEVENT:
+			if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
 				reshape(e.window.data1, e.window.data2);
-				}
 			}
-			else if (e.type == SDL_KEYUP) {
+			break;
+		case SDL_KEYUP:
+		case SDL_KEYDOWN:
+		case SDL_MOUSEMOTION:
+			if (_mouse_buttonState == 1) {
+				rotate(e.motion.x, e.motion.y);
+			}
 
+			if (_mouse_left_click_state == 1) {
+				motion(e.motion.x, e.motion.y);
 			}
-			else if (e.type == SDL_KEYDOWN) {
+			break;
+		case SDL_MOUSEWHEEL:
+			camera.pos.z += 0.5 * e.wheel.y;
+			break;
+		case SDL_MOUSEBUTTONDOWN:
+			if (e.button.button == SDL_BUTTON_LEFT) {
+				_mouse_left_click_state = 1;
+				select_piece(width, height, e.button.x, e.button.y);
 			}
-			else if (e.type == SDL_MOUSEMOTION) {
-				if (_mouse_buttonState == 1) {
-					rotate(e.motion.x, e.motion.y);
-				}
-
-				if (_mouse_left_click_state == 1) {
-					motion(e.motion.x, e.motion.y);
-				}
+			if (e.button.button == SDL_BUTTON_RIGHT) {
+				_mouse_buttonState = 1;
+				mouse_pos.x = e.button.x;
+				mouse_pos.y = e.button.y;
 			}
-			else if (e.type == SDL_MOUSEWHEEL) {
-				camera.pos.z += 0.5 * e.wheel.y;
+			break;
+		case SDL_MOUSEBUTTONUP:
+			if (e.button.button == SDL_BUTTON_LEFT) {
+				_mouse_left_click_state = 0;
+				move_piece();
 			}
-			else if (e.type == SDL_MOUSEBUTTONDOWN) {
-				if (e.button.button == SDL_BUTTON_LEFT) {
-					_mouse_left_click_state = 1;
-					select_piece(width, height, e.button.x, e.button.y);
-				}
-				if (e.button.button == SDL_BUTTON_RIGHT) {
-					_mouse_buttonState = 1;
-					_mouse_buttonX = e.button.x;
-					_mouse_buttonY = e.button.y;
-				}
+			if (e.button.button == SDL_BUTTON_RIGHT) {
+				_mouse_buttonState = 0;
 			}
-			else if (e.type == SDL_MOUSEBUTTONUP) {
-				if (e.button.button == SDL_BUTTON_LEFT) {
-					_mouse_left_click_state = 0;
-					move_piece();
-				}
-				if (e.button.button == SDL_BUTTON_RIGHT) {
-					_mouse_buttonState = 0;
-				}
-			}
+			break;
+		default:
+			break;
 		}
+	}
 
-	__CHECK_FOR_ERRORS
+	return quit;
+}
 
-	dir_shadow_map.Render(get_pieces());
+void Scene::display() {
+	while (events_handle() != 1) {
+		__CHECK_FOR_ERRORS
 
-	glViewport(0, 0, width, height);
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo.id);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		dir_shadow_map.Render(get_pieces());
 
-	RenderToTexture();
+		glViewport(0, 0, width, height);
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo.id);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glViewport(0, 0, width, height);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		RenderToTexture();
 
-	camera.Update();
+		glViewport(0, 0, width, height);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	renderer_skybox.render(&camera);
-	//RenderLights();
+		camera.Update();
 
-	RenderShapes(program_default);
+		renderer_skybox.render(&camera);
+		//RenderLights();
+		RenderShapes(program_default);
 
-	SDL_GL_SwapWindow(d.window);
+		SDL_GL_SwapWindow(d.window);
 	}
 }
 
@@ -178,9 +172,7 @@ void Scene::RenderShapes(GLuint program_id) {
 		uniform_light_point_send(program_id, name, lamps_[i]);
 	}
 	uniform_light_directional_send(program_id, "sun.", sun_);
-
 	uniform_mat4f_send(program_id, "matProj", camera.perspective);
-
 	camera.SendUniform(program_id);
 
 	// potok graficzny mapy cieni ?
@@ -345,10 +337,10 @@ void Scene::move_piece() {
 }
 
 void Scene::rotate(int x, int y) {
-	camera.rot.y += 2*(x - _mouse_buttonX)/(float)width;
-	_mouse_buttonX = x;
-	camera.rot.x -= 2*(_mouse_buttonY - y)/(float)height;
-	_mouse_buttonY = y;
+	camera.rot.y += 2*(x - mouse_pos.x)/(float)width;
+	mouse_pos.x = x;
+	camera.rot.x -= 2*(mouse_pos.y - y)/(float)height;
+	mouse_pos.y = y;
 }
 
 void Scene::motion(int x, int y) {
@@ -365,8 +357,8 @@ void Scene::motion(int x, int y) {
 	//std::cout << "Worldspace: (" << point.x << ", " << point.y << ", " << point.z << "); Screen: (" << x << ", " << y << ")\n";
 
 	// Update piece world position
-	get_pieces()[selected_id]->pos.x = point.x;
-	get_pieces()[selected_id]->pos.z = point.z;
+	pieces_[selected_id]->pos.x = point.x;
+	pieces_[selected_id]->pos.z = point.z;
 }
 
 void Scene::reshape(int w, int h) {

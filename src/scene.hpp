@@ -34,6 +34,7 @@ public:
 	Scene();
 
 	void Setup();
+	int events_handle();
 	void display();
 
 	Display d;
@@ -81,8 +82,7 @@ public:
 	// Zmienne do kontroli stanu myszy
 	int _mouse_buttonState = 0;
 	int _mouse_left_click_state = 0;
-	int _mouse_buttonX;
-	int _mouse_buttonY;
+	SDL_Point mouse_pos;
 
 	void select_piece(int wx, int wy, int x, int y);
 	void move_piece();
