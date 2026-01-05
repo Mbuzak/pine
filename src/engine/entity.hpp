@@ -21,6 +21,7 @@
 // Visible object on scene
 class Shape {
 public:
+	Shape() = default;
 	Shape(Mesh*);
 	Shape(Mesh*, glm::vec3);
 	Shape(Mesh*, glm::vec3, GLuint);
@@ -55,5 +56,9 @@ public:
 private:
 	std::string field_;
 };
+
+Shape terrain_init();
+
+void render(GLuint, Shape*);
 
 #endif

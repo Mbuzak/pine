@@ -123,3 +123,34 @@ void Piece::update_position() {
 
 	field_ = std::string() + (char)('a' + file) + (char)('8' - rank);
 }
+
+Shape terrain_init() {
+	Shape shape;
+	shape.pos = {0.0, -0.1, 0.0};
+	shape.rot = {0.0, 0.0, 0.0};
+	shape.mesh = new Mesh();
+	mesh_texture_init(shape.mesh, "square");
+	shape.texture_ = texture_2d_init("grass.jpg");
+	shape.material_ = Material{glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.70f, 0.27f, 0.08f), glm::vec3(0.25f, 0.13f, 0.08f), 1.0f};
+	return shape;
+}
+
+void render(GLuint program_id, Shape* shape) {
+	glm::mat4 model(1.0);
+	model = glm::translate(model, shape->pos);
+	model = glm::rotate(model, shape->rot.x, glm::vec3(1.0, 0.0, 0.0));
+	model = glm::rotate(model, shape->rot.y, glm::vec3(0.0, 1.0, 0.0));
+	model = glm::rotate(model, shape->rot.z, glm::vec3(0.0, 0.0, 1.0));
+	model = glm::scale(model, {80, 80, 80});
+	uniform_mat4f_send(program_id, "matModel", model);
+
+	glm::mat3 matNormal = glm::transpose(glm::inverse(model));
+	glUniformMatrix3fv(glGetUniformLocation(program_id, "matNormal"), 1, GL_FALSE, glm::value_ptr(matNormal));
+
+	uniform_material_send(program_id, "my_material.", &shape->material_);
+
+	glUniform1i(glGetUniformLocation(program_id, "hasTex"), 1);
+	texture_2d_send(program_id, shape->texture_);
+
+	mesh_texture_draw(shape->mesh);
+}

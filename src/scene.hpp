@@ -49,7 +49,8 @@ public:
 
 	Sun sun;
 	std::array<Lamp*, 4> lamps_;
-	std::vector<Shape*> background_;
+	Shape terrain;
+	Shape board;
 	std::vector<Piece*> pieces_;
 	std::array<Shape*, 64> squares_;
 

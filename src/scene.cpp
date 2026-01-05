@@ -21,7 +21,7 @@ void Scene::Setup() {
 	renderer_skybox.init();
 
 	// Load models
-	std::vector<std::string> model_names = {"square", "pawn", "knight", "bishop", "rook", "king", "queen", "chessboard", "ground", "sphere"};
+	std::vector<std::string> model_names = {"square", "pawn", "knight", "bishop", "rook", "king", "queen", "chessboard", "sphere"};
 	for (std::string &name: model_names) {
 		Mesh* mesh = new Mesh();
 		mesh_texture_init(mesh, name);
@@ -29,15 +29,15 @@ void Scene::Setup() {
 	}
 	
 	// Load textures
-	std::vector<std::string> texture_names = {"white", "black", "chessboard", "grass"};
+	std::vector<std::string> texture_names = {"white", "black", "chessboard"};
 	for (std::string &name: texture_names) {
 		std::string file = name + ".jpg";
 		textures.insert({name, texture_2d_init(file.c_str())});
 	}
 
 	// --- Shapes ---
-	background_.push_back(new Shape(meshes.at("ground"), {0.0, -0.1, 0.0}, textures.at("grass")));
-	background_.push_back(new Shape(meshes.at("chessboard"), {0.0, 0.0, 0.0}, textures.at("chessboard")));
+	terrain = terrain_init();
+	board = Shape(meshes.at("chessboard"), {0.0, 0.0, 0.0}, textures.at("chessboard"));
 
 	// --- Lights ---
 	sun = sun_init({1.0, -2.0, 2.0});
@@ -163,7 +163,7 @@ void Scene::display() {
 void Scene::RenderToTexture() {
 	glUseProgram(program_default);
 	uniform_mat4f_send(program_default, "matProj", camera.perspective);
-	background_[1]->Display(program_default);
+	board.Display(program_default);
 	glUseProgram(0);
 }
 
@@ -188,8 +188,8 @@ void Scene::RenderShapes(GLuint program_id) {
 	// rysowanie obiektów nie-selekcyjnych (identyfikator 0)
 	glStencilFunc(GL_ALWAYS, 0, 0xFF);
 
-	for (Shape *shape : background_)
-		shape->Display(program_id);
+	render(program_id, &terrain);
+	board.Display(program_id);
 	
 	glUseProgram(program_color);
 	camera.SendUniform(program_color);
