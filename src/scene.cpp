@@ -202,7 +202,9 @@ void Scene::RenderShapes(GLuint program_id) {
 	glUseProgram(program_id);
 	for (int i = 0; i < pieces_.size(); ++i) {
 		glStencilFunc(GL_ALWAYS, i + 1, 0xFF);
-		pieces_[i]->Display(program_id);
+		if (pieces_[i]->is_active) {
+			pieces_[i]->Display(program_id);
+		}
 	}
 
 	if (selected_id >= 0) {
@@ -226,34 +228,6 @@ void Scene::RenderLights() {
 // game
 std::vector<Piece*> Scene::get_pieces() {
 	return pieces_;
-}
-
-void Scene::DisactivatePiece(Piece &piece) {
-	if (piece.colour == "white") {
-		if (off_rank_white < 8.0) {
-			piece.pos.x = 12.0;
-			piece.pos.z = off_rank_white;
-		}
-		else {
-			piece.pos.x = 14.0;
-			piece.pos.z = off_rank_white - 16.0;
-		}
-		
-		off_rank_white += 2.0;
-	}
-	else {
-		if (off_rank_black < 8.0) {
-			piece.pos.x = -12.0;
-			piece.pos.z = off_rank_black;
-		}
-		else {
-			piece.pos.x = -14.0;
-			piece.pos.z = off_rank_black - 16.0;
-		}
-		off_rank_black += 2.0;
-	}
-
-	piece.is_active = false;
 }
 
 glm::vec3 Scene::IndexToPosition(int id) {
@@ -329,7 +303,7 @@ void Scene::move_piece() {
 
 			for (Piece *piece: pieces_) {
 				if (piece->get_field() == remove_field && piece != pieces_[selected_id] && piece->is_active) {
-					DisactivatePiece(*piece);
+					piece->is_active = false;
 				}
 			}
 		}

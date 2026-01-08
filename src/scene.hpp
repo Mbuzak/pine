@@ -60,8 +60,6 @@ public:
 	chschr::Chess* chess;
 	std::vector<int> active_fields;
 
-	float off_rank_white = -8.0;
-	float off_rank_black = -8.0;
 	int selected_id = -1;
 
 private:
@@ -82,7 +80,6 @@ public:
 
 	std::vector<Piece*> get_pieces();
 	glm::vec3 IndexToPosition(int id);
-	void DisactivatePiece(Piece &piece);
 };
 
 #endif
