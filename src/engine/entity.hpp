@@ -40,21 +40,18 @@ public:
 	Mesh *mesh = nullptr;
 };
 
-class Piece: public Shape {
+class Piece {
 public:
 	Piece(int, Mesh*, GLuint);
-
-	std::string get_field();
 
 	void update_field(std::string);
 	void update_world_position();
 	void update_position();
 
+	Shape shape;
 	bool is_active = true;
 	std::string colour;
-
-private:
-	std::string field_;
+	std::string field;
 };
 
 Shape terrain_init();

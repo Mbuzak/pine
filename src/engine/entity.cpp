@@ -82,38 +82,32 @@ void Shape::DisplayOutline(GLuint program_id, int selected_id) {
 	glStencilFunc(GL_ALWAYS, 0, 0xFF);
 }
 
-Piece::Piece(int field_id, Mesh *mesh, GLuint texture):
-Shape(mesh, glm::vec3(0.0, 0.1, 0.0), texture) {
-	field_.push_back((char)'a' + (field_id % 8));
-	field_.push_back((char)'8' - (field_id / 8));
+Piece::Piece(int field_id, Mesh *mesh, GLuint texture) {
+	shape = Shape(mesh, glm::vec3(0.0, 0.1, 0.0), texture);
+	field.push_back((char)'a' + (field_id % 8));
+	field.push_back((char)'8' - (field_id / 8));
 
 	// std::cout << field_ << "\n";
 
 	update_world_position();
 }
 
-std::string Piece::get_field() {
-	return field_;
-}
-
-void Piece::update_field(std::string field) {
-	field_ = field;
+void Piece::update_field(std::string f) {
+	field = f;
 	update_world_position();
 }
 
 void Piece::update_world_position() {
-	pos.x = (field_[0] - 'a' - 4) * 2.25 + 1.12;
-	pos.z = ('8' - field_[1] - 4) * 2.25 + 1.12;
+	shape.pos.x = (field[0] - 'a' - 4) * 2.25 + 1.12;
+	shape.pos.z = ('8' - field[1] - 4) * 2.25 + 1.12;
 
-	// std::cout << field_ << "\n";
+	// std::cout << field << "\n";
 	// std::cout << pos.x << " " << pos.y << " " << pos.z << "\n";
 }
 
 void Piece::update_position() {
-	int rank, file;
-
-	rank = 4 + (int)((pos.z + 22.5) / 2.25) - 10;
-	file = 4 + (int)((pos.x + 22.5) / 2.25) - 10;
+	int rank = 4 + (int)((shape.pos.z + 22.5) / 2.25) - 10;
+	int file = 4 + (int)((shape.pos.x + 22.5) / 2.25) - 10;
 
 	int field_id = rank * 8 + file;
 	std::cout << "Update!\n" << "rank: " << rank << ", file: " << file << "\n";
@@ -121,7 +115,7 @@ void Piece::update_position() {
 
 	std::cout << (char)('a' + file) << (char)('8' - rank) << "\n";
 
-	field_ = std::string() + (char)('a' + file) + (char)('8' - rank);
+	field = std::string() + (char)('a' + file) + (char)('8' - rank);
 }
 
 Shape terrain_init() {

@@ -67,7 +67,7 @@ void Scene::Setup() {
 		Piece *piece = new Piece(i, meshes.at(name), textures.at(colour));
 		piece->colour = colour;
 		if (colour == "white") {
-			piece->rot.y = 3.2;
+			piece->shape.rot.y = 3.2;
 		}
 		pieces_.push_back(piece);
 	}
@@ -203,14 +203,14 @@ void Scene::RenderShapes(GLuint program_id) {
 	for (int i = 0; i < pieces_.size(); ++i) {
 		glStencilFunc(GL_ALWAYS, i + 1, 0xFF);
 		if (pieces_[i]->is_active) {
-			pieces_[i]->Display(program_id);
+			pieces_[i]->shape.Display(program_id);
 		}
 	}
 
 	if (selected_id >= 0) {
 		glUseProgram(program_color);
 		uniform_vec3f_send(program_color, "color", {0.0, 0.0, 0.35});
-		pieces_[selected_id]->DisplayOutline(program_color, selected_id);
+		pieces_[selected_id]->shape.DisplayOutline(program_color, selected_id);
 	}
 
 	glUseProgram(0);
@@ -262,7 +262,7 @@ void Scene::select_piece(int wx, int wy, int x, int y) {
 	}
 
 	if (selected_id >= 0) {
-		std::string field = pieces_[selected_id]->get_field();
+		std::string field = pieces_[selected_id]->field;
 		//std::cout << "Field: " << field << "\n";
 		int field_id = (field[0] - 'a') + 8 * ('8' - field[1]);
 		std::cout << "Field id: " << field_id << "\n";
@@ -272,9 +272,7 @@ void Scene::select_piece(int wx, int wy, int x, int y) {
 			active_fields.push_back(value);
 		}
 
-		std::cout << "\nPos: (" << pieces_[selected_id]->pos.x << ", " <<
-			pieces_[selected_id]->pos.y << ", " <<
-			pieces_[selected_id]->pos.z << ")\n";
+		std::cout << "\nPos: (" << pieces_[selected_id]->shape.pos.x << ", " << pieces_[selected_id]->shape.pos.y << ", " << pieces_[selected_id]->shape.pos.z << ")\n";
 	}
 }
 
@@ -283,10 +281,10 @@ void Scene::move_piece() {
 		return;
 	}
 
-	std::string field = pieces_[selected_id]->get_field();
+	std::string field = pieces_[selected_id]->field;
 	
-	int rank = 4 + (int)((pieces_[selected_id]->pos.z + 22.5) / 2.25) - 10;
-	int file = 4 + (int)((pieces_[selected_id]->pos.x + 22.5) / 2.25) - 10;
+	int rank = 4 + (int)((pieces_[selected_id]->shape.pos.z + 22.5) / 2.25) - 10;
+	int file = 4 + (int)((pieces_[selected_id]->shape.pos.x + 22.5) / 2.25) - 10;
 
 	//std::cout << "rank: " << rank << ", file: " << file << "\n";
 	//std::cout << (char)('a' + file) << (char)('8' - rank) << "\n";
@@ -299,10 +297,10 @@ void Scene::move_piece() {
 		if (chess->perform(move)) {
 			pieces_[selected_id]->update_position();
 
-			std::string remove_field = pieces_[selected_id]->get_field();
+			std::string remove_field = pieces_[selected_id]->field;
 
 			for (Piece *piece: pieces_) {
-				if (piece->get_field() == remove_field && piece != pieces_[selected_id] && piece->is_active) {
+				if (piece->field == remove_field && piece != pieces_[selected_id] && piece->is_active) {
 					piece->is_active = false;
 				}
 			}
@@ -335,8 +333,8 @@ void Scene::motion(int x, int y) {
 	//std::cout << "Worldspace: (" << point.x << ", " << point.y << ", " << point.z << "); Screen: (" << x << ", " << y << ")\n";
 
 	// Update piece world position
-	pieces_[selected_id]->pos.x = point.x;
-	pieces_[selected_id]->pos.z = point.z;
+	pieces_[selected_id]->shape.pos.x = point.x;
+	pieces_[selected_id]->shape.pos.z = point.z;
 }
 
 void Scene::reshape(int w, int h) {

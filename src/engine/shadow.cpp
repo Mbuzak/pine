@@ -49,9 +49,9 @@ void ShadowMap::Render(std::vector<Piece*> pieces) {
 	glUniformMatrix4fv(glGetUniformLocation(program_id, "lightView"), 1, GL_FALSE, glm::value_ptr(lightView));
 
 	// Render shapes
-	for (Shape *piece: pieces) {
-		glUniformMatrix4fv(glGetUniformLocation(program_id, "matModel"), 1, GL_FALSE, glm::value_ptr(piece->CalculateMatModel()));
-		mesh_texture_draw(piece->mesh);
+	for (Piece *piece: pieces) {
+		glUniformMatrix4fv(glGetUniformLocation(program_id, "matModel"), 1, GL_FALSE, glm::value_ptr(piece->shape.CalculateMatModel()));
+		mesh_texture_draw(piece->shape.mesh);
 	}
 
 	glUseProgram(0);
