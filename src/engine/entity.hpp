@@ -18,6 +18,14 @@
 #define STANDARD 0
 #define OUTLINE 1
 
+typedef struct {
+	glm::vec3 pos;
+	glm::vec3 rot;
+	float scale;
+} Transform;
+
+glm::mat4 transform_model_compute(Transform*);
+
 // Visible object on scene
 class Shape {
 public:
@@ -25,7 +33,6 @@ public:
 	Shape(Mesh*);
 	Shape(Mesh*, glm::vec3);
 	Shape(Mesh*, glm::vec3, GLuint);
-	Shape(Mesh*, glm::vec3, Material&);
 
 	bool HasTexture();
 	glm::mat4 CalculateMatModel(int value = 0);
@@ -33,9 +40,8 @@ public:
 	void Display(GLuint programID, int value = STANDARD);
 	void DisplayOutline(GLuint, int);
 
-	glm::vec3 pos;
-	glm::vec3 rot;
-	Material material_;
+	Transform transform;
+	Material material;
 	GLuint texture_;
 	Mesh *mesh = nullptr;
 };

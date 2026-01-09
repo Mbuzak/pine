@@ -53,7 +53,7 @@ void Scene::Setup() {
 	for (int i = 0; i < squares_.size(); i++) {
 		squares_[i] = new Shape(meshes.at("square"), IndexToPosition(i));
 		if (((i % 8) + (i / 8)) % 2 == 0) {
-			squares_[i]->material_.ambient = glm::vec3(0.5);
+			squares_[i]->material.ambient = glm::vec3(0.5);
 		}
 	}
 
@@ -67,7 +67,7 @@ void Scene::Setup() {
 		Piece *piece = new Piece(i, meshes.at(name), textures.at(colour));
 		piece->colour = colour;
 		if (colour == "white") {
-			piece->shape.rot.y = 3.2;
+			piece->shape.transform.rot.y = 3.2;
 		}
 		pieces_.push_back(piece);
 	}
@@ -189,7 +189,7 @@ void Scene::RenderShapes(GLuint program_id) {
 	glStencilFunc(GL_ALWAYS, 0, 0xFF);
 
 	render(program_id, &terrain);
-	board.Display(program_id);
+	render(program_id, &board);
 	
 	glUseProgram(program_color);
 	camera.SendUniform(program_color);
@@ -203,7 +203,7 @@ void Scene::RenderShapes(GLuint program_id) {
 	for (int i = 0; i < pieces_.size(); ++i) {
 		glStencilFunc(GL_ALWAYS, i + 1, 0xFF);
 		if (pieces_[i]->is_active) {
-			pieces_[i]->shape.Display(program_id);
+			render(program_id, &pieces_[i]->shape);
 		}
 	}
 
@@ -272,7 +272,7 @@ void Scene::select_piece(int wx, int wy, int x, int y) {
 			active_fields.push_back(value);
 		}
 
-		std::cout << "\nPos: (" << pieces_[selected_id]->shape.pos.x << ", " << pieces_[selected_id]->shape.pos.y << ", " << pieces_[selected_id]->shape.pos.z << ")\n";
+		std::cout << "\nPos: (" << pieces_[selected_id]->shape.transform.pos.x << ", " << pieces_[selected_id]->shape.transform.pos.y << ", " << pieces_[selected_id]->shape.transform.pos.z << ")\n";
 	}
 }
 
@@ -283,8 +283,8 @@ void Scene::move_piece() {
 
 	std::string field = pieces_[selected_id]->field;
 	
-	int rank = 4 + (int)((pieces_[selected_id]->shape.pos.z + 22.5) / 2.25) - 10;
-	int file = 4 + (int)((pieces_[selected_id]->shape.pos.x + 22.5) / 2.25) - 10;
+	int rank = 4 + (int)((pieces_[selected_id]->shape.transform.pos.z + 22.5) / 2.25) - 10;
+	int file = 4 + (int)((pieces_[selected_id]->shape.transform.pos.x + 22.5) / 2.25) - 10;
 
 	//std::cout << "rank: " << rank << ", file: " << file << "\n";
 	//std::cout << (char)('a' + file) << (char)('8' - rank) << "\n";
@@ -333,8 +333,8 @@ void Scene::motion(int x, int y) {
 	//std::cout << "Worldspace: (" << point.x << ", " << point.y << ", " << point.z << "); Screen: (" << x << ", " << y << ")\n";
 
 	// Update piece world position
-	pieces_[selected_id]->shape.pos.x = point.x;
-	pieces_[selected_id]->shape.pos.z = point.z;
+	pieces_[selected_id]->shape.transform.pos.x = point.x;
+	pieces_[selected_id]->shape.transform.pos.z = point.z;
 }
 
 void Scene::reshape(int w, int h) {

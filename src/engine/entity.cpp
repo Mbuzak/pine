@@ -1,26 +1,30 @@
 #include "entity.hpp"
 
+glm::mat4 transform_model_compute(Transform* transform) {
+	glm::mat4 model(1.0);
+	model = glm::translate(model, transform->pos);
+	model = glm::rotate(model, transform->rot.x, {1.0, 0.0, 0.0});
+	model = glm::rotate(model, transform->rot.y, {0.0, 1.0, 0.0});
+	model = glm::rotate(model, transform->rot.z, {0.0, 0.0, 1.0});
+	model = glm::scale(model, glm::vec3(transform->scale));
+	return model;
+}
+
 Shape::Shape(Mesh *mesh) {
-	this->pos = glm::vec3(0.0);
-	this->rot = glm::vec3(0.0);
+	transform = {glm::vec3(0), glm::vec3(0), 1};
 	this->mesh = mesh;
 	this->texture_ = -1;
-	material_ = Material{glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.70f, 0.27f, 0.08f), glm::vec3(0.25f, 0.13f, 0.08f), 1.0f};
+	material = Material{{0.1f, 0.1f, 0.1f}, {0.70f, 0.27f, 0.08f}, {0.25f, 0.13f, 0.08f}, 1.0f};
 }
 
 Shape::Shape(Mesh *mesh, glm::vec3 position):
 Shape(mesh) {
-	pos = position;
+	transform.pos = position;
 }
 
 Shape::Shape(Mesh *mesh, glm::vec3 position, GLuint texture):
 Shape(mesh, position) {
 	texture_ = texture;
-}
-
-Shape::Shape(Mesh *mesh, glm::vec3 position, Material &material):
-Shape(mesh, position) {
-	material_ = material;
 }
 
 bool Shape::HasTexture() {
@@ -29,11 +33,10 @@ bool Shape::HasTexture() {
 
 glm::mat4 Shape::CalculateMatModel(int value) {
 	glm::mat4 model(1.0);
-
-	model = glm::translate(model, pos);
-	model = glm::rotate(model, rot.x, glm::vec3(1.0, 0.0, 0.0));
-	model = glm::rotate(model, rot.y, glm::vec3(0.0, 1.0, 0.0));
-	model = glm::rotate(model, rot.z, glm::vec3(0.0, 0.0, 1.0));
+	model = glm::translate(model, transform.pos);
+	model = glm::rotate(model, transform.rot.x, glm::vec3(1.0, 0.0, 0.0));
+	model = glm::rotate(model, transform.rot.y, glm::vec3(0.0, 1.0, 0.0));
+	model = glm::rotate(model, transform.rot.z, glm::vec3(0.0, 0.0, 1.0));
 
 	if (value == 0)
 		return model;
@@ -50,7 +53,7 @@ void Shape::Display(GLuint programID, int value) {
 	glm::mat3 matNormal = glm::transpose(glm::inverse(model));
 	glUniformMatrix3fv(glGetUniformLocation(programID, "matNormal"), 1, GL_FALSE, glm::value_ptr(matNormal));
 
-	uniform_material_send(programID, "my_material.", &material_);
+	uniform_material_send(programID, "my_material.", &material);
 
 	glUniform1i(glGetUniformLocation(programID, "hasTex"), HasTexture());
 
@@ -98,16 +101,16 @@ void Piece::update_field(std::string f) {
 }
 
 void Piece::update_world_position() {
-	shape.pos.x = (field[0] - 'a' - 4) * 2.25 + 1.12;
-	shape.pos.z = ('8' - field[1] - 4) * 2.25 + 1.12;
+	shape.transform.pos.x = (field[0] - 'a' - 4) * 2.25 + 1.12;
+	shape.transform.pos.z = ('8' - field[1] - 4) * 2.25 + 1.12;
 
 	// std::cout << field << "\n";
 	// std::cout << pos.x << " " << pos.y << " " << pos.z << "\n";
 }
 
 void Piece::update_position() {
-	int rank = 4 + (int)((shape.pos.z + 22.5) / 2.25) - 10;
-	int file = 4 + (int)((shape.pos.x + 22.5) / 2.25) - 10;
+	int rank = 4 + (int)((shape.transform.pos.z + 22.5) / 2.25) - 10;
+	int file = 4 + (int)((shape.transform.pos.x + 22.5) / 2.25) - 10;
 
 	int field_id = rank * 8 + file;
 	std::cout << "Update!\n" << "rank: " << rank << ", file: " << file << "\n";
@@ -120,28 +123,22 @@ void Piece::update_position() {
 
 Shape terrain_init() {
 	Shape shape;
-	shape.pos = {0.0, -0.1, 0.0};
-	shape.rot = {0.0, 0.0, 0.0};
+	shape.transform = {{0, -0.1, 0}, glm::vec3(0), 80};
 	shape.mesh = new Mesh();
 	mesh_texture_init(shape.mesh, "square");
 	shape.texture_ = texture_2d_init("grass.jpg");
-	shape.material_ = Material{glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.70f, 0.27f, 0.08f), glm::vec3(0.25f, 0.13f, 0.08f), 1.0f};
+	shape.material = Material{{0.1f, 0.1f, 0.1f}, {0.7f, 0.27f, 0.08f}, {0.25f, 0.13f, 0.08f}, 1.0f};
 	return shape;
 }
 
 void render(GLuint program_id, Shape* shape) {
-	glm::mat4 model(1.0);
-	model = glm::translate(model, shape->pos);
-	model = glm::rotate(model, shape->rot.x, glm::vec3(1.0, 0.0, 0.0));
-	model = glm::rotate(model, shape->rot.y, glm::vec3(0.0, 1.0, 0.0));
-	model = glm::rotate(model, shape->rot.z, glm::vec3(0.0, 0.0, 1.0));
-	model = glm::scale(model, {80, 80, 80});
+	glm::mat4 model = transform_model_compute(&shape->transform);
 	uniform_mat4f_send(program_id, "matModel", model);
 
 	glm::mat3 matNormal = glm::transpose(glm::inverse(model));
 	glUniformMatrix3fv(glGetUniformLocation(program_id, "matNormal"), 1, GL_FALSE, glm::value_ptr(matNormal));
 
-	uniform_material_send(program_id, "my_material.", &shape->material_);
+	uniform_material_send(program_id, "my_material.", &shape->material);
 
 	glUniform1i(glGetUniformLocation(program_id, "hasTex"), 1);
 	texture_2d_send(program_id, shape->texture_);
