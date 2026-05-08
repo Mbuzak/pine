@@ -1,11 +1,16 @@
 #include "entity.hpp"
 
-glm::mat4 transform_model_compute(Transform* transform) {
+glm::mat4 position_model_compute(const glm::vec3* pos) {
+	glm::mat4 model = glm::translate(glm::mat4(1.0f), *pos);
+	return model;
+}
+
+glm::mat4 transform_model_compute(const Transform* transform) {
 	glm::mat4 model(1.0);
 	model = glm::translate(model, transform->pos);
-	model = glm::rotate(model, transform->rot.x, {1.0, 0.0, 0.0});
-	model = glm::rotate(model, transform->rot.y, {0.0, 1.0, 0.0});
-	model = glm::rotate(model, transform->rot.z, {0.0, 0.0, 1.0});
+	model = glm::rotate(model, transform->rot.x, glm::vec3(1.0, 0.0, 0.0));
+	model = glm::rotate(model, transform->rot.y, glm::vec3(0.0, 1.0, 0.0));
+	model = glm::rotate(model, transform->rot.z, glm::vec3(0.0, 0.0, 1.0));
 	model = glm::scale(model, glm::vec3(transform->scale));
 	return model;
 }
@@ -31,23 +36,14 @@ bool Shape::HasTexture() {
 	return texture_ != -1;
 }
 
-glm::mat4 Shape::CalculateMatModel(int value) {
-	glm::mat4 model(1.0);
-	model = glm::translate(model, transform.pos);
-	model = glm::rotate(model, transform.rot.x, glm::vec3(1.0, 0.0, 0.0));
-	model = glm::rotate(model, transform.rot.y, glm::vec3(0.0, 1.0, 0.0));
-	model = glm::rotate(model, transform.rot.z, glm::vec3(0.0, 0.0, 1.0));
-
-	if (value == 0)
-		return model;
-	
-	model = glm::scale(model, glm::vec3(1.35, 1.04, 1.35));
-
-	return model;
-}
-
 void Shape::Display(GLuint programID, int value) {
-	glm::mat4 model = CalculateMatModel(value);
+	glm::mat4 model = transform_model_compute(&transform);
+
+	// Outline scale
+	if (value == 1) {
+		model = glm::scale(model, glm::vec3(1.35, 1.04, 1.35));
+	}
+
 	uniform_mat4f_send(programID, "matModel", model);
 
 	glm::mat3 matNormal = glm::transpose(glm::inverse(model));

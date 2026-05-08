@@ -11,7 +11,6 @@
 struct Lamp {
 	Lamp(Mesh*, glm::vec3, glm::vec3);
 
-	glm::mat4 CalculateMatModel();
 	void Display(GLuint);
 
 	glm::vec3 position;

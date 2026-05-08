@@ -9,13 +9,8 @@ Lamp::Lamp(Mesh* mesh, glm::vec3 position, glm::vec3 diffuse) {
 	this->attenuation = glm::vec3(0.1);
 }
 
-glm::mat4 Lamp::CalculateMatModel() {
-	glm::mat4 model = glm::translate(glm::mat4(1.0f), position);
-	return model;
-}
-
 void Lamp::Display(GLuint program_id) {
-	glm::mat4 mat_model = CalculateMatModel();
+	glm::mat4 mat_model = position_model_compute(&position);
 	glUniformMatrix4fv(glGetUniformLocation(program_id, "matModel"), 1, GL_FALSE, glm::value_ptr(mat_model));
 
 	glm::mat3 matNormal = glm::transpose(glm::inverse(mat_model));

@@ -24,7 +24,8 @@ typedef struct {
 	float scale;
 } Transform;
 
-glm::mat4 transform_model_compute(Transform*);
+glm::mat4 position_model_compute(const glm::vec3*);
+glm::mat4 transform_model_compute(const Transform*);
 
 // Visible object on scene
 class Shape {
@@ -35,8 +36,6 @@ public:
 	Shape(Mesh*, glm::vec3, GLuint);
 
 	bool HasTexture();
-	glm::mat4 CalculateMatModel(int value = 0);
-	glm::mat4 ScaledMatModel(float, float, float);
 	void Display(GLuint programID, int value = STANDARD);
 	void DisplayOutline(GLuint, int);
 

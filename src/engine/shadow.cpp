@@ -50,7 +50,7 @@ void ShadowMap::Render(std::vector<Piece*> pieces) {
 
 	// Render shapes
 	for (Piece *piece: pieces) {
-		glUniformMatrix4fv(glGetUniformLocation(program_id, "matModel"), 1, GL_FALSE, glm::value_ptr(piece->shape.CalculateMatModel()));
+		glUniformMatrix4fv(glGetUniformLocation(program_id, "matModel"), 1, GL_FALSE, glm::value_ptr(transform_model_compute(&piece->shape.transform)));
 		mesh_texture_draw(piece->shape.mesh);
 	}
 
