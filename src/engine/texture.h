@@ -1,9 +1,10 @@
 #ifndef TEXTURE_HPP
 #define TEXTURE_HPP
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <GL/glew.h>
-#include <iostream>
 
 #define ALPHA_CHANNEL 4
 

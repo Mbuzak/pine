@@ -1,5 +1,4 @@
-#include "texture.hpp"
-
+#include "texture.h"
 #include "stb_image.h"
 
 GLuint texture_2d_init(const char* file) {
@@ -14,7 +13,7 @@ GLuint texture_2d_init(const char* file) {
 	texture = stbi_load(path, &width, &height, &n, 0);
 
 	if (texture == NULL) {
-		std::cout << "Texture " << path << " not found\n";
+		printf("Texture %s not found\n", path);
 	}
 	
 	// Bind texture

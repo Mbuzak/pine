@@ -10,10 +10,17 @@
 #include <memory>
 #include <vector>
 #include "material.hpp"
-#include "texture.hpp"
 #include "mesh.hpp"
 #include "uniform.hpp"
 #include "material.hpp"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include "texture.h"
+#ifdef __cplusplus
+}
+#endif
 
 #define STANDARD 0
 #define OUTLINE 1

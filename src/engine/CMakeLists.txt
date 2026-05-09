@@ -1,5 +1,5 @@
 add_library(Engine STATIC camera.cpp fbo.c light.cpp mesh.cpp
-	entity.cpp shader.c shadow.cpp texture.cpp renderer.cpp display.c
+	entity.cpp shader.c shadow.cpp texture.c renderer.cpp display.c
 	uniform.cpp material.cpp
 )
 

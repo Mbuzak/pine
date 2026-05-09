@@ -4,12 +4,12 @@
 #include <GL/glew.h>
 #include "mesh.hpp"
 #include "camera.hpp"
-#include "texture.hpp"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 #include "shader.h"
+#include "texture.h"
 #ifdef __cplusplus
 }
 #endif

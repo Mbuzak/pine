@@ -10,7 +10,6 @@
 #include "engine/mesh.hpp"
 #include "engine/entity.hpp"
 #include "engine/light.hpp"
-#include "engine/texture.hpp"
 #include "engine/shadow.hpp"
 #include "engine/camera.hpp"
 #include "engine/renderer.hpp"
@@ -25,6 +24,7 @@ extern "C" {
 #include "engine/display.h"
 #include "engine/fbo.h"
 #include "engine/controller.h"
+#include "engine/texture.h"
 #ifdef __cplusplus
 }
 #endif
