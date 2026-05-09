@@ -166,7 +166,7 @@ void Scene::display() {
 		camera.Update();
 
 		renderer_skybox.render(&camera);
-		//RenderLights();
+		RenderLights();
 		RenderShapes(program_default);
 
 		SDL_GL_SwapWindow(d.window);
@@ -233,8 +233,8 @@ void Scene::RenderLights() {
 	glUseProgram(program_color);
 
 	for (int i = 0; i < 4; i++) {
-		uniform_vec3f_send(program_default, "color", lamps[i].diffuse);
-		lamp_render(&lamps[i], program_default);
+		uniform_vec3f_send(program_color, "color", lamps[i].diffuse);
+		lamp_render(&lamps[i], program_color);
 	}
 }
 

@@ -17,7 +17,7 @@ void lamp_render(Lamp* lamp, GLuint program_id) {
 	glm::mat3 matNormal = glm::transpose(glm::inverse(mat_model));
 	glUniformMatrix3fv(glGetUniformLocation(program_id, "matNormal"), 1, GL_FALSE, glm::value_ptr(matNormal));
 
-	mesh_raw_draw(lamp->mesh);
+	mesh_texture_draw(lamp->mesh);
 }
 
 Sun sun_init(glm::vec3 dir) {
