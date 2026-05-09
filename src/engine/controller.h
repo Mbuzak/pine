@@ -1,7 +1,7 @@
 #ifndef PINE_CONTROLLER
 #define PINE_CONTROLLER
 
-#include <SDL2/SDL.h>
+#include "SDL2/SDL.h"
 
 typedef struct {
 	SDL_Point mouse_pos;

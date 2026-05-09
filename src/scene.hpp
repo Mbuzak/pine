@@ -16,6 +16,7 @@
 #include "engine/renderer.hpp"
 #include "engine/uniform.hpp"
 #include "chess/chess.hpp"
+#include "SDL2/SDL.h"
 
 #ifdef __cplusplus
 extern "C" {

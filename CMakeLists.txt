@@ -4,6 +4,6 @@ project(pine VERSION 1.0)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-find_package(SDL2 REQUIRED)
+add_subdirectory(libs/SDL2)
 
 add_subdirectory(src)
