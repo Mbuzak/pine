@@ -9,19 +9,16 @@
 
 // Lamp class represents point light
 struct Lamp {
-	Lamp() = default;
-	Lamp(Mesh*, glm::vec3, glm::vec3);
-
-	void Display(GLuint);
-
+	Mesh* mesh;
 	glm::vec3 position;
 	glm::vec3 attenuation;
 	glm::vec3 ambient;
 	glm::vec3 diffuse;
 	glm::vec3 specular;
-
-	Mesh* mesh = nullptr;
 };
+
+int lamp_init(Lamp*, Mesh*, glm::vec3, glm::vec3);
+void lamp_render(Lamp*, GLuint);
 
 // Sun class represents directional lighting
 struct Sun {

@@ -1,22 +1,23 @@
 #include "light.hpp"
 
-Lamp::Lamp(Mesh* mesh, glm::vec3 position, glm::vec3 diffuse) {
-	this->mesh = mesh;
-	this->position = position;
-	this->ambient = glm::vec3(0.1);
-	this->diffuse = diffuse;
-	this->specular = glm::vec3(0.5);
-	this->attenuation = glm::vec3(0.1);
+int lamp_init(Lamp* lamp, Mesh* mesh, glm::vec3 position, glm::vec3 diffuse) {
+	lamp->mesh = mesh;
+	lamp->position = position;
+	lamp->ambient = glm::vec3(0.1);
+	lamp->diffuse = diffuse;
+	lamp->specular = glm::vec3(0.5);
+	lamp->attenuation = glm::vec3(0.1);
+	return 1;
 }
 
-void Lamp::Display(GLuint program_id) {
-	glm::mat4 mat_model = position_model_compute(&position);
+void lamp_render(Lamp* lamp, GLuint program_id) {
+	glm::mat4 mat_model = position_model_compute(&lamp->position);
 	glUniformMatrix4fv(glGetUniformLocation(program_id, "matModel"), 1, GL_FALSE, glm::value_ptr(mat_model));
 
 	glm::mat3 matNormal = glm::transpose(glm::inverse(mat_model));
 	glUniformMatrix3fv(glGetUniformLocation(program_id, "matNormal"), 1, GL_FALSE, glm::value_ptr(matNormal));
 
-	mesh_raw_draw(mesh);
+	mesh_raw_draw(lamp->mesh);
 }
 
 Sun sun_init(glm::vec3 dir) {

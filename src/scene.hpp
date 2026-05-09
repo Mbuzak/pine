@@ -48,7 +48,7 @@ public:
 	std::map<std::string, GLuint> textures;
 
 	Sun sun;
-	std::array<Lamp, 4> lamps_;
+	std::array<Lamp, 4> lamps;
 	Shape terrain;
 	Shape board;
 	std::vector<Piece*> pieces_;

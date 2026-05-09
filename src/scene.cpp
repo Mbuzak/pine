@@ -42,10 +42,10 @@ void Scene::Setup() {
 	// --- Lights ---
 	sun = sun_init({1.0, -2.0, 2.0});
 
-	lamps_[0] = Lamp(&meshes.at("sphere"), {9.0, 1.0, 9.0}, {5.2, 0.3, 0.5});
-	lamps_[1] = Lamp(&meshes.at("sphere"), {9.0, 1.0, -9.0}, {0.4, 0.4, 0.6});
-	lamps_[2] = Lamp(&meshes.at("sphere"), {-9.0, 1.0, 9.0}, {0.2, 0.9, 0.5});
-	lamps_[3] = Lamp(&meshes.at("sphere"), {-9.0, 1.0, -9.0}, {0.2, 0.3, 0.5});
+	lamp_init(&lamps[0], &meshes.at("sphere"), {9.0, 1.0, 9.0}, {5.2, 0.3, 0.5});
+	lamp_init(&lamps[1], &meshes.at("sphere"), {9.0, 1.0, -9.0}, {0.4, 0.4, 0.6});
+	lamp_init(&lamps[2], &meshes.at("sphere"), {-9.0, 1.0, 9.0}, {0.2, 0.9, 0.5});
+	lamp_init(&lamps[3], &meshes.at("sphere"), {-9.0, 1.0, -9.0}, {0.2, 0.3, 0.5});
 
 	dir_shadow_map.Init(sun.direction);
 	fbo_init(&fbo);
@@ -171,9 +171,9 @@ void Scene::RenderShapes(GLuint program_id) {
 	glUseProgram(program_id);
 
 	// Send light
-	for (int i = 0; i < lamps_.size(); i++) {
+	for (int i = 0; i < lamps.size(); i++) {
 		std::string name = "lights[" + std::to_string(i) + "].";
-		uniform_light_point_send(program_id, name, &lamps_[i]);
+		uniform_light_point_send(program_id, name, &lamps[i]);
 	}
 	uniform_light_directional_send(program_id, "sun.", &sun);
 	uniform_mat4f_send(program_id, "matProj", camera.perspective);
@@ -220,8 +220,8 @@ void Scene::RenderLights() {
 	glUseProgram(program_color);
 
 	for (int i = 0; i < 4; i++) {
-		uniform_vec3f_send(program_default, "color", lamps_[i].diffuse);
-		lamps_[i].Display(program_default);
+		uniform_vec3f_send(program_default, "color", lamps[i].diffuse);
+		lamp_render(&lamps[i], program_default);
 	}
 }
 
