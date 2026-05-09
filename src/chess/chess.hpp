@@ -9,7 +9,14 @@
 #include <vector>
 #include "piece.hpp"
 #include "move.hpp"
-#include "direction.hpp"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include "direction.h"
+#ifdef __cplusplus
+}
+#endif
 
 namespace chschr
 {
