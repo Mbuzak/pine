@@ -64,9 +64,8 @@ public:
 	int selected_id = -1;
 
 private:
-	void RenderToTexture();
+	void RenderToTexture(GLuint);
 	void RenderShapes(GLuint);
-	void RenderLights();
 
 	int events_handle();
 	void select_piece(int wx, int wy, int x, int y);
@@ -78,9 +77,10 @@ private:
 public:
 	void Setup();
 	void display();
-
-	std::vector<Piece*> get_pieces();
-	glm::vec3 IndexToPosition(int id);
 };
+
+glm::vec3 IndexToPosition(int id);
+
+void lamps_render(std::array<Lamp, 4>, GLuint);
 
 #endif

@@ -157,7 +157,7 @@ void Scene::display() {
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo.id);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		RenderToTexture();
+		RenderToTexture(program_default);
 
 		glViewport(0, 0, d.width, d.height);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -166,17 +166,17 @@ void Scene::display() {
 		camera.Update();
 
 		renderer_skybox.render(&camera);
-		RenderLights();
+		lamps_render(lamps, program_color);
 		RenderShapes(program_default);
 
 		SDL_GL_SwapWindow(d.window);
 	}
 }
 
-void Scene::RenderToTexture() {
-	glUseProgram(program_default);
-	uniform_mat4f_send(program_default, "matProj", camera.perspective);
-	board.Display(program_default);
+void Scene::RenderToTexture(GLuint program_id) {
+	glUseProgram(program_id);
+	uniform_mat4f_send(program_id, "matProj", camera.perspective);
+	board.Display(program_id);
 	glUseProgram(0);
 }
 
@@ -229,30 +229,8 @@ void Scene::RenderShapes(GLuint program_id) {
 	glUseProgram(0);
 }
 
-void Scene::RenderLights() {
-	glUseProgram(program_color);
-
-	for (int i = 0; i < 4; i++) {
-		uniform_vec3f_send(program_color, "color", lamps[i].diffuse);
-		lamp_render(&lamps[i], program_color);
-	}
-}
 
 // game
-std::vector<Piece*> Scene::get_pieces() {
-	return pieces_;
-}
-
-glm::vec3 Scene::IndexToPosition(int id) {
-	glm::vec3 position;
-
-	position.x = ((id % 8) - 4) * 2.25 + 1.12;
-	position.y = 0.15;
-	position.z = ((id / 8) - 4) * 2.25 + 1.12;
-
-	return position;
-}
-
 void Scene::select_piece(int wx, int wy, int x, int y) {
 	GLbyte color[4];
 	GLfloat depth;
@@ -357,4 +335,23 @@ void Scene::reshape(int w, int h) {
 
 	glViewport(0, 0, d.width, d.height);
 	camera.update_perspective(d.width / (float)d.height);
+}
+
+glm::vec3 IndexToPosition(int id) {
+	glm::vec3 pos = {
+		((id % 8) - 4) * 2.25 + 1.12,
+		0.15,
+		((id / 8) - 4) * 2.25 + 1.12
+	};
+
+	return pos;
+}
+
+void lamps_render(std::array<Lamp, 4> lamps, GLuint program_id) {
+	glUseProgram(program_id);
+
+	for (int i = 0; i < 4; i++) {
+		uniform_vec3f_send(program_id, "color", lamps[i].diffuse);
+		lamp_render(&lamps[i], program_id);
+	}
 }
