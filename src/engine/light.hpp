@@ -9,6 +9,7 @@
 
 // Lamp class represents point light
 struct Lamp {
+	Lamp() = default;
 	Lamp(Mesh*, glm::vec3, glm::vec3);
 
 	void Display(GLuint);

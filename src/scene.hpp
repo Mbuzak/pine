@@ -44,15 +44,15 @@ public:
 	Camera camera;
 	Controller controller;
 
-	std::map<std::string, Mesh*> meshes;
+	std::map<std::string, Mesh> meshes;
 	std::map<std::string, GLuint> textures;
 
 	Sun sun;
-	std::array<Lamp*, 4> lamps_;
+	std::array<Lamp, 4> lamps_;
 	Shape terrain;
 	Shape board;
 	std::vector<Piece*> pieces_;
-	std::array<Shape*, 64> squares_;
+	std::array<Shape, 64> squares_;
 
 	ShadowMap dir_shadow_map;
 	Framebuffer fbo;

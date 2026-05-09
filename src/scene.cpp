@@ -23,8 +23,8 @@ void Scene::Setup() {
 	// Load models
 	std::vector<std::string> model_names = {"square", "pawn", "knight", "bishop", "rook", "king", "queen", "chessboard", "sphere"};
 	for (std::string &name: model_names) {
-		Mesh* mesh = new Mesh();
-		mesh_texture_init(mesh, name);
+		Mesh mesh;
+		mesh_texture_init(&mesh, name);
 		meshes.insert({name, mesh});
 	}
 	
@@ -37,23 +37,23 @@ void Scene::Setup() {
 
 	// --- Shapes ---
 	terrain = terrain_init();
-	board = Shape(meshes.at("chessboard"), {0.0, 0.0, 0.0}, textures.at("chessboard"));
+	board = Shape(&meshes.at("chessboard"), {0.0, 0.0, 0.0}, textures.at("chessboard"));
 
 	// --- Lights ---
 	sun = sun_init({1.0, -2.0, 2.0});
 
-	lamps_[0] = new Lamp(meshes.at("sphere"), {9.0, 1.0, 9.0}, {5.2, 0.3, 0.5});
-	lamps_[1] = new Lamp(meshes.at("sphere"), {9.0, 1.0, -9.0}, {0.4, 0.4, 0.6});
-	lamps_[2] = new Lamp(meshes.at("sphere"), {-9.0, 1.0, 9.0}, {0.2, 0.9, 0.5});
-	lamps_[3] = new Lamp(meshes.at("sphere"), {-9.0, 1.0, -9.0}, {0.2, 0.3, 0.5});
+	lamps_[0] = Lamp(&meshes.at("sphere"), {9.0, 1.0, 9.0}, {5.2, 0.3, 0.5});
+	lamps_[1] = Lamp(&meshes.at("sphere"), {9.0, 1.0, -9.0}, {0.4, 0.4, 0.6});
+	lamps_[2] = Lamp(&meshes.at("sphere"), {-9.0, 1.0, 9.0}, {0.2, 0.9, 0.5});
+	lamps_[3] = Lamp(&meshes.at("sphere"), {-9.0, 1.0, -9.0}, {0.2, 0.3, 0.5});
 
 	dir_shadow_map.Init(sun.direction);
 	fbo_init(&fbo);
 
 	for (int i = 0; i < squares_.size(); i++) {
-		squares_[i] = new Shape(meshes.at("square"), IndexToPosition(i));
+		squares_[i] = Shape(&meshes.at("square"), IndexToPosition(i));
 		if (((i % 8) + (i / 8)) % 2 == 0) {
-			squares_[i]->material.ambient = glm::vec3(0.5);
+			squares_[i].material.ambient = glm::vec3(0.5);
 		}
 	}
 
@@ -64,7 +64,7 @@ void Scene::Setup() {
 		if (name == "x")
 			continue;
 
-		Piece *piece = new Piece(i, meshes.at(name), textures.at(colour));
+		Piece *piece = new Piece(i, &meshes.at(name), textures.at(colour));
 		piece->colour = colour;
 		if (colour == "white") {
 			piece->shape.transform.rot.y = 3.2;
@@ -173,7 +173,7 @@ void Scene::RenderShapes(GLuint program_id) {
 	// Send light
 	for (int i = 0; i < lamps_.size(); i++) {
 		std::string name = "lights[" + std::to_string(i) + "].";
-		uniform_light_point_send(program_id, name, lamps_[i]);
+		uniform_light_point_send(program_id, name, &lamps_[i]);
 	}
 	uniform_light_directional_send(program_id, "sun.", &sun);
 	uniform_mat4f_send(program_id, "matProj", camera.perspective);
@@ -196,7 +196,7 @@ void Scene::RenderShapes(GLuint program_id) {
 	uniform_mat4f_send(program_color, "matProj", camera.perspective);
 	uniform_vec3f_send(program_color, "color", {0.2, 0.8, 0.2});
 	for (int &value: active_fields) {
-		squares_[value]->Display(program_color);
+		squares_[value].Display(program_color);
 	}
 
 	glUseProgram(program_id);
@@ -220,8 +220,8 @@ void Scene::RenderLights() {
 	glUseProgram(program_color);
 
 	for (int i = 0; i < 4; i++) {
-		uniform_vec3f_send(program_default, "color", lamps_[i]->diffuse);
-		lamps_[i]->Display(program_default);
+		uniform_vec3f_send(program_default, "color", lamps_[i].diffuse);
+		lamps_[i].Display(program_default);
 	}
 }
 
