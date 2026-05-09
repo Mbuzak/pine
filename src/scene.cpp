@@ -2,7 +2,7 @@
 #include "stb_image.h"
 
 Scene::Scene() {
-	d = display_init(800, 600, "pine");
+	d = display_init(1440, 900, "pine");
 	chess = new chschr::Chess();
 
 	controller.mouse_button_left = 0;
@@ -73,6 +73,7 @@ void Scene::Setup() {
 	}
 
 	printf("\n---Skróty klawiszowe---\n\n");
+	printf("ESC - Quit program\n");
 	printf("RPM - obrót sceny\n");
 	printf("LPM - selecja obiektów\n");
 	printf("Scroll - przybliżanie/oddalanie sceny\n\n");
@@ -83,51 +84,63 @@ int Scene::events_handle() {
 	int quit = 0;
 	while (SDL_PollEvent(&e) != 0) {
 		switch (e.type) {
-		case SDL_QUIT:
-			quit = 1;
-			break;
-		case SDL_WINDOWEVENT:
-			if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
-				reshape(e.window.data1, e.window.data2);
-			}
-			break;
-		case SDL_KEYUP:
-		case SDL_KEYDOWN:
-		case SDL_MOUSEMOTION:
-			if (controller.mouse_button_right == 1) {
-				rotate(e.motion.x, e.motion.y);
-			}
+			case SDL_QUIT:
+				quit = 1;
+				break;
 
-			if (controller.mouse_button_left == 1) {
-				motion(e.motion.x, e.motion.y);
-			}
-			break;
-		case SDL_MOUSEWHEEL:
-			camera.pos.z += 0.5 * e.wheel.y;
-			break;
-		case SDL_MOUSEBUTTONDOWN:
-			if (e.button.button == SDL_BUTTON_LEFT) {
-				controller.mouse_button_left = 1;
-				select_piece(d.width, d.height, e.button.x, e.button.y);
-			}
-			if (e.button.button == SDL_BUTTON_RIGHT) {
-				controller.mouse_button_right = 1;
-				controller.mouse_pos.x = e.button.x;
-				controller.mouse_pos.y = e.button.y;
-			}
-			break;
-		case SDL_MOUSEBUTTONUP:
-			if (e.button.button == SDL_BUTTON_LEFT) {
-				controller.mouse_button_left = 0;
-				move_piece();
-			}
+			case SDL_WINDOWEVENT:
+				if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
+					reshape(e.window.data1, e.window.data2);
+				}
+				break;
 
-			if (e.button.button == SDL_BUTTON_RIGHT) {
-				controller.mouse_button_right = 0;
-			}
-			break;
-		default:
-			break;
+			case SDL_KEYUP:
+				break;
+
+			case SDL_KEYDOWN:
+				if (e.key.keysym.sym == SDLK_ESCAPE) {
+					quit = 1;
+				}
+				break;
+
+			case SDL_MOUSEMOTION:
+				if (controller.mouse_button_right == 1) {
+					rotate(e.motion.x, e.motion.y);
+				}
+
+				if (controller.mouse_button_left == 1) {
+					motion(e.motion.x, e.motion.y);
+				}
+				break;
+
+			case SDL_MOUSEWHEEL:
+				camera.pos.z += 0.5 * e.wheel.y;
+				break;
+
+			case SDL_MOUSEBUTTONDOWN:
+				if (e.button.button == SDL_BUTTON_LEFT) {
+					controller.mouse_button_left = 1;
+					select_piece(d.width, d.height, e.button.x, e.button.y);
+				}
+				if (e.button.button == SDL_BUTTON_RIGHT) {
+					controller.mouse_button_right = 1;
+					controller.mouse_pos.x = e.button.x;
+					controller.mouse_pos.y = e.button.y;
+				}
+				break;
+			case SDL_MOUSEBUTTONUP:
+				if (e.button.button == SDL_BUTTON_LEFT) {
+					controller.mouse_button_left = 0;
+					move_piece();
+				}
+
+				if (e.button.button == SDL_BUTTON_RIGHT) {
+					controller.mouse_button_right = 0;
+				}
+				break;
+
+			default:
+				break;
 		}
 	}
 
