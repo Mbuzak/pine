@@ -8,9 +8,9 @@ glm::mat4 position_model_compute(const glm::vec3* pos) {
 glm::mat4 transform_model_compute(const Transform* transform) {
 	glm::mat4 model(1.0);
 	model = glm::translate(model, transform->pos);
-	model = glm::rotate(model, transform->rot.x, glm::vec3(1.0, 0.0, 0.0));
-	model = glm::rotate(model, transform->rot.y, glm::vec3(0.0, 1.0, 0.0));
-	model = glm::rotate(model, transform->rot.z, glm::vec3(0.0, 0.0, 1.0));
+	model = glm::rotate(model, glm::radians(transform->rot.x), glm::vec3(1.0, 0.0, 0.0));
+	model = glm::rotate(model, glm::radians(transform->rot.y), glm::vec3(0.0, 1.0, 0.0));
+	model = glm::rotate(model, glm::radians(transform->rot.z), glm::vec3(0.0, 0.0, 1.0));
 	model = glm::scale(model, glm::vec3(transform->scale));
 	return model;
 }

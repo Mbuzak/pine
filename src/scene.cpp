@@ -13,7 +13,7 @@ void Scene::Setup() {
 	stbi_set_flip_vertically_on_load(true);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	camera.init({0.0, -3.0, -22.0}, {0.3, -1.57});
+	camera.init({0.0, -3.0, -22.0}, {15, 270});
 	reshape(d.width, d.height);
 
 	program_default = program_init("default");
@@ -67,7 +67,7 @@ void Scene::Setup() {
 		Piece *piece = new Piece(i, &meshes.at(name), textures.at(colour));
 		piece->colour = colour;
 		if (colour == "white") {
-			piece->shape.transform.rot.y = 3.2;
+			piece->shape.transform.rot.y = 180;
 		}
 		pieces_.push_back(piece);
 	}
@@ -326,9 +326,10 @@ void Scene::move_piece() {
 }
 
 void Scene::rotate(int x, int y) {
-	camera.rot.y += 2 * (x - controller.mouse_pos.x) / (float)d.width;
+	const float rad_to_degree = 57.3;
+	camera.rot.y += 2 * rad_to_degree * (x - controller.mouse_pos.x) / (float)d.width;
 	controller.mouse_pos.x = x;
-	camera.rot.x -= 2 * (controller.mouse_pos.y - y) / (float)d.height;
+	camera.rot.x -= 2 * rad_to_degree * (controller.mouse_pos.y - y) / (float)d.height;
 	controller.mouse_pos.y = y;
 }
 
