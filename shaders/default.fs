@@ -159,7 +159,7 @@ void main() {
 
 	vec3 light_coef = calculate_sun(sun, my_material);
 	for (int i = 0; i < NUMBER_OF_LIGHTS; i++) {
-		//light_coef += calculate_lamp(lights[i], my_material);
+		light_coef += calculate_lamp(lights[i], my_material);
 	}
 
 	float shadow = calcDirectionalShadow();

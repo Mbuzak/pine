@@ -6,5 +6,5 @@ out vec4 outColor;
 uniform samplerCube tex_skybox;
 
 void main() {
-	outColor = texture(tex_skybox, fragPos.xyz);
+	outColor = 0.3 * texture(tex_skybox, fragPos.xyz);
 }

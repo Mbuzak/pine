@@ -6,7 +6,7 @@ int lamp_init(Lamp* lamp, Mesh* mesh, glm::vec3 position, glm::vec3 diffuse) {
 	lamp->ambient = glm::vec3(0.1);
 	lamp->diffuse = diffuse;
 	lamp->specular = glm::vec3(0.5);
-	lamp->attenuation = glm::vec3(0.1);
+	lamp->attenuation = glm::vec3(0.01);
 	return 1;
 }
 
@@ -23,7 +23,7 @@ void lamp_render(Lamp* lamp, GLuint program_id) {
 Sun sun_init(glm::vec3 dir) {
 	Sun sun;
 	sun.direction = dir;
-	sun.ambient = glm::vec3(0.4);
+	sun.ambient = glm::vec3(0.2f);
 	sun.diffuse = glm::vec3(0.2, 0.2, 0.5);
 	sun.specular = glm::vec3(0.1);
 
