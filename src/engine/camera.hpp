@@ -8,7 +8,6 @@
 
 class Camera {
 public:
-	void init(glm::vec3, glm::vec2);
 	void Update();
 	void SendUniform(GLuint);
 	void update_perspective(float);

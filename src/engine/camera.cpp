@@ -1,13 +1,5 @@
 #include "camera.hpp"
 
-void Camera::init(glm::vec3 pos, glm::vec2 rot) {
-	this->pos = pos;
-	this->rot = rot;
-	this->fov = 60.0f;
-	this->near_plane = 0.1f;
-	this->far_plane = 200.0f;
-}
-
 void Camera::Update() {
 	view = UpdateViewMatrix();
 	position_ = ExtractCameraPos(view);

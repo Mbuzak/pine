@@ -1,54 +1,53 @@
 #include "scene.hpp"
 #include "stb_image.h"
 
-Scene::Scene() {
-	d = display_init(1440, 900, "pine");
-	chess = new chschr::Chess();
+/* Obligatory default global settings - 3D app
+ * Mouse: ON
+ * Directional light: ON
+ * Point light: ON
+ * Skybox: ON
+ * Terrain: ON
+ * Directional shadow: ON
+ * Chess: ON
+ */
+int app_init(Scene* app, int window_width, int window_height, const char* window_name) {
+	app->d = display_init(window_width, window_height, window_name);
 
-	controller.mouse_button_left = 0;
-	controller.mouse_button_right = 0;
-}
+	// Enable mouse
+	app->controller.mouse_button_left = 0;
+	app->controller.mouse_button_right = 0;
 
-void Scene::Setup() {
+	// Camera settings
+	app->camera.fov = 60.0f;
+	app->camera.near_plane = 0.1f;
+	app->camera.far_plane = 200.0f;
+
 	stbi_set_flip_vertically_on_load(true);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	camera.init({0.0, -3.0, -22.0}, {15, 270});
-	reshape(d.width, d.height);
+	app->renderer_skybox.init();
+	app->terrain = terrain_init();
 
-	program_default = program_init("default");
-	program_color = program_init("color");
-	renderer_skybox.init();
+	app->sun = sun_init({1.0, -2.0, 2.0});
+	app->dir_shadow_map.Init(app->sun.direction);
+	fbo_init(&app->fbo);
 
-	// Load models
-	std::vector<std::string> model_names = {"square", "pawn", "knight", "bishop", "rook", "king", "queen", "chessboard", "sphere"};
-	for (std::string &name: model_names) {
-		Mesh mesh;
-		mesh_texture_init(&mesh, name);
-		meshes.insert({name, mesh});
-	}
-	
-	// Load textures
-	std::vector<std::string> texture_names = {"white", "black", "chessboard"};
-	for (std::string &name: texture_names) {
-		std::string file = name + ".jpg";
-		textures.insert({name, texture_2d_init(file.c_str())});
-	}
+	app->chess = new chschr::Chess();
 
+	return 0;
+}
+
+/* Optional settings */
+void Scene::Setup() {
 	// --- Shapes ---
-	terrain = terrain_init();
-	board = Shape(&meshes.at("chessboard"), {0.0, 0.0, 0.0}, textures.at("chessboard"));
+	board = Shape(&meshes.at("chessboard"), {0.0, 0.0, 0.0}, textures[TEX_CHS]);
 
 	// --- Lights ---
-	sun = sun_init({1.0, -2.0, 2.0});
-
 	lamp_init(&lamps[0], &meshes.at("sphere"), {9.0, 1.0, 9.0}, {5.2, 0.3, 0.5});
 	lamp_init(&lamps[1], &meshes.at("sphere"), {9.0, 1.0, -9.0}, {0.4, 0.4, 0.6});
 	lamp_init(&lamps[2], &meshes.at("sphere"), {-9.0, 1.0, 9.0}, {0.2, 0.9, 0.5});
 	lamp_init(&lamps[3], &meshes.at("sphere"), {-9.0, 1.0, -9.0}, {0.2, 0.3, 0.5});
 
-	dir_shadow_map.Init(sun.direction);
-	fbo_init(&fbo);
 
 	for (int i = 0; i < squares_.size(); i++) {
 		squares_[i] = Shape(&meshes.at("square"), IndexToPosition(i));
@@ -64,7 +63,8 @@ void Scene::Setup() {
 		if (name == "x")
 			continue;
 
-		Piece *piece = new Piece(i, &meshes.at(name), textures.at(colour));
+		GLuint t = (colour == "white") ? textures[TEX_WHT] : textures[TEX_BLC];
+		Piece *piece = new Piece(i, &meshes.at(name), t);
 		piece->colour = colour;
 		if (colour == "white") {
 			piece->shape.transform.rot.y = 180;

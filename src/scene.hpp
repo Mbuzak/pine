@@ -1,6 +1,10 @@
 #ifndef PINE_SCENE
 #define PINE_SCENE
 
+#define TEX_WHT 0
+#define TEX_BLC 1
+#define TEX_CHS 2
+
 #include <stdlib.h>
 #include <iostream>
 #include <string>
@@ -33,8 +37,7 @@ extern "C" {
 
 class Scene {
 public:
-	Scene();
-
+	Scene() = default;
 
 	Display d;
 	RendererSkybox renderer_skybox;
@@ -46,7 +49,7 @@ public:
 	Controller controller;
 
 	std::map<std::string, Mesh> meshes;
-	std::map<std::string, GLuint> textures;
+	GLuint* textures;
 
 	Sun sun;
 	std::array<Lamp, 4> lamps;
@@ -78,6 +81,8 @@ public:
 	void Setup();
 	void display();
 };
+
+int app_init(Scene*, int, int, const char*);
 
 glm::vec3 IndexToPosition(int id);
 
