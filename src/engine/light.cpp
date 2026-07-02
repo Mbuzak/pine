@@ -1,12 +1,12 @@
 #include "light.hpp"
 
-int lamp_init(Lamp* lamp, Mesh* mesh, glm::vec3 position, glm::vec3 diffuse) {
+int lamp_init(Lamp* lamp, Mesh* mesh, glm::vec3 position) {
 	lamp->mesh = mesh;
 	lamp->position = position;
 	lamp->ambient = glm::vec3(0.1);
-	lamp->diffuse = diffuse;
+	lamp->diffuse = {0.9, 0.9, 0.2};
 	lamp->specular = glm::vec3(0.5);
-	lamp->attenuation = glm::vec3(0.01);
+	lamp->attenuation = glm::vec3(0.005);
 	return 1;
 }
 

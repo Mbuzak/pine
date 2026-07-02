@@ -26,7 +26,7 @@ int app_init(Scene* app, int window_width, int window_height, const char* window
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	app->renderer_skybox.init();
-	app->terrain = terrain_init();
+	//app->terrain = terrain_init();
 
 	app->sun = sun_init({1.0, -2.0, 2.0});
 	app->dir_shadow_map.Init(app->sun.direction);
@@ -39,21 +39,20 @@ int app_init(Scene* app, int window_width, int window_height, const char* window
 
 /* Optional settings */
 void Scene::Setup() {
-	// --- Shapes ---
+	GLuint grass = texture_2d_init("grass.jpg");
+	terrain = Shape(&meshes.at("square"), {0.0, -0.1, 0.0}, grass);
+	terrain.transform.scale = 80;
+
 	board = Shape(&meshes.at("chessboard"), {0.0, 0.0, 0.0}, textures[TEX_CHS]);
 
 	// --- Lights ---
-	lamp_init(&lamps[0], &meshes.at("sphere"), {9.0, 1.0, 9.0}, {5.2, 0.3, 0.5});
-	lamp_init(&lamps[1], &meshes.at("sphere"), {9.0, 1.0, -9.0}, {0.4, 0.4, 0.6});
-	lamp_init(&lamps[2], &meshes.at("sphere"), {-9.0, 1.0, 9.0}, {0.2, 0.9, 0.5});
-	lamp_init(&lamps[3], &meshes.at("sphere"), {-9.0, 1.0, -9.0}, {0.2, 0.3, 0.5});
-
+	lamp_init(&lamps[0], &meshes.at("sphere"), {9.0, 0.2, 9.0});
+	lamp_init(&lamps[1], &meshes.at("sphere"), {9.0, 0.2, -9.0});
+	lamp_init(&lamps[2], &meshes.at("sphere"), {-9.0, 0.2, 9.0});
+	lamp_init(&lamps[3], &meshes.at("sphere"), {-9.0, 0.2, -9.0});
 
 	for (int i = 0; i < squares_.size(); i++) {
 		squares_[i] = Shape(&meshes.at("square"), IndexToPosition(i));
-		if (((i % 8) + (i / 8)) % 2 == 0) {
-			squares_[i].material.ambient = glm::vec3(0.5);
-		}
 	}
 
 	for (int i = 0; i < chess->mBoard.size(); i++) {
@@ -72,11 +71,9 @@ void Scene::Setup() {
 		pieces_.push_back(piece);
 	}
 
-	printf("\n---Skróty klawiszowe---\n\n");
-	printf("ESC - Quit program\n");
-	printf("RPM - obrót sceny\n");
-	printf("LPM - selecja obiektów\n");
-	printf("Scroll - przybliżanie/oddalanie sceny\n\n");
+	printf("\nESC - exit\n");
+	printf("LPM/RPM - select/rotate\n");
+	printf("Scroll - zoom\n\n");
 }
 
 int Scene::events_handle() {

@@ -17,7 +17,7 @@ struct Lamp {
 	glm::vec3 specular;
 };
 
-int lamp_init(Lamp*, Mesh*, glm::vec3, glm::vec3);
+int lamp_init(Lamp*, Mesh*, glm::vec3);
 void lamp_render(Lamp*, GLuint);
 
 // Sun class represents directional lighting
