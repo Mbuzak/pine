@@ -16,6 +16,9 @@ int app_init(Scene* app, int window_width, int window_height, const char* window
 	// Enable mouse
 	app->controller.mouse_button_left = 0;
 	app->controller.mouse_button_right = 0;
+	for (int i = 0; i < 128; i++) {
+		app->controller.keys_pressed[i] = 0;
+	}
 
 	// Camera settings
 	app->camera.fov = 60.0f;
@@ -92,12 +95,15 @@ int Scene::events_handle() {
 				break;
 
 			case SDL_KEYUP:
+				controller.keys_pressed[e.key.keysym.sym] = 0;
 				break;
 
 			case SDL_KEYDOWN:
+				controller.keys_pressed[e.key.keysym.sym] = 1;
 				if (e.key.keysym.sym == SDLK_ESCAPE) {
 					quit = 1;
 				}
+
 				break;
 
 			case SDL_MOUSEMOTION:
@@ -146,6 +152,19 @@ int Scene::events_handle() {
 
 void Scene::display() {
 	while (events_handle() != 1) {
+		float camera_speed = 0.5;
+		if (controller.keys_pressed[SDLK_w] == 1) {
+			camera.pos.z += camera_speed;
+		}
+		if (controller.keys_pressed[SDLK_s] == 1) {
+			camera.pos.z -= camera_speed;
+		}
+		if (controller.keys_pressed[SDLK_a] == 1) {
+			camera.pos.x += camera_speed;
+		}
+		if (controller.keys_pressed[SDLK_d] == 1) {
+			camera.pos.x -= camera_speed;
+		}
 		__CHECK_FOR_ERRORS
 
 		dir_shadow_map.Render(pieces_);

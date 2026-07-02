@@ -7,6 +7,7 @@ typedef struct {
 	SDL_Point mouse_pos;
 	int mouse_button_left;
 	int mouse_button_right;
+	int keys_pressed[128];
 } Controller;
 
 #endif
