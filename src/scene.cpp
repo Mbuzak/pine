@@ -154,16 +154,16 @@ void Scene::display() {
 	while (events_handle() != 1) {
 		float camera_speed = 0.5;
 		if (controller.keys_pressed[SDLK_w] == 1) {
-			camera.pos.z += camera_speed;
+			camera.pos.x -= camera_speed;
 		}
 		if (controller.keys_pressed[SDLK_s] == 1) {
-			camera.pos.z -= camera_speed;
-		}
-		if (controller.keys_pressed[SDLK_a] == 1) {
 			camera.pos.x += camera_speed;
 		}
+		if (controller.keys_pressed[SDLK_a] == 1) {
+			camera.pos.z += camera_speed;
+		}
 		if (controller.keys_pressed[SDLK_d] == 1) {
-			camera.pos.x -= camera_speed;
+			camera.pos.z -= camera_speed;
 		}
 		__CHECK_FOR_ERRORS
 

@@ -54,10 +54,15 @@ void Camera::update_perspective(float aspect_ratio) {
 
 // Funkcja zwraca macierz widoku dla kamery
 glm::mat4 Camera::UpdateViewMatrix() {
-	glm::mat4 matView = glm::mat4x4(1.0);
+	/*glm::mat4 matView = glm::mat4x4(1.0);
 	matView = glm::translate(matView, pos);
 	matView = glm::rotate(matView, glm::radians(rot.x), glm::vec3(1.0f, 0.0f, 0.0f));
-	matView = glm::rotate(matView, glm::radians(rot.y), glm::vec3(0.0f, 1.0f, 0.0f));
+	matView = glm::rotate(matView, glm::radians(rot.y), glm::vec3(0.0f, 1.0f, 0.0f));*/
+	dir.x = cos(glm::radians(rot.y)) * cos(glm::radians(rot.x));
+	dir.y = sin(glm::radians(rot.x));
+	dir.z = sin(glm::radians(rot.y)) * cos(glm::radians(rot.x));
+	dir = glm::normalize(dir);
+	glm::mat4 matView = glm::lookAt(pos, pos + dir, glm::vec3(0, 1, 0));
 
 	return matView;
 }

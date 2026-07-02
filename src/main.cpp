@@ -7,12 +7,15 @@
  * Rename Scene to App
  * Change Scene methods to functions
  */
+/* FIXME
+ * Keys out of 128 ASCII brakes program
+ */
 int main(int argc, char *argv[]) {
 	Scene app;
 	app_init(&app, 1920, 1080, "pine");
 
-	app.camera.pos = {0.0, -3.0, -22.0};
-	app.camera.rot = {15, 270};
+	app.camera.pos = {22.0, 9.0, -0.0};
+	app.camera.rot = {-15, 180};
 
 	app.program_default = program_init("default");
 	app.program_color = program_init("color");

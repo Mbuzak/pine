@@ -16,6 +16,7 @@ public:
 	glm::mat4 view;
 
 	glm::vec3 pos;
+	glm::vec3 dir;
 	glm::vec2 rot;
 
 	float fov;
