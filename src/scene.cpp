@@ -153,21 +153,23 @@ int Scene::events_handle() {
 
 void Scene::display() {
 	while (events_handle() != 1) {
+		glm::vec3 dir = camera_dir_compute(camera.rot);
+		glm::vec3 right = camera_right_compute(dir);
 		glm::vec3 speed = glm::vec3(0.5);
 		if (controller.keys_pressed[SDLK_w] == 1) {
-			glm::vec3 mydir = speed * camera.dir;
+			glm::vec3 mydir = speed * dir;
 			camera.pos += mydir;
 		}
 		if (controller.keys_pressed[SDLK_s] == 1) {
-			glm::vec3 mydir = speed * camera.dir;
+			glm::vec3 mydir = speed * dir;
 			camera.pos -= mydir;
 		}
 		if (controller.keys_pressed[SDLK_a] == 1) {
-			glm::vec3 mydir = speed * camera.right;
+			glm::vec3 mydir = speed * right;
 			camera.pos += mydir;
 		}
 		if (controller.keys_pressed[SDLK_d] == 1) {
-			glm::vec3 mydir = speed * camera.right;
+			glm::vec3 mydir = speed * right;
 			camera.pos -= mydir;
 		}
 		__CHECK_FOR_ERRORS
@@ -184,7 +186,7 @@ void Scene::display() {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-		camera.Update();
+		camera.view = view_matrix_compute(camera.pos, camera.rot);
 
 		renderer_skybox.render(&camera);
 		lamps_render(lamps, program_color);
@@ -196,7 +198,7 @@ void Scene::display() {
 
 void Scene::RenderToTexture(GLuint program_id) {
 	glUseProgram(program_id);
-	uniform_mat4f_send(program_id, "matProj", camera.perspective);
+	uniform_mat4f_send(program_id, "matProj", camera.projection);
 	board.Display(program_id);
 	glUseProgram(0);
 }
@@ -210,8 +212,8 @@ void Scene::RenderShapes(GLuint program_id) {
 		uniform_light_point_send(program_id, name, &lamps[i]);
 	}
 	uniform_light_directional_send(program_id, "sun.", &sun);
-	uniform_mat4f_send(program_id, "matProj", camera.perspective);
-	camera.SendUniform(program_id);
+	uniform_mat4f_send(program_id, "matProj", camera.projection);
+	camera_send_uniform(program_id, camera.pos, camera.rot);
 
 	// potok graficzny mapy cieni ?
 	uniform_mat4f_send(program_id, "lightProj", dir_shadow_map.lightProj);
@@ -226,8 +228,8 @@ void Scene::RenderShapes(GLuint program_id) {
 	render(program_id, &board);
 	
 	glUseProgram(program_color);
-	camera.SendUniform(program_color);
-	uniform_mat4f_send(program_color, "matProj", camera.perspective);
+	camera_send_uniform(program_color, camera.pos, camera.rot);
+	uniform_mat4f_send(program_color, "matProj", camera.projection);
 	uniform_vec3f_send(program_color, "color", {0.2, 0.8, 0.2});
 	for (int &value: active_fields) {
 		squares_[value].Display(program_color);
@@ -342,7 +344,7 @@ void Scene::motion(int x, int y) {
 	glReadPixels(x, d.height - y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	glm::vec3 point = glm::unProject(glm::vec3(x, d.height - y, depth), camera.view, camera.perspective, glm::vec4(0, 0, d.width, d.height));
+	glm::vec3 point = glm::unProject(glm::vec3(x, d.height - y, depth), camera.view, camera.projection, glm::vec4(0, 0, d.width, d.height));
 	//std::cout << "Worldspace: (" << point.x << ", " << point.y << ", " << point.z << "); Screen: (" << x << ", " << y << ")\n";
 
 	// Update piece world position
@@ -355,7 +357,8 @@ void Scene::reshape(int w, int h) {
 	d.height = h;
 
 	glViewport(0, 0, d.width, d.height);
-	camera.update_perspective(d.width / (float)d.height);
+	camera.projection = projection_matrix_compute(&camera,
+		d.width / (float)d.height);
 }
 
 glm::vec3 IndexToPosition(int id) {

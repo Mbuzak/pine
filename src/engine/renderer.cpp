@@ -13,7 +13,7 @@ void RendererSkybox::init() {
 
 void RendererSkybox::render(Camera* camera) {
 	glUseProgram(program_id);
-	glm::mat4 matPVM = camera->perspective * camera->view * glm::scale(glm::mat4(1), glm::vec3(80.0, 80.0, 80.0));
+	glm::mat4 matPVM = camera->projection * camera->view * glm::scale(glm::mat4(1), glm::vec3(80.0, 80.0, 80.0));
 	glUniformMatrix4fv(glGetUniformLocation(program_id, "matPVM"), 1, GL_FALSE, glm::value_ptr(matPVM));
 
 	texture_cube_map_send(program_id, texture_id);
