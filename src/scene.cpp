@@ -42,6 +42,7 @@ int app_init(Scene* app, int window_width, int window_height, const char* window
 
 /* Optional settings */
 void Scene::Setup() {
+	reshape(d.width, d.height);
 	GLuint grass = texture_2d_init("grass.jpg");
 	terrain = Shape(&meshes.at("square"), {0.0, -0.1, 0.0}, grass);
 	terrain.transform.scale = 80;
@@ -152,18 +153,22 @@ int Scene::events_handle() {
 
 void Scene::display() {
 	while (events_handle() != 1) {
-		float camera_speed = 0.5;
+		glm::vec3 speed = glm::vec3(0.5);
 		if (controller.keys_pressed[SDLK_w] == 1) {
-			camera.pos.x -= camera_speed;
+			glm::vec3 mydir = speed * camera.dir;
+			camera.pos += mydir;
 		}
 		if (controller.keys_pressed[SDLK_s] == 1) {
-			camera.pos.x += camera_speed;
+			glm::vec3 mydir = speed * camera.dir;
+			camera.pos -= mydir;
 		}
 		if (controller.keys_pressed[SDLK_a] == 1) {
-			camera.pos.z += camera_speed;
+			glm::vec3 mydir = speed * camera.right;
+			camera.pos += mydir;
 		}
 		if (controller.keys_pressed[SDLK_d] == 1) {
-			camera.pos.z -= camera_speed;
+			glm::vec3 mydir = speed * camera.right;
+			camera.pos -= mydir;
 		}
 		__CHECK_FOR_ERRORS
 

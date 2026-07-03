@@ -18,17 +18,11 @@ public:
 	glm::vec3 pos;
 	glm::vec3 dir;
 	glm::vec2 rot;
+	glm::vec3 right;
 
 	float fov;
 	float near_plane;
 	float far_plane;
-
-	glm::mat4 UpdateViewMatrix();
-
-private:
-	glm::vec3 position_;
 };
-
-glm::vec3 ExtractCameraPos(const glm::mat4&);
 
 #endif
