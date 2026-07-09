@@ -28,7 +28,7 @@ int app_init(Scene* app, int window_width, int window_height, const char* window
 	stbi_set_flip_vertically_on_load(true);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	app->renderer_skybox.init();
+	renderer_skybox_init(&app->renderer_skybox);
 	//app->terrain = terrain_init();
 
 	app->sun = sun_init({1.0, -2.0, 2.0});
@@ -188,7 +188,7 @@ void Scene::display() {
 
 		camera.view = view_matrix_compute(camera.pos, camera.rot);
 
-		renderer_skybox.render(&camera);
+		renderer_skybox_render(&renderer_skybox, &camera);
 		lamps_render(lamps, program_color);
 		RenderShapes(program_default);
 

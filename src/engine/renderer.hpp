@@ -14,17 +14,14 @@ extern "C" {
 }
 #endif
 
-class RendererSkybox {
-public:
-	RendererSkybox() = default;
-	~RendererSkybox();
-	void init();
-	void render(Camera*);
-
-private:
+typedef struct {
 	GLuint program_id;
-	GLuint texture_id;
 	Mesh mesh;
-};
+	GLuint texture_id;
+} RendererSkybox;
+
+int renderer_skybox_init(RendererSkybox*);
+void renderer_skybox_destroy(RendererSkybox*);
+void renderer_skybox_render(RendererSkybox*, Camera* camera);
 
 #endif

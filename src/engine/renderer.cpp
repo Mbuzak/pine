@@ -1,23 +1,26 @@
 #include "renderer.hpp"
 
-RendererSkybox::~RendererSkybox() {
-	program_destroy(program_id);
+int renderer_skybox_init(RendererSkybox* renderer) {
+	renderer->program_id = program_init("skybox");
+	mesh_raw_init(&renderer->mesh);
+
+	renderer->texture_id = texture_cube_map_init();
+	return 0;
 }
 
-void RendererSkybox::init() {
-	program_id = program_init("skybox");
-	mesh_raw_init(&mesh);
-
-	texture_id = texture_cube_map_init();
+void renderer_skybox_destroy(RendererSkybox* renderer) {
+	program_destroy(renderer->program_id);
 }
 
-void RendererSkybox::render(Camera* camera) {
-	glUseProgram(program_id);
-	glm::mat4 matPVM = camera->projection * camera->view * glm::scale(glm::mat4(1), glm::vec3(80.0, 80.0, 80.0));
-	glUniformMatrix4fv(glGetUniformLocation(program_id, "matPVM"), 1, GL_FALSE, glm::value_ptr(matPVM));
+void renderer_skybox_render(RendererSkybox* renderer, Camera* camera) {
+	const float size = 80.0;
+	glm::mat4 scale = glm::scale(glm::mat4(1), glm::vec3(size));
+	glm::mat4 matPVM = camera->projection * camera->view * scale;
 
-	texture_cube_map_send(program_id, texture_id);
-
-	mesh_raw_draw(&mesh);
+	glUseProgram(renderer->program_id);
+	glUniformMatrix4fv(glGetUniformLocation(renderer->program_id, "matPVM"),
+		1, GL_FALSE, glm::value_ptr(matPVM));
+	texture_cube_map_send(renderer->program_id, renderer->texture_id);
+	mesh_raw_draw(&renderer->mesh);
 	glUseProgram(0);
 }
