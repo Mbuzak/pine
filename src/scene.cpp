@@ -296,28 +296,18 @@ void Scene::move_piece() {
 	}
 
 	std::string field = pieces_[selected_id]->field;
-	
-	int rank = 4 + (int)((pieces_[selected_id]->shape.transform.pos.z + 22.5) / 2.25) - 10;
-	int file = 4 + (int)((pieces_[selected_id]->shape.transform.pos.x + 22.5) / 2.25) - 10;
-
-	//std::cout << "rank: " << rank << ", file: " << file << "\n";
-	//std::cout << (char)('a' + file) << (char)('8' - rank) << "\n";
-
-	std::string new_field = std::string() + (char)('a' + file) + (char)('8' - rank);
+	std::string new_field = square_compute(pieces_[selected_id]->shape.transform.pos);
 
 	// new position
 	if (field != new_field) {
 		chschr::Move move((field + new_field).c_str());
 		if (chess->perform(move)) {
-			pieces_[selected_id]->update_position();
-
-			std::string remove_field = pieces_[selected_id]->field;
-
 			for (Piece *piece: pieces_) {
-				if (piece->field == remove_field && piece != pieces_[selected_id] && piece->is_active) {
+				if (piece->field == new_field && piece->is_active) {
 					piece->is_active = false;
 				}
 			}
+			pieces_[selected_id]->field = new_field;
 		}
 		pieces_[selected_id]->update_world_position();
 	}

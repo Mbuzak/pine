@@ -86,35 +86,20 @@ Piece::Piece(int field_id, Mesh *mesh, GLuint texture) {
 	field.push_back((char)'a' + (field_id % 8));
 	field.push_back((char)'8' - (field_id / 8));
 
-	// std::cout << field_ << "\n";
-
-	update_world_position();
-}
-
-void Piece::update_field(std::string f) {
-	field = f;
 	update_world_position();
 }
 
 void Piece::update_world_position() {
 	shape.transform.pos.x = (field[0] - 'a' - 4) * 2.25 + 1.12;
 	shape.transform.pos.z = ('8' - field[1] - 4) * 2.25 + 1.12;
-
-	// std::cout << field << "\n";
-	// std::cout << pos.x << " " << pos.y << " " << pos.z << "\n";
 }
 
-void Piece::update_position() {
-	int rank = 4 + (int)((shape.transform.pos.z + 22.5) / 2.25) - 10;
-	int file = 4 + (int)((shape.transform.pos.x + 22.5) / 2.25) - 10;
+std::string square_compute(glm::vec3 pos) {
+	int rank = 4 + (int)((pos.z + 22.5) / 2.25) - 10;
+	int file = 4 + (int)((pos.x + 22.5) / 2.25) - 10;
 
-	int field_id = rank * 8 + file;
-	std::cout << "Update!\n" << "rank: " << rank << ", file: " << file << "\n";
-	std::cout << "field_id: " << field_id << "\n";
-
-	std::cout << (char)('a' + file) << (char)('8' - rank) << "\n";
-
-	field = std::string() + (char)('a' + file) + (char)('8' - rank);
+	std::string field = std::string() + (char)('a' + file) + (char)('8' - rank);
+	return field;
 }
 
 Shape terrain_init() {

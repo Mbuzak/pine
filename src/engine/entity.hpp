@@ -52,13 +52,13 @@ public:
 	Mesh *mesh = nullptr;
 };
 
+std::string square_compute(glm::vec3);
+
 class Piece {
 public:
 	Piece(int, Mesh*, GLuint);
 
-	void update_field(std::string);
 	void update_world_position();
-	void update_position();
 
 	Shape shape;
 	bool is_active = true;
