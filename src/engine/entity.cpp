@@ -1,10 +1,5 @@
 #include "entity.hpp"
 
-glm::mat4 position_model_compute(const glm::vec3* pos) {
-	glm::mat4 model = glm::translate(glm::mat4(1.0f), *pos);
-	return model;
-}
-
 glm::mat4 transform_model_compute(const Transform* transform) {
 	glm::mat4 model(1.0);
 	model = glm::translate(model, transform->pos);

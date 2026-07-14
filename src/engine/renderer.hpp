@@ -4,6 +4,7 @@
 #include <GL/glew.h>
 #include "mesh.hpp"
 #include "camera.hpp"
+#include "entity.hpp"
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,5 +24,8 @@ typedef struct {
 int renderer_skybox_init(RendererSkybox*);
 void renderer_skybox_destroy(RendererSkybox*);
 void renderer_skybox_render(RendererSkybox*, Camera* camera);
+
+// Render colored solid model
+void solid_render(GLuint, Transform*, Mesh*);
 
 #endif

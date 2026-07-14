@@ -31,7 +31,6 @@ typedef struct {
 	float scale;
 } Transform;
 
-glm::mat4 position_model_compute(const glm::vec3*);
 glm::mat4 transform_model_compute(const Transform*);
 
 // Visible object on scene

@@ -1,23 +1,12 @@
 #include "light.hpp"
 
-int lamp_init(Lamp* lamp, Mesh* mesh, glm::vec3 position) {
+void lamp_init(Lamp* lamp, glm::vec3 pos, Mesh* mesh) {
+	lamp->transform = {.pos = pos, .rot = glm::vec3(0), .scale = 1.0};
 	lamp->mesh = mesh;
-	lamp->position = position;
 	lamp->ambient = glm::vec3(0.1);
 	lamp->diffuse = {0.9, 0.9, 0.2};
 	lamp->specular = glm::vec3(0.5);
 	lamp->attenuation = glm::vec3(0.005);
-	return 1;
-}
-
-void lamp_render(Lamp* lamp, GLuint program_id) {
-	glm::mat4 mat_model = position_model_compute(&lamp->position);
-	glUniformMatrix4fv(glGetUniformLocation(program_id, "matModel"), 1, GL_FALSE, glm::value_ptr(mat_model));
-
-	glm::mat3 matNormal = glm::transpose(glm::inverse(mat_model));
-	glUniformMatrix3fv(glGetUniformLocation(program_id, "matNormal"), 1, GL_FALSE, glm::value_ptr(matNormal));
-
-	mesh_texture_draw(lamp->mesh);
 }
 
 Sun sun_init(glm::vec3 dir) {
@@ -34,7 +23,7 @@ void uniform_light_point_send(GLuint program_id, std::string name, Lamp* light) 
 	uniform_vec3f_send(program_id, (name + "ambient").c_str(), light->ambient);
 	uniform_vec3f_send(program_id, (name + "specular").c_str(), light->specular);
 	uniform_vec3f_send(program_id, (name + "attenuation").c_str(), light->attenuation);
-	uniform_vec3f_send(program_id, (name + "position").c_str(), light->position);
+	uniform_vec3f_send(program_id, (name + "position").c_str(), light->transform.pos);
 }
 
 void uniform_light_directional_send(GLuint program_id, std::string name, Sun* light) {

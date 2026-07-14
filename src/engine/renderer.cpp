@@ -24,3 +24,13 @@ void renderer_skybox_render(RendererSkybox* renderer, Camera* camera) {
 	mesh_raw_draw(&renderer->mesh);
 	glUseProgram(0);
 }
+
+void solid_render(GLuint program_id, Transform* transform, Mesh* mesh) {
+	glm::mat4 mat_model = transform_model_compute(transform);
+	glUniformMatrix4fv(glGetUniformLocation(program_id, "matModel"), 1, GL_FALSE, glm::value_ptr(mat_model));
+
+	glm::mat3 matNormal = glm::transpose(glm::inverse(mat_model));
+	glUniformMatrix3fv(glGetUniformLocation(program_id, "matNormal"), 1, GL_FALSE, glm::value_ptr(matNormal));
+
+	mesh_texture_draw(mesh);
+}

@@ -50,10 +50,10 @@ void Scene::Setup() {
 	board = Shape(&meshes.at("chessboard"), {0.0, 0.0, 0.0}, textures[TEX_CHS]);
 
 	// --- Lights ---
-	lamp_init(&lamps[0], &meshes.at("sphere"), {9.0, 0.2, 9.0});
-	lamp_init(&lamps[1], &meshes.at("sphere"), {9.0, 0.2, -9.0});
-	lamp_init(&lamps[2], &meshes.at("sphere"), {-9.0, 0.2, 9.0});
-	lamp_init(&lamps[3], &meshes.at("sphere"), {-9.0, 0.2, -9.0});
+	lamp_init(&lamps[0], {9.0, 0.2, 9.0}, &meshes.at("sphere"));
+	lamp_init(&lamps[1], {9.0, 0.2, -9.0}, &meshes.at("sphere"));
+	lamp_init(&lamps[2], {-9.0, 0.2, 9.0}, &meshes.at("sphere"));
+	lamp_init(&lamps[3], {-9.0, 0.2, -9.0}, &meshes.at("sphere"));
 
 	for (int i = 0; i < squares_.size(); i++) {
 		squares_[i] = Shape(&meshes.at("square"), IndexToPosition(i));
@@ -366,6 +366,6 @@ void lamps_render(std::array<Lamp, 4> lamps, GLuint program_id) {
 
 	for (int i = 0; i < 4; i++) {
 		uniform_vec3f_send(program_id, "color", lamps[i].diffuse);
-		lamp_render(&lamps[i], program_id);
+		solid_render(program_id, &lamps[i].transform, lamps[i].mesh);
 	}
 }
