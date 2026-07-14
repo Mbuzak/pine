@@ -174,14 +174,13 @@ void Scene::display() {
 		}
 		__CHECK_FOR_ERRORS
 
+		// Shadow FBO
 		dir_shadow_map.Render(pieces_);
 
-		glViewport(0, 0, d.width, d.height);
-		glBindFramebuffer(GL_FRAMEBUFFER, fbo.id);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+		// World model detection FBO
 		RenderToTexture(program_default);
 
+		// Default FBO
 		glViewport(0, 0, d.width, d.height);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -197,6 +196,10 @@ void Scene::display() {
 }
 
 void Scene::RenderToTexture(GLuint program_id) {
+	glViewport(0, 0, d.width, d.height);
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo.id);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	glUseProgram(program_id);
 	uniform_mat4f_send(program_id, "matProj", camera.projection);
 	board.Display(program_id);
@@ -210,7 +213,6 @@ void Scene::RenderShapes(GLuint program_id) {
 	for (int i = 0; i < lamps.size(); i++) {
 		std::string name = "lights[" + std::to_string(i) + "].";
 		uniform_light_point_send(program_id, name, &lamps[i].light);
-		uniform_vec3f_send(program_id, (name + "position").c_str(), lamps[i].transform.pos);
 	}
 	uniform_light_directional_send(program_id, "sun.", &sun);
 	uniform_mat4f_send(program_id, "matProj", camera.projection);
@@ -366,7 +368,9 @@ void lamps_render(std::array<Lamp, 4> lamps, GLuint program_id) {
 	glUseProgram(program_id);
 
 	for (int i = 0; i < 4; i++) {
+		Transform transform = {.pos = lamps[i].light.position,
+			.rot = glm::vec3(0), .scale = 1.0};
 		uniform_vec3f_send(program_id, "color", lamps[i].light.diffuse);
-		solid_render(program_id, &lamps[i].transform, lamps[i].mesh);
+		solid_render(program_id, &transform, lamps[i].mesh);
 	}
 }

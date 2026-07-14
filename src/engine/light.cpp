@@ -16,6 +16,7 @@ void uniform_light_point_send(GLuint program_id, std::string name,
 	uniform_vec3f_send(program_id, (name + "ambient").c_str(), light->ambient);
 	uniform_vec3f_send(program_id, (name + "specular").c_str(), light->specular);
 	uniform_vec3f_send(program_id, (name + "attenuation").c_str(), light->attenuation);
+	uniform_vec3f_send(program_id, (name + "position").c_str(), light->position);
 }
 
 void uniform_light_directional_send(GLuint program_id, std::string name,

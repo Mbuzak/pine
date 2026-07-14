@@ -71,9 +71,8 @@ Shape terrain_init();
 void render(GLuint, Shape*);
 
 typedef struct {
-	Transform transform;
-	Mesh* mesh;
 	LightPoint light;
+	Mesh* mesh;
 } Lamp;
 
 void lamp_init(Lamp*, glm::vec3, Mesh*);
