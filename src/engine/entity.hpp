@@ -13,6 +13,7 @@
 #include "mesh.hpp"
 #include "uniform.hpp"
 #include "material.hpp"
+#include "light.hpp"
 
 #ifdef __cplusplus
 extern "C" {
@@ -68,5 +69,13 @@ public:
 Shape terrain_init();
 
 void render(GLuint, Shape*);
+
+typedef struct {
+	Transform transform;
+	Mesh* mesh;
+	LightPoint light;
+} Lamp;
+
+void lamp_init(Lamp*, glm::vec3, Mesh*);
 
 #endif

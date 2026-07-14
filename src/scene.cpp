@@ -209,7 +209,8 @@ void Scene::RenderShapes(GLuint program_id) {
 	// Send light
 	for (int i = 0; i < lamps.size(); i++) {
 		std::string name = "lights[" + std::to_string(i) + "].";
-		uniform_light_point_send(program_id, name, &lamps[i]);
+		uniform_light_point_send(program_id, name, &lamps[i].light);
+		uniform_vec3f_send(program_id, (name + "position").c_str(), lamps[i].transform.pos);
 	}
 	uniform_light_directional_send(program_id, "sun.", &sun);
 	uniform_mat4f_send(program_id, "matProj", camera.projection);
@@ -365,7 +366,7 @@ void lamps_render(std::array<Lamp, 4> lamps, GLuint program_id) {
 	glUseProgram(program_id);
 
 	for (int i = 0; i < 4; i++) {
-		uniform_vec3f_send(program_id, "color", lamps[i].diffuse);
+		uniform_vec3f_send(program_id, "color", lamps[i].light.diffuse);
 		solid_render(program_id, &lamps[i].transform, lamps[i].mesh);
 	}
 }

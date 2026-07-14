@@ -4,20 +4,15 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include "entity.hpp"
+#include <string>
 #include "uniform.hpp"
 
-// Lamp class represents point light
-struct Lamp {
-	Transform transform;
-	Mesh* mesh;
-	glm::vec3 attenuation;
+typedef struct {
 	glm::vec3 ambient;
 	glm::vec3 diffuse;
 	glm::vec3 specular;
-};
-
-void lamp_init(Lamp*, glm::vec3, Mesh*);
+	glm::vec3 attenuation;
+} LightPoint;
 
 // Sun class represents directional lighting
 struct Sun {
@@ -29,7 +24,7 @@ struct Sun {
 
 Sun sun_init(glm::vec3);
 
-void uniform_light_point_send(GLuint, std::string, Lamp*);
+void uniform_light_point_send(GLuint, std::string, LightPoint*);
 void uniform_light_directional_send(GLuint, std::string, Sun*);
 
 #endif
