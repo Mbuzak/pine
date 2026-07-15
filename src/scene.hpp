@@ -26,7 +26,7 @@ extern "C" {
 #endif
 #include "engine/shader.h"
 #include "engine/display.h"
-#include "engine/fbo.h"
+#include "engine/frame.h"
 #include "engine/controller.h"
 #include "engine/texture.h"
 #ifdef __cplusplus
@@ -59,7 +59,7 @@ public:
 	std::array<Shape, 64> squares_;
 
 	ShadowMap dir_shadow_map;
-	Framebuffer fbo;
+	Frame frame;
 
 	chschr::Chess* chess;
 	std::vector<int> active_fields;

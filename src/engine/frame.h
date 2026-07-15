@@ -6,14 +6,13 @@
 #include <GL/glew.h>
 
 typedef struct {
-	GLuint id;
-	GLuint id_depth;
-	GLuint id_texture;
-	
+	GLuint fbo_id;
+	GLuint depth_id;
+	GLuint texture_id;
 	int width;
 	int height;
-} Framebuffer;
+} Frame;
 
-int fbo_init(Framebuffer*);
+int frame_init(Frame*);
 
 #endif

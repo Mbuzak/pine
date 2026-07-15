@@ -33,7 +33,7 @@ int app_init(Scene* app, int window_width, int window_height, const char* window
 
 	app->sun = sun_init({1.0, -2.0, 2.0});
 	app->dir_shadow_map.Init(app->sun.direction);
-	fbo_init(&app->fbo);
+	frame_init(&app->frame);
 
 	app->chess = new chschr::Chess();
 
@@ -197,7 +197,7 @@ void Scene::display() {
 
 void Scene::RenderToTexture(GLuint program_id) {
 	glViewport(0, 0, d.width, d.height);
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo.id);
+	glBindFramebuffer(GL_FRAMEBUFFER, frame.fbo_id);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(program_id);
@@ -332,7 +332,7 @@ void Scene::motion(int x, int y) {
 		return;
 	}
 
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo.id);
+	glBindFramebuffer(GL_FRAMEBUFFER, frame.fbo_id);
 	GLfloat depth;
 	glReadPixels(x, d.height - y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
