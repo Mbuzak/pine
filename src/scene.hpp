@@ -46,6 +46,7 @@ public:
 	GLuint program_color;
 
 	Camera camera;
+	CameraOrthographic camera_light;
 	Controller controller;
 
 	std::map<std::string, Mesh> meshes;

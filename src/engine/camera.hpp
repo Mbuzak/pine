@@ -18,6 +18,20 @@ typedef struct {
 	float far_plane;
 } Camera;
 
+struct CameraOrthographic {
+	glm::mat4 projection;
+	glm::mat4 view;
+
+	glm::vec3 pos;
+	glm::vec2 rot;
+
+	float size;
+	float plane_near;
+	float plane_far;
+};
+
+void camera_light_init(CameraOrthographic*, glm::vec3, glm::vec2);
+
 glm::vec3 camera_dir_compute(glm::vec2);
 glm::vec3 camera_right_compute(glm::vec3);
 glm::mat4 view_matrix_compute(glm::vec3, glm::vec2);

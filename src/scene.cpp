@@ -25,6 +25,8 @@ int app_init(Scene* app, int window_width, int window_height, const char* window
 	app->camera.near_plane = 0.1f;
 	app->camera.far_plane = 200.0f;
 
+	camera_light_init(&app->camera_light, {-10.12, 2.0, -10.12}, {-43, 65});
+
 	stbi_set_flip_vertically_on_load(true);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -32,7 +34,8 @@ int app_init(Scene* app, int window_width, int window_height, const char* window
 	//app->terrain = terrain_init();
 
 	app->sun = sun_init({1.0, -2.0, 2.0});
-	app->dir_shadow_map.Init(app->sun.direction);
+	app->sun.direction = camera_dir_compute(app->camera_light.rot);
+	app->dir_shadow_map.Init(&app->camera_light);
 	frame_init(&app->frame);
 
 	app->chess = new chschr::Chess();
@@ -175,7 +178,7 @@ void Scene::display() {
 		__CHECK_FOR_ERRORS
 
 		// Shadow FBO
-		dir_shadow_map.Render(pieces_);
+		dir_shadow_map.Render(&camera_light, pieces_);
 
 		// World model detection FBO
 		RenderToTexture(program_default);
@@ -219,8 +222,8 @@ void Scene::RenderShapes(GLuint program_id) {
 	camera_send_uniform(program_id, camera.pos, camera.rot);
 
 	// potok graficzny mapy cieni ?
-	uniform_mat4f_send(program_id, "lightProj", dir_shadow_map.lightProj);
-	uniform_mat4f_send(program_id, "lightView", dir_shadow_map.lightView);
+	uniform_mat4f_send(program_id, "lightProj", camera_light.projection);
+	uniform_mat4f_send(program_id, "lightView", camera_light.view);
 
 	dir_shadow_map.SendTexture(program_id);
 

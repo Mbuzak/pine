@@ -1,16 +1,6 @@
 #include "shadow.hpp"
 
-void ShadowMap::Init(glm::vec3 direction) {
-	// Ustawienie polozenia i kierunku swiatla
-	//Light_Direction = glm::normalize(glm::vec3(0.2, -0.8f, 1.1f));
-	Light_Position = glm::vec3(-10.12f, 2.0f, -10.12f);
-
-	// Ustawienie macierzy kamery swiatla
-	float size = 18.0;
-	//float size = 30.0;
-	lightProj = glm::ortho(-size, size, -size, size, 2.0f, 35.5f);
-	lightView = glm::lookAt(Light_Position, Light_Position + direction, glm::vec3(0.0f, 1.0f, 0.0f));
-
+void ShadowMap::Init(CameraOrthographic* camera) {
 	// Create texture
 	glGenTextures(1, &texture_id);
 	glBindTexture(GL_TEXTURE_2D, texture_id);
@@ -35,25 +25,25 @@ void ShadowMap::Init(glm::vec3 direction) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	program_id = program_init("shadow_map");
+
+	// Send default uniforms
+	glUseProgram(program_id);
+	glUniformMatrix4fv(glGetUniformLocation(program_id, "lightProj"), 1, GL_FALSE, glm::value_ptr(camera->projection));
+	glUniformMatrix4fv(glGetUniformLocation(program_id, "lightView"), 1, GL_FALSE, glm::value_ptr(camera->view));
+	glUseProgram(0);
 }
 
-void ShadowMap::Render(std::vector<Piece*> pieces) {
+void ShadowMap::Render(CameraOrthographic* camera, std::vector<Piece*> pieces) {
 	// Render texture from light poisiton
 	glViewport(0, 0, width, height);
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo_id);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(program_id);
-	// Send camera from light position
-	glUniformMatrix4fv(glGetUniformLocation(program_id, "lightProj"), 1, GL_FALSE, glm::value_ptr(lightProj));
-	glUniformMatrix4fv(glGetUniformLocation(program_id, "lightView"), 1, GL_FALSE, glm::value_ptr(lightView));
-
-	// Render shapes
 	for (Piece *piece: pieces) {
 		glUniformMatrix4fv(glGetUniformLocation(program_id, "matModel"), 1, GL_FALSE, glm::value_ptr(transform_model_compute(&piece->shape.transform)));
 		mesh_texture_draw(piece->shape.mesh);
 	}
-
 	glUseProgram(0);
 }
 

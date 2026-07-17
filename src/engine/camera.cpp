@@ -1,5 +1,18 @@
 #include "camera.hpp"
 
+void camera_light_init(CameraOrthographic* camera, glm::vec3 pos,
+	glm::vec2 rot)
+{
+	camera->pos = pos;
+	camera->rot = rot;
+	camera->size = 18.0;
+	camera->plane_near = 2.0;
+	camera->plane_far = 35.5;
+	camera->projection = glm::ortho(-camera->size, camera->size,
+		-camera->size, camera->size, camera->plane_near, camera->plane_far);
+	camera->view = view_matrix_compute(camera->pos, camera->rot);
+}
+
 glm::vec3 camera_dir_compute(glm::vec2 rot) {
 	glm::vec3 dir;
 	dir.x = cos(glm::radians(rot.y)) * cos(glm::radians(rot.x));

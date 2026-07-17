@@ -7,6 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
 #include "entity.hpp"
+#include "camera.hpp"
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,10 +20,10 @@ extern "C" {
 // Shadow map of direction or point light
 class ShadowMap {
 public:
-	void Init(glm::vec3);
+	void Init(CameraOrthographic*);
 
 	// Render shapes to depth map
-	void Render(std::vector<Piece*>);
+	void Render(CameraOrthographic*, std::vector<Piece*>);
 
 	void SendTexture(GLuint);
 
@@ -33,16 +34,6 @@ public:
 	GLuint program_id;
 	GLuint fbo_id;
 	GLuint texture_id;
-
-	// Parametry swiatla kierunkowego, ale znacznie lepiej ubrac
-	// to w strukture, ktora uzywalismy podczas zajec z oswietlenia
-	//inline glm::vec3 Light_Direction;
-	glm::vec3 Light_Position;
-
-	// Macierze rzutowania dla kamery patrzacej z punktu widzenia oswietlenia
-	glm::mat4 lightProj;
-	glm::mat4 lightView;
 };
-
 
 #endif
