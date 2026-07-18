@@ -2,5 +2,8 @@
 build/
 bin/
 
+# Ctags
+tags
+
 # 3rd party libraries
 libs/
