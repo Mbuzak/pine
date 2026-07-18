@@ -33,8 +33,7 @@ int app_init(Scene* app, int window_width, int window_height, const char* window
 	renderer_skybox_init(&app->renderer_skybox);
 	//app->terrain = terrain_init();
 
-	app->sun = sun_init({1.0, -2.0, 2.0});
-	app->sun.direction = camera_dir_compute(app->camera_light.rot);
+	app->sun = sun_init();
 	app->dir_shadow_map.Init(&app->camera_light);
 	frame_init(&app->frame);
 
@@ -216,8 +215,11 @@ void Scene::RenderShapes(GLuint program_id) {
 	for (int i = 0; i < lamps.size(); i++) {
 		std::string name = "lights[" + std::to_string(i) + "].";
 		uniform_light_point_send(program_id, name, &lamps[i].light);
+		uniform_vec3f_send(program_id, (name + "position").c_str(), lamps[i].transform.pos);
 	}
 	uniform_light_directional_send(program_id, "sun.", &sun);
+	glm::vec3 light_dir = camera_dir_compute(camera_light.rot);
+	uniform_vec3f_send(program_id, "sun.direction", light_dir);
 	uniform_mat4f_send(program_id, "matProj", camera.projection);
 	camera_send_uniform(program_id, camera.pos, camera.rot);
 
@@ -371,9 +373,7 @@ void lamps_render(std::array<Lamp, 4> lamps, GLuint program_id) {
 	glUseProgram(program_id);
 
 	for (int i = 0; i < 4; i++) {
-		Transform transform = {.pos = lamps[i].light.position,
-			.rot = glm::vec3(0), .scale = 1.0};
 		uniform_vec3f_send(program_id, "color", lamps[i].light.diffuse);
-		solid_render(program_id, &transform, lamps[i].mesh);
+		solid_render(program_id, &lamps[i].transform, lamps[i].mesh);
 	}
 }
