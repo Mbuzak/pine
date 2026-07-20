@@ -19,6 +19,7 @@ int main(int argc, char *argv[]) {
 
 	app.program_default = program_init("default");
 	app.program_color = program_init("color");
+	shader_static_init(&app.shader_static, app.program_default);
 
 	// Load models
 	std::vector<std::string> model_names = {"square", "pawn", "knight", "bishop", "rook", "king", "queen", "chessboard", "sphere"};

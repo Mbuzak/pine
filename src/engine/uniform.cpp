@@ -11,3 +11,13 @@ void uniform_vec3f_send(GLuint program_id, const char* name, glm::vec3 value) {
 void uniform_mat4f_send(GLuint program_id, const char* name, glm::mat4& value) {
 	glUniformMatrix4fv(glGetUniformLocation(program_id, name), 1, GL_FALSE, glm::value_ptr(value));
 }
+
+void shader_static_projection_send(ShaderStatic* shader,
+	glm::mat4 projection)
+{
+	glUniformMatrix4fv(shader->locations[LOCATIONS_STATIC_PROJECTION], 1, GL_FALSE, glm::value_ptr(projection));
+}
+
+void shader_static_view_send(ShaderStatic* shader, glm::mat4 view) {
+	glUniformMatrix4fv(shader->locations[LOCATIONS_STATIC_VIEW], 1, GL_FALSE, glm::value_ptr(view));
+};

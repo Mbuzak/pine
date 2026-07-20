@@ -21,6 +21,15 @@ typedef struct {
 	GLuint texture_id;
 } RendererSkybox;
 
+struct RendererStatic {
+	ShaderStatic shader;
+	float fov;
+	float plane_near;
+	float plane_far;
+};
+
+void renderer_static_init(RendererStatic*);
+
 int renderer_skybox_init(RendererSkybox*);
 void renderer_skybox_destroy(RendererSkybox*);
 void renderer_skybox_render(RendererSkybox*, Camera* camera);

@@ -44,6 +44,7 @@ public:
 
 	GLuint program_default;
 	GLuint program_color;
+	ShaderStatic shader_static;
 
 	Camera camera;
 	CameraOrthographic camera_light;

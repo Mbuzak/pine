@@ -1,5 +1,12 @@
 #include "renderer.hpp"
 
+void renderer_static_init(RendererStatic* renderer) {
+	shader_static_init(&renderer->shader, program_init("default"));
+	renderer->fov = 60.0;
+	renderer->plane_near = 0.1;
+	renderer->plane_far = 200.0;
+}
+
 int renderer_skybox_init(RendererSkybox* renderer) {
 	renderer->program_id = program_init("skybox");
 	mesh_raw_init(&renderer->mesh);

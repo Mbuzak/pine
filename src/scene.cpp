@@ -203,7 +203,7 @@ void Scene::RenderToTexture(GLuint program_id) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(program_id);
-	uniform_mat4f_send(program_id, "matProj", camera.projection);
+	shader_static_projection_send(&shader_static, camera.projection);
 	board.Display(program_id);
 	glUseProgram(0);
 }
@@ -220,7 +220,7 @@ void Scene::RenderShapes(GLuint program_id) {
 	uniform_light_directional_send(program_id, "sun.", &sun);
 	glm::vec3 light_dir = camera_dir_compute(camera_light.rot);
 	uniform_vec3f_send(program_id, "sun.direction", light_dir);
-	uniform_mat4f_send(program_id, "matProj", camera.projection);
+	shader_static_projection_send(&shader_static, camera.projection);
 	camera_send_uniform(program_id, camera.pos, camera.rot);
 
 	// potok graficzny mapy cieni ?
@@ -237,7 +237,7 @@ void Scene::RenderShapes(GLuint program_id) {
 	
 	glUseProgram(program_color);
 	camera_send_uniform(program_color, camera.pos, camera.rot);
-	uniform_mat4f_send(program_color, "matProj", camera.projection);
+	shader_static_projection_send(&shader_static, camera.projection);
 	uniform_vec3f_send(program_color, "color", {0.2, 0.8, 0.2});
 	for (int &value: active_fields) {
 		squares_[value].Display(program_color);
