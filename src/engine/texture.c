@@ -78,9 +78,3 @@ void texture_2d_send(GLuint program_id, GLuint texture_id) {
 	glBindTexture(GL_TEXTURE_2D, texture_id);
 	glUniform1i(glGetUniformLocation(program_id, "uTexture"), 0);
 }
-
-void texture_cube_map_send(GLuint program_id, GLuint texture_id) {
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, texture_id);
-	glUniform1i(glGetUniformLocation(program_id, "tex_skybox"), 0);
-}

@@ -17,6 +17,7 @@
 #include "engine/shadow.hpp"
 #include "engine/camera.hpp"
 #include "engine/renderer.hpp"
+#include "engine/skybox.hpp"
 #include "engine/uniform.hpp"
 #include "chess/chess.hpp"
 #include "SDL2/SDL.h"

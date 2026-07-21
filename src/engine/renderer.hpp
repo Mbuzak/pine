@@ -15,12 +15,6 @@ extern "C" {
 }
 #endif
 
-typedef struct {
-	GLuint program_id;
-	Mesh mesh;
-	GLuint texture_id;
-} RendererSkybox;
-
 struct RendererStatic {
 	ShaderStatic shader;
 	float fov;
@@ -29,10 +23,6 @@ struct RendererStatic {
 };
 
 void renderer_static_init(RendererStatic*);
-
-int renderer_skybox_init(RendererSkybox*);
-void renderer_skybox_destroy(RendererSkybox*);
-void renderer_skybox_render(RendererSkybox*, Camera* camera);
 
 // Render colored solid model
 void solid_render(GLuint, Transform*, Mesh*);
