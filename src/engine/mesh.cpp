@@ -47,7 +47,7 @@ int mesh_raw_init(Mesh* mesh) {
 int mesh_texture_init(Mesh* mesh, std::string filename) {
 	mesh->type = MESH_TEXTURE;
 
-	std::string path = "models/" + filename + ".obj";
+	std::string path = "res/models/" + filename + ".obj";
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec2> uvs;
 	std::vector<glm::vec3> normals;

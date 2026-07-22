@@ -5,7 +5,7 @@ GLuint texture_2d_init(const char* file) {
 	GLuint id;
 
 	// Load from file
-	char path[64] = "textures/";
+	char path[64] = "res/textures/";
 	strcat(path, file);
 
 	int width, height, n;
@@ -35,8 +35,8 @@ GLuint texture_2d_init(const char* file) {
 }
 
 GLuint texture_cube_map_init() {
-	const char files[6][30] = {"skybox/posx.jpg", "skybox/negx.jpg",
-	"skybox/posy.jpg", "skybox/negy.jpg", "skybox/posz.jpg", "skybox/negz.jpg"
+	const char files[6][30] = {"res/skybox/posx.jpg", "res/skybox/negx.jpg",
+	"res/skybox/posy.jpg", "res/skybox/negy.jpg", "res/skybox/posz.jpg", "res/skybox/negz.jpg"
 	};
 
 	GLuint id;

@@ -97,7 +97,7 @@ GLchar* shader_code_load(const char* path) {
 }
 
 void shader_path_get(char* path, const char* filename, const char* extension) {
-	strcpy(path, "shaders/");
+	strcpy(path, "res/shaders/");
 	strcat(path, filename);
 	strcat(path, extension);
 }
