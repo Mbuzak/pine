@@ -204,7 +204,7 @@ void Scene::RenderToTexture(GLuint program_id) {
 
 	glUseProgram(program_id);
 	shader_static_projection_send(&shader_static, camera.projection);
-	board.Display(program_id);
+	shape_render(program_id, &board);
 	glUseProgram(0);
 }
 
@@ -232,22 +232,22 @@ void Scene::RenderShapes(GLuint program_id) {
 	// rysowanie obiektów nie-selekcyjnych (identyfikator 0)
 	glStencilFunc(GL_ALWAYS, 0, 0xFF);
 
-	render(program_id, &terrain);
-	render(program_id, &board);
+	shape_render(program_id, &terrain);
+	shape_render(program_id, &board);
 	
 	glUseProgram(program_color);
 	camera_send_uniform(program_color, camera.pos, camera.rot);
 	shader_static_projection_send(&shader_static, camera.projection);
 	uniform_vec3f_send(program_color, "color", {0.2, 0.8, 0.2});
 	for (int &value: active_fields) {
-		squares_[value].Display(program_color);
+		shape_render(program_color, &squares_[value]);
 	}
 
 	glUseProgram(program_id);
 	for (int i = 0; i < pieces_.size(); ++i) {
 		glStencilFunc(GL_ALWAYS, i + 1, 0xFF);
 		if (pieces_[i]->is_active) {
-			render(program_id, &pieces_[i]->shape);
+			shape_render(program_id, &pieces_[i]->shape);
 		}
 	}
 

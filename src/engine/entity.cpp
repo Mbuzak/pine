@@ -27,26 +27,6 @@ Shape(mesh, position) {
 	texture_ = texture;
 }
 
-bool Shape::HasTexture() {
-	return texture_ != -1;
-}
-
-void Shape::Display(GLuint program_id) {
-	glm::mat4 model = transform_model_compute(&transform);
-	uniform_mat4f_send(program_id, "matModel", model);
-
-	glm::mat3 matNormal = glm::transpose(glm::inverse(model));
-	glUniformMatrix3fv(glGetUniformLocation(program_id, "matNormal"), 1, GL_FALSE, glm::value_ptr(matNormal));
-
-	uniform_material_send(program_id, "my_material.", &material);
-
-	glUniform1i(glGetUniformLocation(program_id, "hasTex"), HasTexture());
-	if (HasTexture())
-		texture_2d_send(program_id, texture_);
-
-	mesh_texture_draw(mesh);
-}
-
 Piece::Piece(int field_id, Mesh *mesh, GLuint texture) {
 	shape = Shape(mesh, glm::vec3(0.0, 0.1, 0.0), texture);
 	field.push_back((char)'a' + (field_id % 8));
@@ -78,20 +58,6 @@ Shape terrain_init() {
 	return shape;
 }
 
-void render(GLuint program_id, Shape* shape) {
-	glm::mat4 model = transform_model_compute(&shape->transform);
-	uniform_mat4f_send(program_id, "matModel", model);
-
-	glm::mat3 matNormal = glm::transpose(glm::inverse(model));
-	glUniformMatrix3fv(glGetUniformLocation(program_id, "matNormal"), 1, GL_FALSE, glm::value_ptr(matNormal));
-
-	uniform_material_send(program_id, "my_material.", &shape->material);
-
-	glUniform1i(glGetUniformLocation(program_id, "hasTex"), 1);
-	texture_2d_send(program_id, shape->texture_);
-
-	mesh_texture_draw(shape->mesh);
-}
 
 void lamp_init(Lamp* lamp, glm::vec3 pos, Mesh* mesh) {
 	LightPoint light = {.ambient = glm::vec3(0.1), .diffuse = {0.9, 0.9, 0.2},

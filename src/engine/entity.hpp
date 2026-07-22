@@ -39,9 +39,6 @@ public:
 	Shape(Mesh*, glm::vec3);
 	Shape(Mesh*, glm::vec3, GLuint);
 
-	bool HasTexture();
-	void Display(GLuint);
-
 	Transform transform;
 	Material material;
 	GLuint texture_;
@@ -63,8 +60,6 @@ public:
 };
 
 Shape terrain_init();
-
-void render(GLuint, Shape*);
 
 struct Lamp {
 	LightPoint light;
