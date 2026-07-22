@@ -44,11 +44,9 @@ int app_init(Scene* app, int window_width, int window_height, const char* window
 /* Optional settings */
 void Scene::Setup() {
 	reshape(d.width, d.height);
-	GLuint grass = texture_2d_init("grass.jpg");
+	GLuint grass = texture_2d_init("grass.png");
 	terrain = Shape(&meshes.at("square"), {0.0, -0.1, 0.0}, grass);
 	terrain.transform.scale = 80;
-
-	board = Shape(&meshes.at("chessboard"), {0.0, 0.0, 0.0}, textures[TEX_CHS]);
 
 	// --- Lights ---
 	lamp_init(&lamps[0], {9.0, 0.2, 9.0}, &meshes.at("sphere"));
@@ -56,23 +54,14 @@ void Scene::Setup() {
 	lamp_init(&lamps[2], {-9.0, 0.2, 9.0}, &meshes.at("sphere"));
 	lamp_init(&lamps[3], {-9.0, 0.2, -9.0}, &meshes.at("sphere"));
 
-	for (int i = 0; i < squares_.size(); i++) {
-		squares_[i] = Shape(&meshes.at("square"), IndexToPosition(i));
-	}
-
 	for (int i = 0; i < chess->mBoard.size(); i++) {
 		std::string name = chess->pieceName.at(chess->mBoard[i]);
-		std::string colour = (chess->isWhite(i / 8, i % 8)) ? "white" : "black";
 
 		if (name == "x")
 			continue;
 
-		GLuint t = (colour == "white") ? textures[TEX_WHT] : textures[TEX_BLC];
-		Piece *piece = new Piece(i, &meshes.at(name), t);
-		piece->colour = colour;
-		if (colour == "white") {
-			piece->shape.transform.rot.y = 180;
-		}
+		GLuint t = (rand() % 2) ? textures[TEX_WHT] : textures[TEX_BLC];
+		Piece *piece = new Piece(&meshes.at(name), t);
 		pieces_.push_back(piece);
 	}
 
@@ -203,7 +192,7 @@ void Scene::RenderToTexture(GLuint program_id) {
 
 	glUseProgram(program_id);
 	shader_static_projection_send(&shader_static, camera.projection);
-	shape_render(program_id, &board);
+	shape_render(program_id, &terrain);
 	glUseProgram(0);
 }
 
@@ -232,22 +221,16 @@ void Scene::RenderShapes(GLuint program_id) {
 	glStencilFunc(GL_ALWAYS, 0, 0xFF);
 
 	shape_render(program_id, &terrain);
-	shape_render(program_id, &board);
 	
 	glUseProgram(program_color);
 	camera_send_uniform(program_color, camera.pos, camera.rot);
 	shader_static_projection_send(&shader_static, camera.projection);
 	uniform_vec3f_send(program_color, "color", {0.2, 0.8, 0.2});
-	for (int &value: active_fields) {
-		shape_render(program_color, &squares_[value]);
-	}
 
 	glUseProgram(program_id);
 	for (int i = 0; i < pieces_.size(); ++i) {
 		glStencilFunc(GL_ALWAYS, i + 1, 0xFF);
-		if (pieces_[i]->is_active) {
-			shape_render(program_id, &pieces_[i]->shape);
-		}
+		shape_render(program_id, &pieces_[i]->shape);
 	}
 
 	if (selected_id >= 0) {
@@ -276,26 +259,6 @@ void Scene::select_piece(int wx, int wy, int x, int y) {
 	printf("Stencil: %d\n", stencil);
 
 	selected_id = stencil - 1;
-
-	if (selected_id >= 0) {
-		if (pieces_[selected_id]->is_active == false) {
-			selected_id = -1;
-		}
-	}
-
-	if (selected_id >= 0) {
-		std::string field = pieces_[selected_id]->field;
-		//std::cout << "Field: " << field << "\n";
-		int field_id = (field[0] - 'a') + 8 * ('8' - field[1]);
-		std::cout << "Field id: " << field_id << "\n";
-
-		for (int &value: chess->LegalMoves(field_id)) {
-			//std::cout << value << "\n";
-			active_fields.push_back(value);
-		}
-
-		std::cout << "\nPos: (" << pieces_[selected_id]->shape.transform.pos.x << ", " << pieces_[selected_id]->shape.transform.pos.y << ", " << pieces_[selected_id]->shape.transform.pos.z << ")\n";
-	}
 }
 
 void Scene::move_piece() {
@@ -303,24 +266,6 @@ void Scene::move_piece() {
 		return;
 	}
 
-	std::string field = pieces_[selected_id]->field;
-	std::string new_field = square_compute(pieces_[selected_id]->shape.transform.pos);
-
-	// new position
-	if (field != new_field) {
-		chschr::Move move((field + new_field).c_str());
-		if (chess->perform(move)) {
-			for (Piece *piece: pieces_) {
-				if (piece->field == new_field && piece->is_active) {
-					piece->is_active = false;
-				}
-			}
-			pieces_[selected_id]->field = new_field;
-		}
-		pieces_[selected_id]->update_world_position();
-	}
-
-	active_fields.clear();
 	selected_id = -1;
 }
 
@@ -357,16 +302,6 @@ void Scene::reshape(int w, int h) {
 	glViewport(0, 0, d.width, d.height);
 	camera.projection = projection_matrix_compute(&camera,
 		d.width / (float)d.height);
-}
-
-glm::vec3 IndexToPosition(int id) {
-	glm::vec3 pos = {
-		((id % 8) - 4) * 2.25 + 1.12,
-		0.15,
-		((id / 8) - 4) * 2.25 + 1.12
-	};
-
-	return pos;
 }
 
 void lamps_render(std::array<Lamp, 4> lamps, GLuint program_id) {

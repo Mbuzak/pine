@@ -26,25 +26,9 @@ Shape::Shape(Mesh* mesh, glm::vec3 pos, GLuint texture_id) {
 	this->texture_ = texture_id;
 }
 
-Piece::Piece(int field_id, Mesh *mesh, GLuint texture) {
-	shape = Shape(mesh, glm::vec3(0.0, 0.1, 0.0), texture);
-	field.push_back((char)'a' + (field_id % 8));
-	field.push_back((char)'8' - (field_id / 8));
-
-	update_world_position();
-}
-
-void Piece::update_world_position() {
-	shape.transform.pos.x = (field[0] - 'a' - 4) * 2.25 + 1.12;
-	shape.transform.pos.z = ('8' - field[1] - 4) * 2.25 + 1.12;
-}
-
-std::string square_compute(glm::vec3 pos) {
-	int rank = 4 + (int)((pos.z + 22.5) / 2.25) - 10;
-	int file = 4 + (int)((pos.x + 22.5) / 2.25) - 10;
-
-	std::string field = std::string() + (char)('a' + file) + (char)('8' - rank);
-	return field;
+Piece::Piece(Mesh *mesh, GLuint texture) {
+	glm::vec3 pos = { (rand() % 40) - 20, 0.1, (rand() % 40) - 20 };
+	shape = Shape(mesh, pos, texture);
 }
 
 void lamp_init(Lamp* lamp, glm::vec3 pos, Mesh* mesh) {

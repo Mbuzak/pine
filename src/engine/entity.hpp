@@ -44,18 +44,11 @@ public:
 	Mesh *mesh = nullptr;
 };
 
-std::string square_compute(glm::vec3);
-
 class Piece {
 public:
-	Piece(int, Mesh*, GLuint);
-
-	void update_world_position();
+	Piece(Mesh*, GLuint);
 
 	Shape shape;
-	bool is_active = true;
-	std::string colour;
-	std::string field;
 };
 
 struct Lamp {

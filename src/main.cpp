@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
 	shader_static_init(&app.shader_static, app.program_default);
 
 	// Load models
-	std::vector<std::string> model_names = {"square", "pawn", "knight", "bishop", "rook", "king", "queen", "chessboard", "sphere"};
+	std::vector<std::string> model_names = {"square", "pawn", "knight", "bishop", "rook", "king", "queen", "sphere"};
 	for (std::string &name: model_names) {
 		Mesh mesh;
 		mesh_texture_init(&mesh, name);
@@ -30,10 +30,9 @@ int main(int argc, char *argv[]) {
 	}
 
 	// Load textures
-	app.textures = new GLuint[3];
+	app.textures = new GLuint[2];
 	app.textures[TEX_WHT] = texture_2d_init("white.jpg");
 	app.textures[TEX_BLC] = texture_2d_init("black.jpg");
-	app.textures[TEX_CHS] = texture_2d_init("chessboard.jpg");
 
 	app.Setup();
 

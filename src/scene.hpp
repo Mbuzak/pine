@@ -3,7 +3,6 @@
 
 #define TEX_WHT 0
 #define TEX_BLC 1
-#define TEX_CHS 2
 
 #include <stdlib.h>
 #include <iostream>
@@ -57,15 +56,12 @@ public:
 	Sun sun;
 	std::array<Lamp, 4> lamps;
 	Shape terrain;
-	Shape board;
 	std::vector<Piece*> pieces_;
-	std::array<Shape, 64> squares_;
 
 	ShadowMap dir_shadow_map;
 	Frame frame;
 
 	chschr::Chess* chess;
-	std::vector<int> active_fields;
 
 	int selected_id = -1;
 
@@ -86,8 +82,6 @@ public:
 };
 
 int app_init(Scene*, int, int, const char*);
-
-glm::vec3 IndexToPosition(int id);
 
 void lamps_render(std::array<Lamp, 4>, GLuint);
 
