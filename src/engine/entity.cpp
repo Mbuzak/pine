@@ -31,49 +31,20 @@ bool Shape::HasTexture() {
 	return texture_ != -1;
 }
 
-void Shape::Display(GLuint programID, int value) {
+void Shape::Display(GLuint program_id) {
 	glm::mat4 model = transform_model_compute(&transform);
-
-	// Outline scale
-	if (value == 1) {
-		model = glm::scale(model, glm::vec3(1.35, 1.04, 1.35));
-	}
-
-	uniform_mat4f_send(programID, "matModel", model);
+	uniform_mat4f_send(program_id, "matModel", model);
 
 	glm::mat3 matNormal = glm::transpose(glm::inverse(model));
-	glUniformMatrix3fv(glGetUniformLocation(programID, "matNormal"), 1, GL_FALSE, glm::value_ptr(matNormal));
+	glUniformMatrix3fv(glGetUniformLocation(program_id, "matNormal"), 1, GL_FALSE, glm::value_ptr(matNormal));
 
-	uniform_material_send(programID, "my_material.", &material);
+	uniform_material_send(program_id, "my_material.", &material);
 
-	glUniform1i(glGetUniformLocation(programID, "hasTex"), HasTexture());
-
+	glUniform1i(glGetUniformLocation(program_id, "hasTex"), HasTexture());
 	if (HasTexture())
-		texture_2d_send(programID, texture_);
+		texture_2d_send(program_id, texture_);
 
 	mesh_texture_draw(mesh);
-}
-
-void Shape::DisplayOutline(GLuint program_id, int selected_id) {
-	// Wylaczenie zapisu do bufora szablonowego
-	glStencilMask(0x00);
-
-	// Ustwianie funkcji testujacej
-	// Obiekt bedzie rysowany tylko tam, gdzie stencil buffer nie jest rowny 1
-	glStencilFunc(GL_NOTEQUAL, selected_id + 1, 0xFF);
-
-	// Obliczenie nowej macierzy modelu (przeskalowanie obiektu)
-	glUniform1i(glGetUniformLocation(program_id, "selected"), 1);
-	glDisable(GL_DEPTH_TEST);
-	Display(program_id, OUTLINE);
-	glEnable(GL_DEPTH_TEST);
-	glUniform1i(glGetUniformLocation(program_id, "selected"), 0);
-
-	// Ponowne wlaczenie zapisu do bufora szablonowego
-	// W szczegolnosci na potrzeby czyszczenia bufora
-	// poleceniem glClear()
-	glStencilMask(0xFF);
-	glStencilFunc(GL_ALWAYS, 0, 0xFF);
 }
 
 Piece::Piece(int field_id, Mesh *mesh, GLuint texture) {

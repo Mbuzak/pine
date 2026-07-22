@@ -26,5 +26,6 @@ void renderer_static_init(RendererStatic*);
 
 // Render colored solid model
 void solid_render(GLuint, Transform*, Mesh*);
+void outline_render(GLuint, int, Transform*, Mesh*);
 
 #endif

@@ -16,3 +16,21 @@ void solid_render(GLuint program_id, Transform* transform, Mesh* mesh) {
 
 	mesh_texture_draw(mesh);
 }
+
+void outline_render(GLuint program_id, int selected_id, Transform* transform,
+	Mesh* mesh)
+{
+	glStencilMask(0x00);
+	glStencilFunc(GL_NOTEQUAL, selected_id + 1, 0xFF);
+	glDisable(GL_DEPTH_TEST);
+
+	 // Display
+	glm::mat4 model = transform_model_compute(transform);
+	model = glm::scale(model, glm::vec3(1.35, 1.04, 1.35));
+	uniform_mat4f_send(program_id, "matModel", model);
+	mesh_texture_draw(mesh);
+
+	glEnable(GL_DEPTH_TEST);
+	glStencilFunc(GL_ALWAYS, 0, 0xFF);
+	glStencilMask(0xFF);
+}

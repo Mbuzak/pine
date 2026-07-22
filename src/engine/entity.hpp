@@ -23,9 +23,6 @@ extern "C" {
 }
 #endif
 
-#define STANDARD 0
-#define OUTLINE 1
-
 typedef struct {
 	glm::vec3 pos;
 	glm::vec3 rot;
@@ -43,8 +40,7 @@ public:
 	Shape(Mesh*, glm::vec3, GLuint);
 
 	bool HasTexture();
-	void Display(GLuint programID, int value = STANDARD);
-	void DisplayOutline(GLuint, int);
+	void Display(GLuint);
 
 	Transform transform;
 	Material material;

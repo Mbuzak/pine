@@ -254,7 +254,8 @@ void Scene::RenderShapes(GLuint program_id) {
 	if (selected_id >= 0) {
 		glUseProgram(program_color);
 		uniform_vec3f_send(program_color, "color", {0.0, 0.0, 0.35});
-		pieces_[selected_id]->shape.DisplayOutline(program_color, selected_id);
+		Shape shape = pieces_[selected_id]->shape;
+		outline_render(program_color, selected_id, &shape.transform, shape.mesh);
 	}
 
 	glUseProgram(0);
