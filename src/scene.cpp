@@ -36,8 +36,6 @@ int app_init(Scene* app, int window_width, int window_height, const char* window
 	app->dir_shadow_map.Init(&app->camera_light);
 	frame_init(&app->frame);
 
-	app->chess = new chschr::Chess();
-
 	return 0;
 }
 
@@ -45,7 +43,7 @@ int app_init(Scene* app, int window_width, int window_height, const char* window
 void Scene::Setup() {
 	reshape(d.width, d.height);
 	GLuint grass = texture_2d_init("grass.png");
-	terrain = Shape(&meshes.at("square"), {0.0, -0.1, 0.0}, grass);
+	terrain = Shape(&meshes.at("square"), {0.0, 0.0, 0.0}, grass);
 	terrain.transform.scale = 80;
 
 	// --- Lights ---
@@ -54,14 +52,12 @@ void Scene::Setup() {
 	lamp_init(&lamps[2], {-9.0, 0.2, 9.0}, &meshes.at("sphere"));
 	lamp_init(&lamps[3], {-9.0, 0.2, -9.0}, &meshes.at("sphere"));
 
-	for (int i = 0; i < chess->mBoard.size(); i++) {
-		std::string name = chess->pieceName.at(chess->mBoard[i]);
-
-		if (name == "x")
-			continue;
-
+	std::vector<std::string> cn = {"pawn", "knight", "bishop", "rook", "queen", "king"};
+	for (int i = 0; i < 32; i++) {
+		std::string name = cn[rand() % cn.size()];
 		GLuint t = (rand() % 2) ? textures[TEX_WHT] : textures[TEX_BLC];
-		Piece *piece = new Piece(&meshes.at(name), t);
+		glm::vec3 pos = { (rand() % 40) - 20, 0.1, (rand() % 40) - 20 };
+		Shape* piece = new Shape(&meshes.at(name), pos, t);
 		pieces_.push_back(piece);
 	}
 
@@ -230,14 +226,13 @@ void Scene::RenderShapes(GLuint program_id) {
 	glUseProgram(program_id);
 	for (int i = 0; i < pieces_.size(); ++i) {
 		glStencilFunc(GL_ALWAYS, i + 1, 0xFF);
-		shape_render(program_id, &pieces_[i]->shape);
+		shape_render(program_id, pieces_[i]);
 	}
 
 	if (selected_id >= 0) {
 		glUseProgram(program_color);
 		uniform_vec3f_send(program_color, "color", {0.0, 0.0, 0.35});
-		Shape shape = pieces_[selected_id]->shape;
-		outline_render(program_color, selected_id, &shape.transform, shape.mesh);
+		outline_render(program_color, selected_id, &pieces_[selected_id]->transform, pieces_[selected_id]->mesh);
 	}
 
 	glUseProgram(0);
@@ -291,8 +286,8 @@ void Scene::motion(int x, int y) {
 	//std::cout << "Worldspace: (" << point.x << ", " << point.y << ", " << point.z << "); Screen: (" << x << ", " << y << ")\n";
 
 	// Update piece world position
-	pieces_[selected_id]->shape.transform.pos.x = point.x;
-	pieces_[selected_id]->shape.transform.pos.z = point.z;
+	pieces_[selected_id]->transform.pos.x = point.x;
+	pieces_[selected_id]->transform.pos.z = point.z;
 }
 
 void Scene::reshape(int w, int h) {

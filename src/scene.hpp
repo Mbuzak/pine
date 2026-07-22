@@ -18,7 +18,6 @@
 #include "engine/renderer.hpp"
 #include "engine/skybox.hpp"
 #include "engine/uniform.hpp"
-#include "chess/chess.hpp"
 #include "SDL2/SDL.h"
 
 #ifdef __cplusplus
@@ -56,12 +55,10 @@ public:
 	Sun sun;
 	std::array<Lamp, 4> lamps;
 	Shape terrain;
-	std::vector<Piece*> pieces_;
+	std::vector<Shape*> pieces_;
 
 	ShadowMap dir_shadow_map;
 	Frame frame;
-
-	chschr::Chess* chess;
 
 	int selected_id = -1;
 

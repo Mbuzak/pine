@@ -26,11 +26,6 @@ Shape::Shape(Mesh* mesh, glm::vec3 pos, GLuint texture_id) {
 	this->texture_ = texture_id;
 }
 
-Piece::Piece(Mesh *mesh, GLuint texture) {
-	glm::vec3 pos = { (rand() % 40) - 20, 0.1, (rand() % 40) - 20 };
-	shape = Shape(mesh, pos, texture);
-}
-
 void lamp_init(Lamp* lamp, glm::vec3 pos, Mesh* mesh) {
 	LightPoint light = {.ambient = glm::vec3(0.1), .diffuse = {0.9, 0.9, 0.2},
 		.specular = glm::vec3(0.5), .attenuation = glm::vec3(0.005)};

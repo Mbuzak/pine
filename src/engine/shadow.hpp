@@ -23,7 +23,7 @@ public:
 	void Init(CameraOrthographic*);
 
 	// Render shapes to depth map
-	void Render(CameraOrthographic*, std::vector<Piece*>);
+	void Render(CameraOrthographic*, std::vector<Shape*>);
 
 	void SendTexture(GLuint);
 

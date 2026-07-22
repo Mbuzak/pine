@@ -41,14 +41,7 @@ public:
 	Transform transform;
 	Material material;
 	GLuint texture_;
-	Mesh *mesh = nullptr;
-};
-
-class Piece {
-public:
-	Piece(Mesh*, GLuint);
-
-	Shape shape;
+	Mesh* mesh;
 };
 
 struct Lamp {

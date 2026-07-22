@@ -33,16 +33,16 @@ void ShadowMap::Init(CameraOrthographic* camera) {
 	glUseProgram(0);
 }
 
-void ShadowMap::Render(CameraOrthographic* camera, std::vector<Piece*> pieces) {
+void ShadowMap::Render(CameraOrthographic* camera, std::vector<Shape*> pieces) {
 	// Render texture from light poisiton
 	glViewport(0, 0, width, height);
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo_id);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(program_id);
-	for (Piece *piece: pieces) {
-		glUniformMatrix4fv(glGetUniformLocation(program_id, "matModel"), 1, GL_FALSE, glm::value_ptr(transform_model_compute(&piece->shape.transform)));
-		mesh_texture_draw(piece->shape.mesh);
+	for (Shape* piece: pieces) {
+		glUniformMatrix4fv(glGetUniformLocation(program_id, "matModel"), 1, GL_FALSE, glm::value_ptr(transform_model_compute(&piece->transform)));
+		mesh_texture_draw(piece->mesh);
 	}
 	glUseProgram(0);
 }
