@@ -10,21 +10,20 @@ glm::mat4 transform_model_compute(const Transform* transform) {
 	return model;
 }
 
-Shape::Shape(Mesh *mesh) {
-	transform = {glm::vec3(0), glm::vec3(0), 1};
+Shape::Shape(Mesh *mesh, glm::vec3 pos) {
+	this->transform = { .pos = pos, .rot = glm::vec3(0), .scale = 1.0 };
 	this->mesh = mesh;
+	this->material = { .ambient = {0.1, 0.1, 0.1}, .diffuse = {0.7, 0.3, 0.1},
+		.specular = {0.3, 0.1, 0.1}, .shininess = 1.0 };
 	this->texture_ = -1;
-	material = Material{{0.1f, 0.1f, 0.1f}, {0.70f, 0.27f, 0.08f}, {0.25f, 0.13f, 0.08f}, 1.0f};
 }
 
-Shape::Shape(Mesh *mesh, glm::vec3 position):
-Shape(mesh) {
-	transform.pos = position;
-}
-
-Shape::Shape(Mesh *mesh, glm::vec3 position, GLuint texture):
-Shape(mesh, position) {
-	texture_ = texture;
+Shape::Shape(Mesh* mesh, glm::vec3 pos, GLuint texture_id) {
+	this->transform = { .pos = pos, .rot = glm::vec3(0), .scale = 1.0 };
+	this->mesh = mesh;
+	this->material = { .ambient = {0.1, 0.1, 0.1}, .diffuse = {0.7, 0.3, 0.1},
+		.specular = {0.3, 0.1, 0.1}, .shininess = 1.0 };
+	this->texture_ = texture_id;
 }
 
 Piece::Piece(int field_id, Mesh *mesh, GLuint texture) {
@@ -47,17 +46,6 @@ std::string square_compute(glm::vec3 pos) {
 	std::string field = std::string() + (char)('a' + file) + (char)('8' - rank);
 	return field;
 }
-
-Shape terrain_init() {
-	Shape shape;
-	shape.transform = {{0, -0.1, 0}, glm::vec3(0), 80};
-	shape.mesh = new Mesh();
-	mesh_texture_init(shape.mesh, "square");
-	shape.texture_ = texture_2d_init("grass.jpg");
-	shape.material = Material{{0.1f, 0.1f, 0.1f}, {0.7f, 0.27f, 0.08f}, {0.25f, 0.13f, 0.08f}, 1.0f};
-	return shape;
-}
-
 
 void lamp_init(Lamp* lamp, glm::vec3 pos, Mesh* mesh) {
 	LightPoint light = {.ambient = glm::vec3(0.1), .diffuse = {0.9, 0.9, 0.2},

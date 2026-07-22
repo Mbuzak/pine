@@ -31,7 +31,6 @@ int app_init(Scene* app, int window_width, int window_height, const char* window
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	renderer_skybox_init(&app->renderer_skybox);
-	//app->terrain = terrain_init();
 
 	app->sun = sun_init();
 	app->dir_shadow_map.Init(&app->camera_light);

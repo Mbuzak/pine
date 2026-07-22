@@ -35,7 +35,6 @@ glm::mat4 transform_model_compute(const Transform*);
 class Shape {
 public:
 	Shape() = default;
-	Shape(Mesh*);
 	Shape(Mesh*, glm::vec3);
 	Shape(Mesh*, glm::vec3, GLuint);
 
@@ -58,8 +57,6 @@ public:
 	std::string colour;
 	std::string field;
 };
-
-Shape terrain_init();
 
 struct Lamp {
 	LightPoint light;
