@@ -5,13 +5,10 @@ void Scene::Setup() {
 	d = display_init(1280, 720, "pine");
 
 	controller_init(&controller);
-
 	camera_light_init(&camera_light, {-10.12, 2.0, -10.12}, {-43, 65});
 
 	stbi_set_flip_vertically_on_load(true);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-	renderer_skybox_init(&renderer_skybox);
 
 	sun = sun_init();
 	dir_shadow_map.Init(&camera_light);
@@ -25,9 +22,10 @@ void Scene::Setup() {
 	glm::mat4 projection = perspective_projection_compute(d.width, d.height);
 	shader_rendered_init(&shader_rendered, projection);
 	shader_outline_init(&shader_outline, projection);
+	renderer_skybox_init(&renderer_skybox, projection);
 
 	// Load models
-	std::vector<std::string> model_names = {"square", "pawn", "knight", "bishop", "rook", "king", "queen", "sphere"};
+	std::vector<std::string> model_names = {"square", "pawn", "knight", "bishop", "rook", "king", "queen"};
 	for (std::string &name: model_names) {
 		Mesh mesh;
 		mesh_texture_init(&mesh, name);
@@ -158,8 +156,6 @@ void Scene::display() {
 		// Shadow FBO
 		dir_shadow_map.Render(&camera_light, pieces_);
 
-		glm::mat4 p = perspective_projection_compute(d.width, d.height);
-
 		// World model detection FBO
 		RenderToTexture(shader_rendered.id);
 
@@ -168,8 +164,8 @@ void Scene::display() {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-		glm::mat4 view = view_matrix_compute(camera.pos, camera.rot);
-		renderer_skybox_render(&renderer_skybox, p, view);
+		glm::mat4 view = camera_view_compute(&camera);
+		renderer_skybox_render(&renderer_skybox, view);
 		RenderShapes(shader_rendered.id);
 
 		SDL_GL_SwapWindow(d.window);
@@ -187,7 +183,7 @@ void Scene::RenderToTexture(GLuint program_id) {
 }
 
 void Scene::RenderShapes(GLuint program_id) {
-	glm::mat4 view = view_matrix_compute(camera.pos, camera.rot);
+	glm::mat4 view = camera_view_compute(&camera);
 
 	glUseProgram(program_id);
 	// Send light
@@ -264,7 +260,7 @@ void Scene::motion(int x, int y) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	glm::mat4 projection = perspective_projection_compute(d.width, d.height);
-	glm::mat4 view = view_matrix_compute(camera.pos, camera.rot);
+	glm::mat4 view = camera_view_compute(&camera);
 	glm::vec3 point = glm::unProject(glm::vec3(x, d.height - y, depth), view, projection, glm::vec4(0, 0, d.width, d.height));
 	//std::cout << "Worldspace: (" << point.x << ", " << point.y << ", " << point.z << "); Screen: (" << x << ", " << y << ")\n";
 

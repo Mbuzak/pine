@@ -27,7 +27,7 @@ void camera_light_init(CameraOrthographic*, glm::vec3, glm::vec2);
 
 glm::vec3 camera_dir_compute(glm::vec2);
 glm::vec3 camera_right_compute(glm::vec3);
-glm::mat4 view_matrix_compute(glm::vec3, glm::vec2);
+glm::mat4 camera_view_compute(Camera*);
 void camera_send_uniform(GLuint, glm::vec3, glm::vec2);
 
 #endif
