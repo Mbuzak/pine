@@ -12,7 +12,6 @@
  */
 int main(int argc, char *argv[]) {
 	Scene app;
-	app_init(&app, 1280, 720, "pine");
 	app.Setup();
 	app.display();
 

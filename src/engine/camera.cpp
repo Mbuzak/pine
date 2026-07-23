@@ -33,14 +33,6 @@ glm::mat4 view_matrix_compute(glm::vec3 pos, glm::vec2 rot) {
 	return glm::lookAt(pos, pos + dir, up);
 }
 
-glm::mat4 projection_matrix_compute(Camera* camera, float aspect_ratio) {
-	return glm::perspective(glm::radians(camera->fov), aspect_ratio,
-		camera->near_plane, camera->far_plane);
-}
-
 void camera_send_uniform(GLuint program_id, glm::vec3 pos, glm::vec2 rot) {
-	glm::mat4 view = view_matrix_compute(pos, rot);
-	glUniformMatrix4fv(glGetUniformLocation(program_id, "matView"),
-		1, GL_FALSE, glm::value_ptr(view));
 	glUniform3fv(glGetUniformLocation(program_id, "cameraPos"), 1, &pos[0]);
 }

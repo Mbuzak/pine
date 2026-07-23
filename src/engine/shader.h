@@ -18,17 +18,4 @@ void shader_path_get(char*, const char*, const char*);
 
 void program_error_check(GLuint, GLenum);
 
-typedef enum {
-	LOCATIONS_STATIC_PROJECTION,
-	LOCATIONS_STATIC_VIEW,
-	LOCATIONS_STATIC_COUNT
-} LocationsStatic;
-
-typedef struct {
-	GLuint id;
-	LocationsStatic locations[LOCATIONS_STATIC_COUNT];
-} ShaderStatic;
-
-void shader_static_init(ShaderStatic*, GLuint);
-
 #endif

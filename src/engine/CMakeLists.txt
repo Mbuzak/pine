@@ -1,6 +1,6 @@
 add_library(Engine STATIC camera.cpp frame.c light.cpp mesh.cpp
 	entity.cpp shader.c shadow.cpp texture.c renderer.cpp display.c
-	uniform.cpp material.cpp skybox.cpp
+	uniform.cpp material.cpp skybox.cpp controller.c rendered.cpp
 )
 
 target_link_libraries(Engine PUBLIC SDL2::SDL2)

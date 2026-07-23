@@ -1,47 +1,31 @@
 #include "scene.hpp"
 #include "stb_image.h"
 
-/* Obligatory default global settings - 3D app
- * Mouse: ON
- * Directional light: ON
- * Point light: ON
- * Skybox: ON
- * Terrain: ON
- * Directional shadow: ON
- * Chess: ON
- */
-int app_init(Scene* app, int window_width, int window_height, const char* window_name) {
-	app->d = display_init(window_width, window_height, window_name);
+void Scene::Setup() {
+	d = display_init(1280, 720, "pine");
 
-	controller_init(&app->controller);
+	controller_init(&controller);
 
-	// Camera settings
-	app->camera.fov = 60.0f;
-	app->camera.near_plane = 0.1f;
-	app->camera.far_plane = 200.0f;
-
-	camera_light_init(&app->camera_light, {-10.12, 2.0, -10.12}, {-43, 65});
+	camera_light_init(&camera_light, {-10.12, 2.0, -10.12}, {-43, 65});
 
 	stbi_set_flip_vertically_on_load(true);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	renderer_skybox_init(&app->renderer_skybox);
+	renderer_skybox_init(&renderer_skybox);
 
-	app->sun = sun_init();
-	app->dir_shadow_map.Init(&app->camera_light);
-	frame_init(&app->frame);
+	sun = sun_init();
+	dir_shadow_map.Init(&camera_light);
+	frame_init(&frame);
 
-	return 0;
-}
+	reshape(d.width, d.height);
 
-/* Optional settings */
-void Scene::Setup() {
 	camera.pos = {-22.0, 9.0, -0.0};
 	camera.rot = {-15, 0};
 
-	program_default = program_init("default");
 	program_color = program_init("color");
-	shader_static_init(&shader_static, program_default);
+
+	glm::mat4 projection = perspective_projection_compute(d.width, d.height);
+	shader_rendered_init(&shader_rendered, projection);
 
 	// Load models
 	std::vector<std::string> model_names = {"square", "pawn", "knight", "bishop", "rook", "king", "queen", "sphere"};
@@ -56,7 +40,6 @@ void Scene::Setup() {
 	textures[TEX_WHT] = texture_2d_init("white.jpg");
 	textures[TEX_BLC] = texture_2d_init("black.jpg");
 
-	reshape(d.width, d.height);
 	GLuint grass = texture_2d_init("grass.png");
 	terrain = Shape(&meshes.at("square"), {0.0, 0.0, 0.0}, grass);
 	terrain.transform.scale = 80;
@@ -178,19 +161,20 @@ void Scene::display() {
 		// Shadow FBO
 		dir_shadow_map.Render(&camera_light, pieces_);
 
+		glm::mat4 p = perspective_projection_compute(d.width, d.height);
+
 		// World model detection FBO
-		RenderToTexture(program_default);
+		RenderToTexture(shader_rendered.id);
 
 		// Default FBO
 		glViewport(0, 0, d.width, d.height);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-		camera.view = view_matrix_compute(camera.pos, camera.rot);
-
-		renderer_skybox_render(&renderer_skybox, &camera);
+		glm::mat4 view = view_matrix_compute(camera.pos, camera.rot);
+		renderer_skybox_render(&renderer_skybox, p, view);
 		lamps_render(lamps, program_color);
-		RenderShapes(program_default);
+		RenderShapes(shader_rendered.id);
 
 		SDL_GL_SwapWindow(d.window);
 	}
@@ -202,13 +186,14 @@ void Scene::RenderToTexture(GLuint program_id) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(program_id);
-	shader_static_projection_send(&shader_static, camera.projection);
 	shape_render(program_id, &terrain);
 	glUseProgram(0);
 }
 
 void Scene::RenderShapes(GLuint program_id) {
 	glUseProgram(program_id);
+	glm::mat4 projection = perspective_projection_compute(d.width, d.height);
+	glm::mat4 view = view_matrix_compute(camera.pos, camera.rot);
 
 	// Send light
 	for (int i = 0; i < lamps.size(); i++) {
@@ -219,7 +204,7 @@ void Scene::RenderShapes(GLuint program_id) {
 	uniform_light_directional_send(program_id, "sun.", &sun);
 	glm::vec3 light_dir = camera_dir_compute(camera_light.rot);
 	uniform_vec3f_send(program_id, "sun.direction", light_dir);
-	shader_static_projection_send(&shader_static, camera.projection);
+	shader_rendered_view_send(&shader_rendered, view);
 	camera_send_uniform(program_id, camera.pos, camera.rot);
 
 	// potok graficzny mapy cieni ?
@@ -234,8 +219,9 @@ void Scene::RenderShapes(GLuint program_id) {
 	shape_render(program_id, &terrain);
 	
 	glUseProgram(program_color);
+	shader_rendered_view_send(&shader_rendered, view);
 	camera_send_uniform(program_color, camera.pos, camera.rot);
-	shader_static_projection_send(&shader_static, camera.projection);
+	shader_rendered_projection_send(&shader_rendered, projection);
 	uniform_vec3f_send(program_color, "color", {0.2, 0.8, 0.2});
 
 	glUseProgram(program_id);
@@ -289,7 +275,9 @@ void Scene::motion(int x, int y) {
 	glReadPixels(x, d.height - y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	glm::vec3 point = glm::unProject(glm::vec3(x, d.height - y, depth), camera.view, camera.projection, glm::vec4(0, 0, d.width, d.height));
+	glm::mat4 projection = perspective_projection_compute(d.width, d.height);
+	glm::mat4 view = view_matrix_compute(camera.pos, camera.rot);
+	glm::vec3 point = glm::unProject(glm::vec3(x, d.height - y, depth), view, projection, glm::vec4(0, 0, d.width, d.height));
 	//std::cout << "Worldspace: (" << point.x << ", " << point.y << ", " << point.z << "); Screen: (" << x << ", " << y << ")\n";
 
 	// Update piece world position
@@ -302,8 +290,7 @@ void Scene::reshape(int w, int h) {
 	d.height = h;
 
 	glViewport(0, 0, d.width, d.height);
-	camera.projection = projection_matrix_compute(&camera,
-		d.width / (float)d.height);
+	// TODO: Send perspective projection
 }
 
 void lamps_render(std::array<Lamp, 4> lamps, GLuint program_id) {
@@ -313,4 +300,12 @@ void lamps_render(std::array<Lamp, 4> lamps, GLuint program_id) {
 		uniform_vec3f_send(program_id, "color", lamps[i].light.diffuse);
 		solid_render(program_id, &lamps[i].transform, lamps[i].mesh);
 	}
+}
+
+glm::mat4 perspective_projection_compute(float width, float height) {
+	const float FOV = glm::radians(60.0);
+	const float ASPECT_RATIO = width / (float)height;
+	const float PLANE_NEAR = 0.1;
+	const float PLANE_FAR = 200.0;
+	return glm::perspective(FOV, ASPECT_RATIO, PLANE_NEAR, PLANE_FAR);
 }

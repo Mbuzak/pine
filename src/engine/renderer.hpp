@@ -15,15 +15,6 @@ extern "C" {
 }
 #endif
 
-struct RendererStatic {
-	ShaderStatic shader;
-	float fov;
-	float plane_near;
-	float plane_far;
-};
-
-void renderer_static_init(RendererStatic*);
-
 // Render colored solid model
 void solid_render(GLuint, Transform*, Mesh*);
 void shape_render(GLuint, Shape*);

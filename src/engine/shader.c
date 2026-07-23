@@ -115,11 +115,3 @@ void program_error_check(GLuint program, GLenum mode) {
 		free(log);
 	}
 }
-
-void shader_static_init(ShaderStatic* shader, GLuint id) {
-	shader->id = id;
-	shader->locations[LOCATIONS_STATIC_PROJECTION] =
-		glGetUniformLocation(shader->id, "matProj");
-	shader->locations[LOCATIONS_STATIC_VIEW] =
-		glGetUniformLocation(shader->id, "matView");
-}

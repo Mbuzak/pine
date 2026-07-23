@@ -29,10 +29,10 @@ void renderer_skybox_destroy(RendererSkybox* renderer) {
 	program_destroy(renderer->shader.id);
 }
 
-void renderer_skybox_render(RendererSkybox* renderer, Camera* camera) {
+void renderer_skybox_render(RendererSkybox* renderer, glm::mat4 proj, glm::mat4 view) {
 	const float size = 80.0;
 	glm::mat4 scale = glm::scale(glm::mat4(1), glm::vec3(size));
-	glm::mat4 matPVM = camera->projection * camera->view * scale;
+	glm::mat4 matPVM = proj * view * scale;
 
 	glUseProgram(renderer->shader.id);
 	shader_skybox_pvm_send(&renderer->shader, matPVM);

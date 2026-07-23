@@ -40,6 +40,6 @@ void shader_skybox_texture_send(ShaderSkybox*, GLuint);
 
 void renderer_skybox_init(RendererSkybox*);
 void renderer_skybox_destroy(RendererSkybox*);
-void renderer_skybox_render(RendererSkybox*, Camera* camera);
+void renderer_skybox_render(RendererSkybox*, glm::mat4, glm::mat4);
 
 #endif
