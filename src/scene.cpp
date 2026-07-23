@@ -22,10 +22,9 @@ void Scene::Setup() {
 	camera.pos = {-22.0, 9.0, -0.0};
 	camera.rot = {-15, 0};
 
-	program_color = program_init("color");
-
 	glm::mat4 projection = perspective_projection_compute(d.width, d.height);
 	shader_rendered_init(&shader_rendered, projection);
+	shader_outline_init(&shader_outline, projection);
 
 	// Load models
 	std::vector<std::string> model_names = {"square", "pawn", "knight", "bishop", "rook", "king", "queen", "sphere"};
@@ -44,11 +43,9 @@ void Scene::Setup() {
 	terrain = Shape(&meshes.at("square"), {0.0, 0.0, 0.0}, grass);
 	terrain.transform.scale = 80;
 
-	// --- Lights ---
-	lamp_init(&lamps[0], {9.0, 0.2, 9.0}, &meshes.at("sphere"));
-	lamp_init(&lamps[1], {9.0, 0.2, -9.0}, &meshes.at("sphere"));
-	lamp_init(&lamps[2], {-9.0, 0.2, 9.0}, &meshes.at("sphere"));
-	lamp_init(&lamps[3], {-9.0, 0.2, -9.0}, &meshes.at("sphere"));
+	for (int i = 0; i < 4; i++) {
+		lamp_init(&lamps[i], {(rand() % 40) - 20, 0.2, (rand() % 40) - 20});
+	}
 
 	std::vector<std::string> cn = {"pawn", "knight", "bishop", "rook", "queen", "king"};
 	for (int i = 0; i < 32; i++) {
@@ -173,7 +170,6 @@ void Scene::display() {
 
 		glm::mat4 view = view_matrix_compute(camera.pos, camera.rot);
 		renderer_skybox_render(&renderer_skybox, p, view);
-		lamps_render(lamps, program_color);
 		RenderShapes(shader_rendered.id);
 
 		SDL_GL_SwapWindow(d.window);
@@ -191,10 +187,9 @@ void Scene::RenderToTexture(GLuint program_id) {
 }
 
 void Scene::RenderShapes(GLuint program_id) {
-	glUseProgram(program_id);
-	glm::mat4 projection = perspective_projection_compute(d.width, d.height);
 	glm::mat4 view = view_matrix_compute(camera.pos, camera.rot);
 
+	glUseProgram(program_id);
 	// Send light
 	for (int i = 0; i < lamps.size(); i++) {
 		std::string name = "lights[" + std::to_string(i) + "].";
@@ -218,12 +213,6 @@ void Scene::RenderShapes(GLuint program_id) {
 
 	shape_render(program_id, &terrain);
 	
-	glUseProgram(program_color);
-	shader_rendered_view_send(&shader_rendered, view);
-	camera_send_uniform(program_color, camera.pos, camera.rot);
-	shader_rendered_projection_send(&shader_rendered, projection);
-	uniform_vec3f_send(program_color, "color", {0.2, 0.8, 0.2});
-
 	glUseProgram(program_id);
 	for (int i = 0; i < pieces_.size(); ++i) {
 		glStencilFunc(GL_ALWAYS, i + 1, 0xFF);
@@ -231,9 +220,8 @@ void Scene::RenderShapes(GLuint program_id) {
 	}
 
 	if (selected_id >= 0) {
-		glUseProgram(program_color);
-		uniform_vec3f_send(program_color, "color", {0.0, 0.0, 0.35});
-		outline_render(program_color, selected_id, &pieces_[selected_id]->transform, pieces_[selected_id]->mesh);
+		shader_outline_render(&shader_outline, view, selected_id,
+			&pieces_[selected_id]->transform, pieces_[selected_id]->mesh);
 	}
 
 	glUseProgram(0);
@@ -291,15 +279,6 @@ void Scene::reshape(int w, int h) {
 
 	glViewport(0, 0, d.width, d.height);
 	// TODO: Send perspective projection
-}
-
-void lamps_render(std::array<Lamp, 4> lamps, GLuint program_id) {
-	glUseProgram(program_id);
-
-	for (int i = 0; i < 4; i++) {
-		uniform_vec3f_send(program_id, "color", lamps[i].light.diffuse);
-		solid_render(program_id, &lamps[i].transform, lamps[i].mesh);
-	}
 }
 
 glm::mat4 perspective_projection_compute(float width, float height) {

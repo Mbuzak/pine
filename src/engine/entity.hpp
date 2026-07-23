@@ -47,9 +47,8 @@ public:
 struct Lamp {
 	LightPoint light;
 	Transform transform;
-	Mesh* mesh;
 };
 
-void lamp_init(Lamp*, glm::vec3, Mesh*);
+void lamp_init(Lamp*, glm::vec3);
 
 #endif

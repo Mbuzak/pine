@@ -14,7 +14,6 @@ void program_destroy(GLuint);
 
 GLuint shader_load(GLuint, const char*, const char*);
 GLchar* shader_code_load(const char*);
-void shader_path_get(char*, const char*, const char*);
 
 void program_error_check(GLuint, GLenum);
 

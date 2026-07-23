@@ -7,8 +7,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 typedef struct {
-	glm::mat4 view;
-
 	glm::vec3 pos;
 	glm::vec2 rot;
 } Camera;

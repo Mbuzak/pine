@@ -33,11 +33,12 @@ void program_destroy(GLuint program_id) {
 GLuint shader_load(GLuint type, const char* filename, const char* extension) {
 	GLuint shader = glCreateShader(type);
 
-	char* path = malloc(sizeof(char) * 32);
-	shader_path_get(path, filename, extension);
-	char* code = shader_code_load(path);
-	free(path);
+	char path[32];
+	strcpy(path, "res/shaders/");
+	strcat(path, filename);
+	strcat(path, extension);
 
+	char* code = shader_code_load(path);
 	glShaderSource(shader, 1, (const char**)&code, NULL);
 	glCompileShader(shader);
 	free(code);
@@ -59,7 +60,7 @@ GLuint shader_load(GLuint type, const char* filename, const char* extension) {
 
 GLchar* shader_code_load(const char* path) {
 	FILE* file = fopen(path, "r");
-	if (!file) {
+	if (file == NULL) {
 		printf("Can't open file %s !\n", path);
 		exit(1);
 	}
@@ -94,12 +95,6 @@ GLchar* shader_code_load(const char* path) {
 	/*code[i] = 0;*/
 	fclose(file);
 	return code;
-}
-
-void shader_path_get(char* path, const char* filename, const char* extension) {
-	strcpy(path, "res/shaders/");
-	strcat(path, filename);
-	strcat(path, extension);
 }
 
 void program_error_check(GLuint program, GLenum mode) {

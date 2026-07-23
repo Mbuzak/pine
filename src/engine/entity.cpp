@@ -26,10 +26,9 @@ Shape::Shape(Mesh* mesh, glm::vec3 pos, GLuint texture_id) {
 	this->texture_ = texture_id;
 }
 
-void lamp_init(Lamp* lamp, glm::vec3 pos, Mesh* mesh) {
+void lamp_init(Lamp* lamp, glm::vec3 pos) {
 	LightPoint light = {.ambient = glm::vec3(0.1), .diffuse = {0.9, 0.9, 0.2},
 		.specular = glm::vec3(0.5), .attenuation = glm::vec3(0.005)};
 	lamp->light = light;
 	lamp->transform = {.pos = pos, .rot = glm::vec3(0), .scale = 1.0};
-	lamp->mesh = mesh;
 }

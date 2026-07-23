@@ -18,6 +18,7 @@
 #include "engine/renderer.hpp"
 #include "engine/skybox.hpp"
 #include "engine/rendered.hpp"
+#include "engine/outline.hpp"
 #include "engine/uniform.hpp"
 #include "SDL2/SDL.h"
 
@@ -42,8 +43,8 @@ public:
 	Display d;
 	RendererSkybox renderer_skybox;
 
-	GLuint program_color;
 	ShaderRendered shader_rendered;
+	ShaderOutline shader_outline;
 
 	Camera camera;
 	CameraOrthographic camera_light;
@@ -76,8 +77,6 @@ public:
 	void Setup();
 	void display();
 };
-
-void lamps_render(std::array<Lamp, 4>, GLuint);
 
 glm::mat4 perspective_projection_compute(float, float);
 

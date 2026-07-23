@@ -14,12 +14,10 @@ void camera_light_init(CameraOrthographic* camera, glm::vec3 pos,
 }
 
 glm::vec3 camera_dir_compute(glm::vec2 rot) {
-	glm::vec3 dir;
-	dir.x = cos(glm::radians(rot.y)) * cos(glm::radians(rot.x));
-	dir.y = sin(glm::radians(rot.x));
-	dir.z = sin(glm::radians(rot.y)) * cos(glm::radians(rot.x));
-	dir = glm::normalize(dir);
-	return dir;
+	glm::vec3 dir = { cos(glm::radians(rot.y)) * cos(glm::radians(rot.x)),
+		sin(glm::radians(rot.x)),
+		sin(glm::radians(rot.y)) * cos(glm::radians(rot.x)) };
+	return glm::normalize(dir);
 }
 
 glm::vec3 camera_right_compute(glm::vec3 dir) {
