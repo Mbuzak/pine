@@ -4,14 +4,7 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <iostream>
-#include <string>
-#include <memory>
-#include <vector>
-#include "material.hpp"
 #include "mesh.hpp"
-#include "uniform.hpp"
 #include "material.hpp"
 #include "light.hpp"
 
@@ -31,13 +24,7 @@ typedef struct {
 
 glm::mat4 transform_model_compute(const Transform*);
 
-// Visible object on scene
-class Shape {
-public:
-	Shape() = default;
-	Shape(Mesh*, glm::vec3);
-	Shape(Mesh*, glm::vec3, GLuint);
-
+struct Shape {
 	Transform transform;
 	Material material;
 	GLuint texture_;
@@ -49,6 +36,7 @@ struct Lamp {
 	Transform transform;
 };
 
+void shape_init(Shape*, glm::vec3, Mesh*, GLuint);
 void lamp_init(Lamp*, glm::vec3);
 
 #endif

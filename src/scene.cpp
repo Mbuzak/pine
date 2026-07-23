@@ -38,7 +38,7 @@ void Scene::Setup() {
 	textures[TEX_BLC] = texture_2d_init("black.jpg");
 
 	GLuint grass = texture_2d_init("grass.png");
-	terrain = Shape(&meshes.at("square"), {0.0, 0.0, 0.0}, grass);
+	shape_init(&terrain, {0, 0, 0}, &meshes.at("square"), grass);
 	terrain.transform.scale = 80;
 
 	for (int i = 0; i < 4; i++) {
@@ -50,8 +50,9 @@ void Scene::Setup() {
 		std::string name = cn[rand() % cn.size()];
 		GLuint t = (rand() % 2) ? textures[TEX_WHT] : textures[TEX_BLC];
 		glm::vec3 pos = { (rand() % 40) - 20, 0.1, (rand() % 40) - 20 };
-		Shape* piece = new Shape(&meshes.at(name), pos, t);
-		pieces_.push_back(piece);
+		Shape piece;
+		shape_init(&piece, pos, &meshes.at(name), t);
+		pieces.push_back(piece);
 	}
 
 	printf("\nESC - exit\n");
@@ -154,7 +155,7 @@ void Scene::display() {
 		__CHECK_FOR_ERRORS
 
 		// Shadow FBO
-		dir_shadow_map.Render(&camera_light, pieces_);
+		dir_shadow_map.Render(&camera_light, pieces);
 
 		// World model detection FBO
 		RenderToTexture(shader_rendered.id);
@@ -210,14 +211,14 @@ void Scene::RenderShapes(GLuint program_id) {
 	shape_render(program_id, &terrain);
 	
 	glUseProgram(program_id);
-	for (int i = 0; i < pieces_.size(); ++i) {
+	for (int i = 0; i < pieces.size(); ++i) {
 		glStencilFunc(GL_ALWAYS, i + 1, 0xFF);
-		shape_render(program_id, pieces_[i]);
+		shape_render(program_id, &pieces[i]);
 	}
 
 	if (selected_id >= 0) {
 		shader_outline_render(&shader_outline, view, selected_id,
-			&pieces_[selected_id]->transform, pieces_[selected_id]->mesh);
+			&pieces[selected_id].transform, pieces[selected_id].mesh);
 	}
 
 	glUseProgram(0);
@@ -265,8 +266,8 @@ void Scene::motion(int x, int y) {
 	//std::cout << "Worldspace: (" << point.x << ", " << point.y << ", " << point.z << "); Screen: (" << x << ", " << y << ")\n";
 
 	// Update piece world position
-	pieces_[selected_id]->transform.pos.x = point.x;
-	pieces_[selected_id]->transform.pos.z = point.z;
+	pieces[selected_id].transform.pos.x = point.x;
+	pieces[selected_id].transform.pos.z = point.z;
 }
 
 void Scene::reshape(int w, int h) {

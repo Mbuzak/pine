@@ -10,20 +10,12 @@ glm::mat4 transform_model_compute(const Transform* transform) {
 	return model;
 }
 
-Shape::Shape(Mesh *mesh, glm::vec3 pos) {
-	this->transform = { .pos = pos, .rot = glm::vec3(0), .scale = 1.0 };
-	this->mesh = mesh;
-	this->material = { .ambient = {0.1, 0.1, 0.1}, .diffuse = {0.7, 0.3, 0.1},
+void shape_init(Shape* shape, glm::vec3 pos, Mesh* mesh, GLuint texture_id) {
+	shape->transform = { .pos = pos, .rot = glm::vec3(0), .scale = 1.0 };
+	shape->mesh = mesh;
+	shape->material = { .ambient = {0.1, 0.1, 0.1}, .diffuse = {0.7, 0.3, 0.1},
 		.specular = {0.3, 0.1, 0.1}, .shininess = 1.0 };
-	this->texture_ = -1;
-}
-
-Shape::Shape(Mesh* mesh, glm::vec3 pos, GLuint texture_id) {
-	this->transform = { .pos = pos, .rot = glm::vec3(0), .scale = 1.0 };
-	this->mesh = mesh;
-	this->material = { .ambient = {0.1, 0.1, 0.1}, .diffuse = {0.7, 0.3, 0.1},
-		.specular = {0.3, 0.1, 0.1}, .shininess = 1.0 };
-	this->texture_ = texture_id;
+	shape->texture_ = texture_id;
 }
 
 void lamp_init(Lamp* lamp, glm::vec3 pos) {

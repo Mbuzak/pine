@@ -56,7 +56,7 @@ public:
 	Sun sun;
 	std::array<Lamp, 4> lamps;
 	Shape terrain;
-	std::vector<Shape*> pieces_;
+	std::vector<Shape> pieces;
 
 	ShadowMap dir_shadow_map;
 	Frame frame;

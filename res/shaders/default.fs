@@ -43,7 +43,6 @@ uniform vec3 cameraPos;
 
 // uchwyt tekstury
 uniform sampler2D uTexture;
-uniform bool hasTex;
 
 uniform Sun sun;
 uniform Lamp lights[NUMBER_OF_LIGHTS];
@@ -92,7 +91,7 @@ float calcDirectionalShadow() {
 	return (shadow / 9.0);
 }
 
-vec3 calculate_diffuse(vec3 light_diffuse, vec3 material_diffuse, vec3 light_vector) {
+vec3 diffuse_compute(vec3 light_diffuse, vec3 material_diffuse, vec3 light_vector) {
 	float diffuse_factor = max(dot(in_data.normal, light_vector), 0);
 	return diffuse_factor * light_diffuse * material_diffuse;
 }
@@ -107,7 +106,7 @@ float calculate_blinn_phong_reflection_light(float material_shininess, vec3 L, v
 	return pow(max(dot(H, in_data.normal), 0), material_shininess);
 }
 
-vec3 calculate_specular(Material material, vec3 light_specular, vec3 L, bool reflection_type) {
+vec3 specular_compute(Material material, vec3 light_specular, vec3 L, bool reflection_type) {
 	vec3 E = normalize(cameraPos - in_data.position.xyz);
 	float reflection;
 
@@ -122,12 +121,9 @@ vec3 calculate_specular(Material material, vec3 light_specular, vec3 L, bool ref
 vec3 calculate_sun(Sun light, Material material) {
 	vec3 ambient = light.ambient * material.ambient;
 
-	// directional light vector
 	vec3 L = -light.direction;
-	
-	vec3 diffuse = calculate_diffuse(light.diffuse, material.diffuse, L);
-
-	vec3 specular = calculate_specular(material, light.specular, L, PHONG_REFLECTION_LIGHT);
+	vec3 diffuse = diffuse_compute(light.diffuse, material.diffuse, L);
+	vec3 specular = specular_compute(material, light.specular, L, PHONG_REFLECTION_LIGHT);
 
 	return ambient + diffuse + specular;
 }
@@ -135,12 +131,9 @@ vec3 calculate_sun(Sun light, Material material) {
 vec3 calculate_lamp(Lamp light, Material material) {
 	vec3 ambient = light.ambient * material.ambient;
 
-	// point light vector
 	vec3 L = normalize(light.position - in_data.position.xyz);
-	
-	vec3 diffuse = calculate_diffuse(light.diffuse, material.diffuse, L);
-
-	vec3 specular = calculate_specular(material, light.specular, L, PHONG_REFLECTION_LIGHT);
+	vec3 diffuse = diffuse_compute(light.diffuse, material.diffuse, L);
+	vec3 specular = specular_compute(material, light.specular, L, PHONG_REFLECTION_LIGHT);
 
 	float LV = distance(in_data.position.xyz, light.position);
 	float latt = 1 / (light.attenuation.x + light.attenuation.y * LV + light.attenuation.z * LV * LV);
@@ -148,23 +141,14 @@ vec3 calculate_lamp(Lamp light, Material material) {
 }
 
 void main() {
-	vec3 Color;
-	if (hasTex) {
-		vec4 texColor = texture(uTexture, in_data.uv);
-		Color = texColor.xyz;
-	}
-	else {
-		Color = my_material.ambient;
-	}
-
 	vec3 light_coef = calculate_sun(sun, my_material);
 	for (int i = 0; i < NUMBER_OF_LIGHTS; i++) {
 		light_coef += calculate_lamp(lights[i], my_material);
 	}
 
+	vec3 color = texture(uTexture, in_data.uv).xyz;
 	float shadow = calcDirectionalShadow();
 
-	vec3 finalColor = (sun.ambient + (1 - shadow) * light_coef) * Color;
-
+	vec3 finalColor = (sun.ambient + (1 - shadow) * light_coef) * color;
 	outColor = vec4(finalColor, 1.0);
 }
