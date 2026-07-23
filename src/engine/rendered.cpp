@@ -1,7 +1,7 @@
 #include "rendered.hpp"
 
 void shader_rendered_init(ShaderRendered* shader, glm::mat4 projection) {
-	shader->id = program_init("default");
+	shader->id = program_init("rendered");
 	shader->locations[LOCATION_RENDERED_PROJECTION] =
 		glGetUniformLocation(shader->id, "matProj");
 	shader->locations[LOCATION_RENDERED_VIEW] =
