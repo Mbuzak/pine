@@ -13,12 +13,7 @@
 int app_init(Scene* app, int window_width, int window_height, const char* window_name) {
 	app->d = display_init(window_width, window_height, window_name);
 
-	// Enable mouse
-	app->controller.mouse_button_left = 0;
-	app->controller.mouse_button_right = 0;
-	for (int i = 0; i < 128; i++) {
-		app->controller.keys_pressed[i] = 0;
-	}
+	controller_init(&app->controller);
 
 	// Camera settings
 	app->camera.fov = 60.0f;
@@ -41,6 +36,26 @@ int app_init(Scene* app, int window_width, int window_height, const char* window
 
 /* Optional settings */
 void Scene::Setup() {
+	camera.pos = {-22.0, 9.0, -0.0};
+	camera.rot = {-15, 0};
+
+	program_default = program_init("default");
+	program_color = program_init("color");
+	shader_static_init(&shader_static, program_default);
+
+	// Load models
+	std::vector<std::string> model_names = {"square", "pawn", "knight", "bishop", "rook", "king", "queen", "sphere"};
+	for (std::string &name: model_names) {
+		Mesh mesh;
+		mesh_texture_init(&mesh, name);
+		meshes.insert({name, mesh});
+	}
+
+	// Load textures
+	textures = new GLuint[2];
+	textures[TEX_WHT] = texture_2d_init("white.jpg");
+	textures[TEX_BLC] = texture_2d_init("black.jpg");
+
 	reshape(d.width, d.height);
 	GLuint grass = texture_2d_init("grass.png");
 	terrain = Shape(&meshes.at("square"), {0.0, 0.0, 0.0}, grass);
@@ -121,7 +136,7 @@ int Scene::events_handle() {
 			case SDL_MOUSEBUTTONUP:
 				if (e.button.button == SDL_BUTTON_LEFT) {
 					controller.mouse_button_left = 0;
-					move_piece();
+					selected_id = -1;
 				}
 
 				if (e.button.button == SDL_BUTTON_RIGHT) {
@@ -254,14 +269,6 @@ void Scene::select_piece(int wx, int wy, int x, int y) {
 	printf("Stencil: %d\n", stencil);
 
 	selected_id = stencil - 1;
-}
-
-void Scene::move_piece() {
-	if (selected_id < 0) {
-		return;
-	}
-
-	selected_id = -1;
 }
 
 void Scene::rotate(int x, int y) {

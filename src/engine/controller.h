@@ -10,4 +10,6 @@ typedef struct {
 	int keys_pressed[128];
 } Controller;
 
+void controller_init(Controller*);
+
 #endif

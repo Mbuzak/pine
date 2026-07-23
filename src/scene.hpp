@@ -17,6 +17,7 @@
 #include "engine/camera.hpp"
 #include "engine/renderer.hpp"
 #include "engine/skybox.hpp"
+#include "engine/default.hpp"
 #include "engine/uniform.hpp"
 #include "SDL2/SDL.h"
 
@@ -68,7 +69,6 @@ private:
 
 	int events_handle();
 	void select_piece(int wx, int wy, int x, int y);
-	void move_piece();
 	void motion(int x, int y);
 	void reshape(int, int);
 	void rotate(int, int);
