@@ -15,7 +15,6 @@
 #include "engine/light.hpp"
 #include "engine/shadow.hpp"
 #include "engine/camera.hpp"
-#include "engine/renderer.hpp"
 #include "engine/skybox.hpp"
 #include "engine/rendered.hpp"
 #include "engine/outline.hpp"
@@ -47,7 +46,7 @@ public:
 	ShaderOutline shader_outline;
 
 	Camera camera;
-	CameraOrthographic camera_light;
+	Camera camera_light;
 	Controller controller;
 
 	std::map<std::string, Mesh> meshes;
@@ -79,5 +78,6 @@ public:
 };
 
 glm::mat4 perspective_projection_compute(float, float);
+glm::mat4 orthographic_projection_compute();
 
 #endif

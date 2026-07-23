@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "entity.hpp"
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,5 +30,7 @@ struct ShaderRendered {
 void shader_rendered_init(ShaderRendered*, glm::mat4);
 void shader_rendered_projection_send(ShaderRendered*, glm::mat4);
 void shader_rendered_view_send(ShaderRendered*, glm::mat4);
+
+void rendered_shape_render(ShaderRendered*, Shape*);
 
 #endif

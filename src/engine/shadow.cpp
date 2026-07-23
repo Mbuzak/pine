@@ -1,6 +1,21 @@
 #include "shadow.hpp"
 
-void ShadowMap::Init(CameraOrthographic* camera) {
+void shader_shadow_map_init(ShaderShadowMap* shader, glm::mat4 light_projection, glm::mat4 light_view) {
+	shader->id = program_init("shadow_map");
+	shader->locations[LOCATION_SHADOW_MAP_LIGHT_PROJECTION] =
+		glGetUniformLocation(shader->id, "lightProj");
+	shader->locations[LOCATION_SHADOW_MAP_LIGHT_VIEW] =
+		glGetUniformLocation(shader->id, "lightView");
+	shader->locations[LOCATION_SHADOW_MAP_MODEL] =
+		glGetUniformLocation(shader->id, "matModel");
+
+	glUseProgram(shader->id);
+	glUniformMatrix4fv(shader->locations[LOCATION_SHADOW_MAP_LIGHT_PROJECTION], 1, GL_FALSE, glm::value_ptr(light_projection));
+	glUniformMatrix4fv(shader->locations[LOCATION_SHADOW_MAP_LIGHT_VIEW], 1, GL_FALSE, glm::value_ptr(light_view));
+	glUseProgram(0);
+}
+
+void ShadowMap::Init(glm::mat4 projection_light, glm::mat4 view_light) {
 	// Create texture
 	glGenTextures(1, &texture_id);
 	glBindTexture(GL_TEXTURE_2D, texture_id);
@@ -24,24 +39,17 @@ void ShadowMap::Init(CameraOrthographic* camera) {
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	program_id = program_init("shadow_map");
-
-	// Send default uniforms
-	glUseProgram(program_id);
-	glUniformMatrix4fv(glGetUniformLocation(program_id, "lightProj"), 1, GL_FALSE, glm::value_ptr(camera->projection));
-	glUniformMatrix4fv(glGetUniformLocation(program_id, "lightView"), 1, GL_FALSE, glm::value_ptr(camera->view));
-	glUseProgram(0);
+	shader_shadow_map_init(&shader, projection_light, view_light);
 }
 
-void ShadowMap::Render(CameraOrthographic* camera, std::vector<Shape> pieces) {
-	// Render texture from light poisiton
+void ShadowMap::Render(std::vector<Shape> pieces) {
 	glViewport(0, 0, width, height);
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo_id);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-	glUseProgram(program_id);
+	glUseProgram(shader.id);
 	for (Shape piece: pieces) {
-		glUniformMatrix4fv(glGetUniformLocation(program_id, "matModel"), 1, GL_FALSE, glm::value_ptr(transform_model_compute(&piece.transform)));
+		glUniformMatrix4fv(shader.locations[LOCATION_SHADOW_MAP_MODEL], 1, GL_FALSE, glm::value_ptr(transform_model_compute(&piece.transform)));
 		mesh_texture_draw(piece.mesh);
 	}
 	glUseProgram(0);

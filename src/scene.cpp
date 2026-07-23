@@ -5,19 +5,20 @@ void Scene::Setup() {
 	d = display_init(1280, 720, "pine");
 
 	controller_init(&controller);
-	camera_light_init(&camera_light, {-10.12, 2.0, -10.12}, {-43, 65});
+	camera_light = { .pos = {-10.12, 2.0, -10.12}, .rot = {-43, 65} };
 
 	stbi_set_flip_vertically_on_load(true);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
+	glm::mat4 proj_light = orthographic_projection_compute();
+	glm::mat4 view_light = camera_view_compute(&camera_light);
 	sun = sun_init();
-	dir_shadow_map.Init(&camera_light);
+	dir_shadow_map.Init(proj_light, view_light);
 	frame_init(&frame);
 
 	reshape(d.width, d.height);
 
-	camera.pos = {-22.0, 9.0, -0.0};
-	camera.rot = {-15, 0};
+	camera = { .pos = {-22.0, 9.0, -0.0}, .rot = {-15, 0} };
 
 	glm::mat4 projection = perspective_projection_compute(d.width, d.height);
 	shader_rendered_init(&shader_rendered, projection);
@@ -155,7 +156,7 @@ void Scene::display() {
 		__CHECK_FOR_ERRORS
 
 		// Shadow FBO
-		dir_shadow_map.Render(&camera_light, pieces);
+		dir_shadow_map.Render(pieces);
 
 		// World model detection FBO
 		RenderToTexture(shader_rendered.id);
@@ -179,7 +180,7 @@ void Scene::RenderToTexture(GLuint program_id) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(program_id);
-	shape_render(program_id, &terrain);
+	rendered_shape_render(&shader_rendered, &terrain);
 	glUseProgram(0);
 }
 
@@ -199,9 +200,11 @@ void Scene::RenderShapes(GLuint program_id) {
 	shader_rendered_view_send(&shader_rendered, view);
 	camera_send_uniform(program_id, camera.pos, camera.rot);
 
+	glm::mat4 proj_light = orthographic_projection_compute();
+	glm::mat4 view_light = camera_view_compute(&camera_light);
 	// potok graficzny mapy cieni ?
-	uniform_mat4f_send(program_id, "lightProj", camera_light.projection);
-	uniform_mat4f_send(program_id, "lightView", camera_light.view);
+	uniform_mat4f_send(program_id, "lightProj", proj_light);
+	uniform_mat4f_send(program_id, "lightView", view_light);
 
 	dir_shadow_map.SendTexture(program_id);
 
@@ -209,13 +212,13 @@ void Scene::RenderShapes(GLuint program_id) {
 	glStencilFunc(GL_ALWAYS, 0, 0xFF);
 
 	glUniform1i(glGetUniformLocation(shader_rendered.id, "is_terrain"), 1);
-	shape_render(program_id, &terrain);
+	rendered_shape_render(&shader_rendered, &terrain);
 	glUniform1i(glGetUniformLocation(shader_rendered.id, "is_terrain"), 0);
 	
 	glUseProgram(program_id);
 	for (int i = 0; i < pieces.size(); ++i) {
 		glStencilFunc(GL_ALWAYS, i + 1, 0xFF);
-		shape_render(program_id, &pieces[i]);
+		rendered_shape_render(&shader_rendered, &pieces[i]);
 	}
 
 	if (selected_id >= 0) {
@@ -286,4 +289,11 @@ glm::mat4 perspective_projection_compute(float width, float height) {
 	const float PLANE_NEAR = 0.1;
 	const float PLANE_FAR = 200.0;
 	return glm::perspective(FOV, ASPECT_RATIO, PLANE_NEAR, PLANE_FAR);
+}
+
+glm::mat4 orthographic_projection_compute() {
+	const float SIZE = 18.0;
+	const float PLANE_NEAR = 2.0;
+	const float PLANE_FAR = 35.5;
+	return glm::ortho(-SIZE, SIZE, -SIZE, SIZE, PLANE_NEAR, PLANE_FAR);
 }

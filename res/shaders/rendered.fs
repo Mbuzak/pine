@@ -35,15 +35,10 @@ in VertexData {
 	vec4 position_light;
 } in_data;
 
-// Dane potrzebne do wyliczenia cienia
+uniform sampler2D uTexture;
 uniform sampler2D tex_shadowMap;
 
-// Pozycja kamery przekazana z aplikacji
 uniform vec3 cameraPos;
-
-// uchwyt tekstury
-uniform sampler2D uTexture;
-
 uniform Sun sun;
 uniform Lamp lights[NUMBER_OF_LIGHTS];
 uniform Material my_material;
@@ -51,9 +46,7 @@ uniform bool is_terrain;
 
 out vec4 outColor;
 
-// ---------------------------------------------------------------------------
 // Zwraca [0-1], gdzie 1 oznacza ze fragment jest calkowicie w cieniu
-// ---------------------------------------------------------------------------
 float calcDirectionalShadow() {
 	if (in_data.position_light.z > 1.0) {
 		return 0.0;
