@@ -208,7 +208,9 @@ void Scene::RenderShapes(GLuint program_id) {
 	// rysowanie obiektów nie-selekcyjnych (identyfikator 0)
 	glStencilFunc(GL_ALWAYS, 0, 0xFF);
 
+	glUniform1i(glGetUniformLocation(shader_rendered.id, "is_terrain"), 1);
 	shape_render(program_id, &terrain);
+	glUniform1i(glGetUniformLocation(shader_rendered.id, "is_terrain"), 0);
 	
 	glUseProgram(program_id);
 	for (int i = 0; i < pieces.size(); ++i) {

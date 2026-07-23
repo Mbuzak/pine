@@ -47,6 +47,7 @@ uniform sampler2D uTexture;
 uniform Sun sun;
 uniform Lamp lights[NUMBER_OF_LIGHTS];
 uniform Material my_material;
+uniform bool is_terrain;
 
 out vec4 outColor;
 
@@ -146,7 +147,13 @@ void main() {
 		light_coef += calculate_lamp(lights[i], my_material);
 	}
 
-	vec3 color = texture(uTexture, in_data.uv).xyz;
+	vec3 color;
+	if (is_terrain) {
+		color = texture(uTexture, 30 * in_data.uv).xyz;
+	}
+	else {
+		color = texture(uTexture, in_data.uv).xyz;
+	}
 	float shadow = calcDirectionalShadow();
 
 	vec3 finalColor = (sun.ambient + (1 - shadow) * light_coef) * color;
