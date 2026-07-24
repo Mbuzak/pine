@@ -30,6 +30,9 @@ struct ShaderShadowMap {
 
 void shader_shadow_map_init(ShaderShadowMap*, glm::mat4, glm::mat4);
 
+void shader_shadow_map_light_projection_send(ShaderShadowMap*, glm::mat4);
+void shader_shadow_map_light_view_send(ShaderShadowMap*, glm::mat4);
+
 // Shadow map of direction or point light
 class ShadowMap {
 public:
