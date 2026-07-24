@@ -12,7 +12,6 @@ void Scene::Setup() {
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	sun = sun_init();
-	frame_init(&frame);
 
 	// Shaders & renderers
 	glm::mat4 proj_light = orthographic_projection_compute();
@@ -31,14 +30,12 @@ void Scene::Setup() {
 		meshes.insert({name, mesh});
 	}
 
+	renderer_terrain_init(&renderer_terrain, &meshes.at("square"));
+
 	// Load textures
 	textures = new GLuint[2];
 	textures[TEX_WHT] = texture_2d_init("white.jpg");
 	textures[TEX_BLC] = texture_2d_init("black.jpg");
-
-	GLuint grass = texture_2d_init("grass.png");
-	shape_init(&terrain, {0, 0, 0}, &meshes.at("square"), grass);
-	terrain.transform.scale = 80;
 
 	for (int i = 0; i < 4; i++) {
 		lamp_init(&lamps[i], {(rand() % 40) - 20, 0.2, (rand() % 40) - 20});
@@ -175,11 +172,11 @@ void Scene::display() {
 
 void Scene::RenderToTexture(GLuint program_id) {
 	glViewport(0, 0, d.width, d.height);
-	glBindFramebuffer(GL_FRAMEBUFFER, frame.fbo_id);
+	glBindFramebuffer(GL_FRAMEBUFFER, renderer_terrain.frame.fbo_id);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(program_id);
-	rendered_shape_render(&shader_rendered, &terrain);
+	rendered_shape_render(&shader_rendered, &renderer_terrain.shape);
 	glUseProgram(0);
 }
 
@@ -187,6 +184,9 @@ void Scene::RenderShapes(GLuint program_id) {
 	glm::mat4 view = camera_view_compute(&camera);
 	glm::mat4 proj_light = orthographic_projection_compute();
 	glm::mat4 view_light = camera_view_compute(&camera_light);
+
+	// rysowanie obiektów nie-selekcyjnych (identyfikator 0)
+	glStencilFunc(GL_ALWAYS, 0, 0xFF);
 
 	glUseProgram(program_id);
 	// Send light
@@ -206,11 +206,8 @@ void Scene::RenderShapes(GLuint program_id) {
 
 	dir_shadow_map.SendTexture(program_id);
 
-	// rysowanie obiektów nie-selekcyjnych (identyfikator 0)
-	glStencilFunc(GL_ALWAYS, 0, 0xFF);
-
 	glUniform1i(glGetUniformLocation(shader_rendered.id, "is_terrain"), 1);
-	rendered_shape_render(&shader_rendered, &terrain);
+	rendered_shape_render(&shader_rendered, &renderer_terrain.shape);
 	glUniform1i(glGetUniformLocation(shader_rendered.id, "is_terrain"), 0);
 	
 	glUseProgram(program_id);
@@ -240,7 +237,7 @@ void Scene::motion(int x, int y) {
 		return;
 	}
 
-	glBindFramebuffer(GL_FRAMEBUFFER, frame.fbo_id);
+	glBindFramebuffer(GL_FRAMEBUFFER, renderer_terrain.frame.fbo_id);
 	GLfloat depth;
 	glReadPixels(x, d.height - y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
 

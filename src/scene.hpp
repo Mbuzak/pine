@@ -18,6 +18,7 @@
 #include "engine/skybox.hpp"
 #include "engine/rendered.hpp"
 #include "engine/outline.hpp"
+#include "engine/terrain.hpp"
 #include "engine/uniform.hpp"
 #include "SDL2/SDL.h"
 
@@ -41,6 +42,7 @@ public:
 
 	Display d;
 	RendererSkybox renderer_skybox;
+	RendererTerrain renderer_terrain;
 
 	ShaderRendered shader_rendered;
 	ShaderOutline shader_outline;
@@ -54,11 +56,9 @@ public:
 
 	Sun sun;
 	std::array<Lamp, 4> lamps;
-	Shape terrain;
 	std::vector<Shape> pieces;
 
 	ShadowMap dir_shadow_map;
-	Frame frame;
 
 	int selected_id = -1;
 
