@@ -54,3 +54,8 @@ void display_destroy(Display* display) {
 	SDL_DestroyWindow(display->window);
 	SDL_Quit();
 }
+
+void display_reshape(Display* display, int width, int height) {
+	display->width = width;
+	display->height = height;
+}

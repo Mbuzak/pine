@@ -14,7 +14,8 @@ typedef struct {
 } Display;
 
 Display display_init(unsigned int, unsigned int, const char*);
-
 void display_destroy(Display*);
+
+void display_reshape(Display*, int, int);
 
 #endif

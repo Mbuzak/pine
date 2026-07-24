@@ -67,9 +67,7 @@ private:
 	void RenderShapes(GLuint);
 
 	int events_handle();
-	void select_piece(int wx, int wy, int x, int y);
-	void motion(int x, int y);
-	void reshape(int, int);
+	void motion(int, int);
 	void rotate(int, int);
 
 public:
@@ -79,5 +77,7 @@ public:
 
 glm::mat4 perspective_projection_compute(float, float);
 glm::mat4 orthographic_projection_compute();
+
+int selection_id_compute(int, int);
 
 #endif

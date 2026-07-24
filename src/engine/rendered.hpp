@@ -19,6 +19,7 @@ extern "C" {
 enum LocationRendered {
 	LOCATION_RENDERED_PROJECTION,
 	LOCATION_RENDERED_VIEW,
+	LOCATION_RENDERED_CAMERA_POSITION,
 	LOCATION_RENDERED_COUNT
 };
 
@@ -28,8 +29,10 @@ struct ShaderRendered {
 };
 
 void shader_rendered_init(ShaderRendered*, glm::mat4);
+
 void shader_rendered_projection_send(ShaderRendered*, glm::mat4);
 void shader_rendered_view_send(ShaderRendered*, glm::mat4);
+void shader_rendered_camera_position_send(ShaderRendered*, glm::vec3);
 
 void rendered_shape_render(ShaderRendered*, Shape*);
 

@@ -3,27 +3,25 @@
 
 void Scene::Setup() {
 	d = display_init(1280, 720, "pine");
-
 	controller_init(&controller);
+
+	camera = { .pos = {-22.0, 9.0, -0.0}, .rot = {-15, 0} };
 	camera_light = { .pos = {-10.12, 2.0, -10.12}, .rot = {-43, 65} };
 
 	stbi_set_flip_vertically_on_load(true);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	glm::mat4 proj_light = orthographic_projection_compute();
-	glm::mat4 view_light = camera_view_compute(&camera_light);
 	sun = sun_init();
-	dir_shadow_map.Init(proj_light, view_light);
 	frame_init(&frame);
 
-	reshape(d.width, d.height);
-
-	camera = { .pos = {-22.0, 9.0, -0.0}, .rot = {-15, 0} };
-
+	// Shaders & renderers
+	glm::mat4 proj_light = orthographic_projection_compute();
+	glm::mat4 view_light = camera_view_compute(&camera_light);
 	glm::mat4 projection = perspective_projection_compute(d.width, d.height);
 	shader_rendered_init(&shader_rendered, projection);
 	shader_outline_init(&shader_outline, projection);
 	renderer_skybox_init(&renderer_skybox, projection);
+	dir_shadow_map.Init(proj_light, view_light);
 
 	// Load models
 	std::vector<std::string> model_names = {"square", "pawn", "knight", "bishop", "rook", "king", "queen"};
@@ -72,7 +70,8 @@ int Scene::events_handle() {
 
 			case SDL_WINDOWEVENT:
 				if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
-					reshape(e.window.data1, e.window.data2);
+					display_reshape(&d, e.window.data1, e.window.data2);
+					// TODO: Send perspective projection
 				}
 				break;
 
@@ -105,7 +104,7 @@ int Scene::events_handle() {
 			case SDL_MOUSEBUTTONDOWN:
 				if (e.button.button == SDL_BUTTON_LEFT) {
 					controller.mouse_button_left = 1;
-					select_piece(d.width, d.height, e.button.x, e.button.y);
+					selected_id = selection_id_compute(e.button.x, d.height - e.button.y);
 				}
 				if (e.button.button == SDL_BUTTON_RIGHT) {
 					controller.mouse_button_right = 1;
@@ -134,8 +133,8 @@ int Scene::events_handle() {
 
 void Scene::display() {
 	while (events_handle() != 1) {
-		glm::vec3 dir = camera_dir_compute(camera.rot);
-		glm::vec3 right = camera_right_compute(dir);
+		glm::vec3 dir = direction_compute(camera.rot);
+		glm::vec3 right = right_vector_compute(dir);
 		glm::vec3 speed = glm::vec3(0.5);
 		if (controller.keys_pressed[SDLK_w] == 1) {
 			glm::vec3 mydir = speed * dir;
@@ -186,6 +185,8 @@ void Scene::RenderToTexture(GLuint program_id) {
 
 void Scene::RenderShapes(GLuint program_id) {
 	glm::mat4 view = camera_view_compute(&camera);
+	glm::mat4 proj_light = orthographic_projection_compute();
+	glm::mat4 view_light = camera_view_compute(&camera_light);
 
 	glUseProgram(program_id);
 	// Send light
@@ -195,14 +196,11 @@ void Scene::RenderShapes(GLuint program_id) {
 		uniform_vec3f_send(program_id, (name + "position").c_str(), lamps[i].transform.pos);
 	}
 	uniform_light_directional_send(program_id, "sun.", &sun);
-	glm::vec3 light_dir = camera_dir_compute(camera_light.rot);
+	glm::vec3 light_dir = direction_compute(camera_light.rot);
 	uniform_vec3f_send(program_id, "sun.direction", light_dir);
 	shader_rendered_view_send(&shader_rendered, view);
-	camera_send_uniform(program_id, camera.pos, camera.rot);
+	shader_rendered_camera_position_send(&shader_rendered, camera.pos);
 
-	glm::mat4 proj_light = orthographic_projection_compute();
-	glm::mat4 view_light = camera_view_compute(&camera_light);
-	// potok graficzny mapy cieni ?
 	uniform_mat4f_send(program_id, "lightProj", proj_light);
 	uniform_mat4f_send(program_id, "lightView", view_light);
 
@@ -229,24 +227,6 @@ void Scene::RenderShapes(GLuint program_id) {
 	glUseProgram(0);
 }
 
-
-// game
-void Scene::select_piece(int wx, int wy, int x, int y) {
-	GLbyte color[4];
-	GLfloat depth;
-	GLuint stencil;
-
-	glReadPixels(x, wy - y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, color);
-	glReadPixels(x, wy - y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
-	glReadPixels(x, wy - y, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &stencil);
-
-	printf("\nColor: %d %d %d\n", (unsigned char)color[0], (unsigned char)color[1], (unsigned char)color[2]);
-	printf("Depth: %f\n", depth);
-	printf("Stencil: %d\n", stencil);
-
-	selected_id = stencil - 1;
-}
-
 void Scene::rotate(int x, int y) {
 	const float rad_to_degree = 57.3;
 	camera.rot.y += 2 * rad_to_degree * (x - controller.mouse_pos.x) / (float)d.width;
@@ -263,24 +243,16 @@ void Scene::motion(int x, int y) {
 	glBindFramebuffer(GL_FRAMEBUFFER, frame.fbo_id);
 	GLfloat depth;
 	glReadPixels(x, d.height - y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	glm::mat4 projection = perspective_projection_compute(d.width, d.height);
 	glm::mat4 view = camera_view_compute(&camera);
-	glm::vec3 point = glm::unProject(glm::vec3(x, d.height - y, depth), view, projection, glm::vec4(0, 0, d.width, d.height));
-	//std::cout << "Worldspace: (" << point.x << ", " << point.y << ", " << point.z << "); Screen: (" << x << ", " << y << ")\n";
+	const glm::vec3 window_coords = {x, d.height - y, depth};
+	const glm::vec4 viewport = {0, 0, d.width, d.height};
+	glm::vec3 point = glm::unProject(window_coords, view, projection, viewport);
 
 	// Update piece world position
 	pieces[selected_id].transform.pos.x = point.x;
 	pieces[selected_id].transform.pos.z = point.z;
-}
-
-void Scene::reshape(int w, int h) {
-	d.width = w;
-	d.height = h;
-
-	glViewport(0, 0, d.width, d.height);
-	// TODO: Send perspective projection
 }
 
 glm::mat4 perspective_projection_compute(float width, float height) {
@@ -296,4 +268,10 @@ glm::mat4 orthographic_projection_compute() {
 	const float PLANE_NEAR = 2.0;
 	const float PLANE_FAR = 35.5;
 	return glm::ortho(-SIZE, SIZE, -SIZE, SIZE, PLANE_NEAR, PLANE_FAR);
+}
+
+int selection_id_compute(int x, int y) {
+	GLuint stencil;
+	glReadPixels(x, y, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &stencil);
+	return stencil - 1;
 }
