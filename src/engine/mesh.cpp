@@ -1,19 +1,71 @@
 #include "mesh.hpp"
 #include "stb_image.h"
 
+void mesh_terrain_init(Mesh* mesh) {
+	GLfloat coords[3 * 4] = {
+		-80.0,  0.0, -80.0,
+		-80.0,  0.0, 80.0,
+		80.0, 0.0, -80.0,
+		80.0, 0.0, 80.0,
+	};
+	GLfloat uv_coords[2 * 4] = {
+		0.0, 0.0,
+		0.0, 1.0,
+		1.0, 0.0,
+		1.0, 1.0,
+	};
+	GLfloat normals[3 * 4] = {
+		0.0, 1.0, 0.0,
+		0.0, 1.0, 0.0,
+		0.0, 1.0, 0.0,
+		0.0, 1.0, 0.0,
+	};
+	GLuint indices[2 * 3] = {
+		0, 1, 2,
+		1, 2, 3
+	};
+	mesh->size = 2 * 3;
+
+	// Create VAO
+	glGenVertexArrays(1, &mesh->vao);
+	glBindVertexArray(mesh->vao);
+
+	mesh->vbos = new GLuint[4];
+	glGenBuffers(4, mesh->vbos);
+
+	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbos[0]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * 4, coords, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbos[1]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 2 * 4, uv_coords, GL_STATIC_DRAW);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(1);
+
+	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbos[2]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * 4, normals, GL_STATIC_DRAW);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(2);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->vbos[3]);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->size * sizeof(GLuint), indices, GL_STATIC_DRAW);
+
+	glBindVertexArray(0);
+}
+
 int mesh_raw_init(Mesh* mesh) {
-	mesh->type = MESH_RAW;
 	mesh->size = 36;
 
 	GLfloat positions[8*3] = {
-		1.0f, 1.0f, 1.0f,   // 0
-		-1.0f, 1.0f, 1.0f,  // 1
-		-1.0f, -1.0f, 1.0f, // 2
-		1.0f, -1.0f, 1.0f,  // 3
-		1.0f, 1.0f, -1.0f,  // 4
-		-1.0f, 1.0f, -1.0f, // 5
-		-1.0f, -1.0f, -1.0f,// 6
-		1.0f, -1.0f, -1.0f  // 7
+		1.0f, 1.0f, 1.0f,
+		-1.0f, 1.0f, 1.0f,
+		-1.0f, -1.0f, 1.0f,
+		1.0f, -1.0f, 1.0f,
+		1.0f, 1.0f, -1.0f,
+		-1.0f, 1.0f, -1.0f,
+		-1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f
 	};
 
 	GLuint indices[12*3] = {
@@ -45,8 +97,6 @@ int mesh_raw_init(Mesh* mesh) {
 }
 
 int mesh_texture_init(Mesh* mesh, std::string filename) {
-	mesh->type = MESH_TEXTURE;
-
 	std::string path = "res/models/" + filename + ".obj";
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec2> uvs;

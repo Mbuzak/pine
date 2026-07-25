@@ -41,3 +41,13 @@ void rendered_shape_render(ShaderRendered* shader, Shape* shape) {
 	texture_2d_send(shader->id, shape->texture_);
 	mesh_texture_draw(shape->mesh);
 }
+
+void rendered_terrain_render(ShaderRendered* shader, Shape* shape) {
+	glm::mat4 model = transform_model_compute(&shape->transform);
+	uniform_mat4f_send(shader->id, "matModel", model);
+	glm::mat3 matNormal = glm::transpose(glm::inverse(model));
+	glUniformMatrix3fv(glGetUniformLocation(shader->id, "matNormal"), 1, GL_FALSE, glm::value_ptr(matNormal));
+	uniform_material_send(shader->id, "my_material.", &shape->material);
+	texture_2d_send(shader->id, shape->texture_);
+	mesh_raw_draw(shape->mesh);
+}

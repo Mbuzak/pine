@@ -8,9 +8,6 @@
 #include <string>
 #include <vector>
 
-#define MESH_RAW 1
-#define MESH_TEXTURE 2
-
 enum MeshRawBuffer {
 	MESH_RAW_POSITIONS,
 	MESH_RAW_INDICES,
@@ -28,8 +25,9 @@ struct Mesh {
 	GLuint vao;
 	GLuint* vbos;
 	int size;
-	int type;
 };
+
+void mesh_terrain_init(Mesh*);
 
 int mesh_raw_init(Mesh*);
 int mesh_texture_init(Mesh*, std::string);

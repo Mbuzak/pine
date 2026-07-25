@@ -23,14 +23,18 @@ void Scene::Setup() {
 	dir_shadow_map.Init(proj_light, view_light);
 
 	// Load models
-	std::vector<std::string> model_names = {"square", "pawn", "knight", "bishop", "rook", "king", "queen"};
+	std::vector<std::string> model_names = {"pawn", "knight", "bishop", "rook", "king", "queen"};
 	for (std::string &name: model_names) {
 		Mesh mesh;
 		mesh_texture_init(&mesh, name);
 		meshes.insert({name, mesh});
 	}
 
-	renderer_terrain_init(&renderer_terrain, &meshes.at("square"));
+	Mesh terrain;
+	mesh_terrain_init(&terrain);
+	meshes.insert({"terrain", terrain});
+
+	renderer_terrain_init(&renderer_terrain, &meshes.at("terrain"));
 
 	// Load textures
 	textures = new GLuint[2];
@@ -176,7 +180,7 @@ void Scene::RenderToTexture(GLuint program_id) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(program_id);
-	rendered_shape_render(&shader_rendered, &renderer_terrain.shape);
+	rendered_terrain_render(&shader_rendered, &renderer_terrain.shape);
 	glUseProgram(0);
 }
 
@@ -207,7 +211,7 @@ void Scene::RenderShapes(GLuint program_id) {
 	dir_shadow_map.SendTexture(program_id);
 
 	glUniform1i(glGetUniformLocation(shader_rendered.id, "is_terrain"), 1);
-	rendered_shape_render(&shader_rendered, &renderer_terrain.shape);
+	rendered_terrain_render(&shader_rendered, &renderer_terrain.shape);
 	glUniform1i(glGetUniformLocation(shader_rendered.id, "is_terrain"), 0);
 	
 	glUseProgram(program_id);
