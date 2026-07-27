@@ -35,6 +35,5 @@ void shader_rendered_view_send(ShaderRendered*, glm::mat4);
 void shader_rendered_camera_position_send(ShaderRendered*, glm::vec3);
 
 void rendered_shape_render(ShaderRendered*, Shape*);
-void rendered_terrain_render(ShaderRendered*, Shape*);
 
 #endif

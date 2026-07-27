@@ -1,3 +1,4 @@
+#include <time.h>
 #include "scene.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -11,6 +12,7 @@
  * Keys out of 128 ASCII brakes program
  */
 int main(int argc, char *argv[]) {
+	srand(time(NULL));
 	Scene app;
 	app.Setup();
 	app.display();

@@ -30,11 +30,7 @@ void Scene::Setup() {
 		meshes.insert({name, mesh});
 	}
 
-	Mesh terrain;
-	mesh_terrain_init(&terrain);
-	meshes.insert({"terrain", terrain});
-
-	renderer_terrain_init(&renderer_terrain, &meshes.at("terrain"));
+	renderer_terrain_init(&renderer_terrain);
 
 	// Load textures
 	textures = new GLuint[2];
@@ -180,7 +176,7 @@ void Scene::RenderToTexture(GLuint program_id) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(program_id);
-	rendered_terrain_render(&shader_rendered, &renderer_terrain.shape);
+	renderer_terrain_render(&renderer_terrain, shader_rendered.id);
 	glUseProgram(0);
 }
 
@@ -211,7 +207,7 @@ void Scene::RenderShapes(GLuint program_id) {
 	dir_shadow_map.SendTexture(program_id);
 
 	glUniform1i(glGetUniformLocation(shader_rendered.id, "is_terrain"), 1);
-	rendered_terrain_render(&shader_rendered, &renderer_terrain.shape);
+	renderer_terrain_render(&renderer_terrain, shader_rendered.id);
 	glUniform1i(glGetUniformLocation(shader_rendered.id, "is_terrain"), 0);
 	
 	glUseProgram(program_id);

@@ -15,10 +15,16 @@ extern "C" {
 #endif
 
 struct RendererTerrain {
-	Shape shape;
+	glm::vec2 position;
+	Mesh mesh;
+	Material material;
+	GLuint texture_id;
+
 	Frame frame;
 };
 
-void renderer_terrain_init(RendererTerrain*, Mesh*);
+void renderer_terrain_init(RendererTerrain*);
+
+void renderer_terrain_render(RendererTerrain*, GLuint);
 
 #endif
