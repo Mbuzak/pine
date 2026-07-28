@@ -17,4 +17,17 @@ GLchar* shader_code_load(const char*);
 
 void program_error_check(GLuint, GLenum);
 
+enum Uniform {
+	UNIFORM_PROJECTION,
+	UNIFORM_VIEW,
+	UNIFORM_MODEL,
+	UNIFORM_TEXTURE,
+	UNIFORM_COUNT
+};
+
+typedef struct {
+	GLuint id;
+	GLuint* locations;
+} Shader;
+
 #endif

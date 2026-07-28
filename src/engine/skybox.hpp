@@ -17,30 +17,13 @@ extern "C" {
 }
 #endif
 
-enum LocationSkybox {
-	LOCATION_SKYBOX_PROJECTION,
-	LOCATION_SKYBOX_VIEW,
-	LOCATION_SKYBOX_MODEL,
-	LOCATION_SKYBOX_TEXTURE,
-	LOCATION_SKYBOX_COUNT
-};
-
-struct ShaderSkybox {
-	GLuint id;
-	GLuint locations[LOCATION_SKYBOX_COUNT];
-};
-
 struct RendererSkybox {
-	ShaderSkybox shader;
+	Shader shader;
 	Mesh mesh;
 	GLuint texture_id;
 };
 
-void shader_skybox_init(ShaderSkybox*);
-void shader_skybox_projection_send(ShaderSkybox*, glm::mat4);
-void shader_skybox_view_send(ShaderSkybox*, glm::mat4);
-void shader_skybox_model_send(ShaderSkybox*, glm::mat4);
-void shader_skybox_texture_send(ShaderSkybox*, GLuint);
+void shader_skybox_init(Shader*);
 
 void renderer_skybox_init(RendererSkybox*, glm::mat4);
 void renderer_skybox_destroy(RendererSkybox*);

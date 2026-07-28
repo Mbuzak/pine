@@ -164,6 +164,7 @@ void Scene::display() {
 
 		glm::mat4 view = camera_view_compute(&camera);
 		renderer_skybox_render(&renderer_skybox, view);
+
 		RenderShapes(shader_rendered.id);
 
 		SDL_GL_SwapWindow(d.window);
