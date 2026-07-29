@@ -3,3 +3,7 @@ build/
 
 # 3rd party libraries
 libs/
+
+# KDevelop
+pine.kdev4
+.kdev4/
