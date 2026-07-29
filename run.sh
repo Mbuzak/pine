@@ -1,3 +1,3 @@
 #!/bin/bash
 cmake --build build/
-./build/src/pine
+./build/bin/pine
