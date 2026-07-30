@@ -1,6 +1,7 @@
 #ifndef SKYBOX_HPP
 #define SKYBOX_HPP
 
+#include "cglm/struct.h"
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -27,6 +28,6 @@ void shader_skybox_init(Shader*);
 
 void renderer_skybox_init(RendererSkybox*, glm::mat4);
 void renderer_skybox_destroy(RendererSkybox*);
-void renderer_skybox_render(RendererSkybox*, glm::mat4);
+void renderer_skybox_render(RendererSkybox*, mat4s);
 
 #endif

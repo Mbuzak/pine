@@ -1,6 +1,7 @@
 #ifndef OUTLINE_HPP
 #define OUTLINE_HPP
 
+#include "cglm/struct.h"
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -30,8 +31,8 @@ struct ShaderOutline {
 
 void shader_outline_init(ShaderOutline*, glm::mat4);
 void shader_outline_projection_send(ShaderOutline*, glm::mat4);
-void shader_outline_view_send(ShaderOutline*, glm::mat4);
+void shader_outline_view_send(ShaderOutline*, mat4s);
 void shader_outline_model_send(ShaderOutline*, glm::mat4);
-void shader_outline_render(ShaderOutline*, glm::mat4, int, Transform*, Mesh*);
+void shader_outline_render(ShaderOutline*, mat4s, int, Transform*, Mesh*);
 
 #endif

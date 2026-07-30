@@ -1,7 +1,7 @@
 #include "shadow.hpp"
 
 void shader_shadow_map_init(ShaderShadowMap* shader,
-	glm::mat4 light_projection, glm::mat4 light_view)
+	glm::mat4 light_projection, mat4s light_view)
 {
 	shader->id = program_init("shadow_map");
 	shader->locations[LOCATION_SHADOW_MAP_LIGHT_PROJECTION] =
@@ -25,12 +25,12 @@ void shader_shadow_map_light_projection_send(ShaderShadowMap* shader,
 		1, GL_FALSE, glm::value_ptr(projection));
 }
 
-void shader_shadow_map_light_view_send(ShaderShadowMap* shader, glm::mat4 view) {
+void shader_shadow_map_light_view_send(ShaderShadowMap* shader, mat4s view) {
 	glUniformMatrix4fv(shader->locations[LOCATION_SHADOW_MAP_LIGHT_VIEW],
-		1, GL_FALSE, glm::value_ptr(view));
+		1, GL_FALSE, view.raw[0]);
 }
 
-void ShadowMap::Init(glm::mat4 projection_light, glm::mat4 view_light) {
+void ShadowMap::Init(glm::mat4 projection_light, mat4s view_light) {
 	shader_shadow_map_init(&shader, projection_light, view_light);
 
 	// Create texture

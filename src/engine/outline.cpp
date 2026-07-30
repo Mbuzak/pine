@@ -21,9 +21,9 @@ void shader_outline_projection_send(ShaderOutline* shader,
 		GL_FALSE, glm::value_ptr(projection));
 }
 
-void shader_outline_view_send(ShaderOutline* shader, glm::mat4 view) {
+void shader_outline_view_send(ShaderOutline* shader, mat4s view) {
 	glUniformMatrix4fv(shader->locations[LOCATION_OUTLINE_VIEW], 1,
-		GL_FALSE, glm::value_ptr(view));
+		GL_FALSE, view.raw[0]);
 }
 
 void shader_outline_model_send(ShaderOutline* shader, glm::mat4 model) {
@@ -31,7 +31,7 @@ void shader_outline_model_send(ShaderOutline* shader, glm::mat4 model) {
 		GL_FALSE, glm::value_ptr(model));
 }
 
-void shader_outline_render(ShaderOutline* shader, glm::mat4 view, int selected_id, Transform* transform, Mesh* mesh) {
+void shader_outline_render(ShaderOutline* shader, mat4s view, int selected_id, Transform* transform, Mesh* mesh) {
 	glm::mat4 model = transform_model_compute(transform);
 	model = glm::scale(model, glm::vec3(1.35, 1.04, 1.35));
 

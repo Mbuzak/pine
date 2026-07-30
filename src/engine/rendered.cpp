@@ -21,15 +21,15 @@ void shader_rendered_projection_send(ShaderRendered* shader,
 		GL_FALSE, glm::value_ptr(projection));
 }
 
-void shader_rendered_view_send(ShaderRendered* shader, glm::mat4 view) {
+void shader_rendered_view_send(ShaderRendered* shader, mat4s view) {
 	glUniformMatrix4fv(shader->locations[LOCATION_RENDERED_VIEW], 1,
-		GL_FALSE, glm::value_ptr(view));
+		GL_FALSE, view.raw[0]);
 }
 
 void shader_rendered_camera_position_send(ShaderRendered* shader,
-	glm::vec3 pos) {
+	vec3s pos) {
 	glUniform3fv(shader->locations[LOCATION_RENDERED_CAMERA_POSITION],
-		1, glm::value_ptr(pos));
+		1, pos.raw);
 }
 
 void rendered_shape_render(ShaderRendered* shader, Shape* shape) {

@@ -1,6 +1,7 @@
 #ifndef PINE_SHADOW
 #define PINE_SHADOW
 
+#include "cglm/struct.h"
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -31,12 +32,12 @@ struct ShaderShadowMap {
 void shader_shadow_map_init(ShaderShadowMap*, glm::mat4, glm::mat4);
 
 void shader_shadow_map_light_projection_send(ShaderShadowMap*, glm::mat4);
-void shader_shadow_map_light_view_send(ShaderShadowMap*, glm::mat4);
+void shader_shadow_map_light_view_send(ShaderShadowMap*, mat4s);
 
 // Shadow map of direction or point light
 class ShadowMap {
 public:
-	void Init(glm::mat4, glm::mat4);
+	void Init(glm::mat4, mat4s);
 
 	// Render shapes to depth map
 	void Render(std::vector<Shape>);

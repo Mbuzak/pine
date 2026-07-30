@@ -15,7 +15,7 @@ void Scene::Setup() {
 
 	// Shaders & renderers
 	glm::mat4 proj_light = orthographic_projection_compute();
-	glm::mat4 view_light = camera_view_compute(&camera_light);
+	mat4s view_light = camera_view_compute(&camera_light);
 	glm::mat4 projection = perspective_projection_compute(d.width, d.height);
 	shader_rendered_init(&shader_rendered, projection);
 	shader_outline_init(&shader_outline, projection);
@@ -130,24 +130,24 @@ int Scene::events_handle() {
 
 void Scene::display() {
 	while (events_handle() != 1) {
-		glm::vec3 dir = direction_compute(camera.rot);
-		glm::vec3 right = right_vector_compute(dir);
-		glm::vec3 speed = glm::vec3(0.5);
+		vec3s dir = direction_compute(camera.rot);
+		vec3s right = right_vector_compute(dir);
+		const float speed = 0.5;
 		if (controller.keys_pressed[SDLK_w] == 1) {
-			glm::vec3 mydir = speed * dir;
-			camera.pos += mydir;
+			vec3s mydir = glms_vec3_scale(dir, speed);
+			camera.pos = glms_vec3_add(camera.pos, mydir);
 		}
 		if (controller.keys_pressed[SDLK_s] == 1) {
-			glm::vec3 mydir = speed * dir;
-			camera.pos -= mydir;
+			vec3s mydir = glms_vec3_scale(dir, speed);
+			camera.pos = glms_vec3_sub(camera.pos, mydir);
 		}
 		if (controller.keys_pressed[SDLK_a] == 1) {
-			glm::vec3 mydir = speed * right;
-			camera.pos += mydir;
+			vec3s mydir = glms_vec3_scale(right, speed);
+			camera.pos = glms_vec3_add(camera.pos, mydir);
 		}
 		if (controller.keys_pressed[SDLK_d] == 1) {
-			glm::vec3 mydir = speed * right;
-			camera.pos -= mydir;
+			vec3s mydir = glms_vec3_scale(right, speed);
+			camera.pos = glms_vec3_sub(camera.pos, mydir);
 		}
 		__CHECK_FOR_ERRORS
 
@@ -162,7 +162,7 @@ void Scene::display() {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-		glm::mat4 view = camera_view_compute(&camera);
+		mat4s view = camera_view_compute(&camera);
 		renderer_skybox_render(&renderer_skybox, view);
 
 		RenderShapes(shader_rendered.id);
@@ -182,9 +182,9 @@ void Scene::RenderToTexture(GLuint program_id) {
 }
 
 void Scene::RenderShapes(GLuint program_id) {
-	glm::mat4 view = camera_view_compute(&camera);
+	mat4s view = camera_view_compute(&camera);
 	glm::mat4 proj_light = orthographic_projection_compute();
-	glm::mat4 view_light = camera_view_compute(&camera_light);
+	mat4s view_light = camera_view_compute(&camera_light);
 
 	// rysowanie obiektów nie-selekcyjnych (identyfikator 0)
 	glStencilFunc(GL_ALWAYS, 0, 0xFF);
@@ -197,13 +197,15 @@ void Scene::RenderShapes(GLuint program_id) {
 		uniform_vec3f_send(program_id, (name + "position").c_str(), lamps[i].transform.pos);
 	}
 	uniform_light_directional_send(program_id, "sun.", &sun);
-	glm::vec3 light_dir = direction_compute(camera_light.rot);
-	uniform_vec3f_send(program_id, "sun.direction", light_dir);
+	vec3s light_dir = direction_compute(camera_light.rot);
+	//uniform_vec3f_send(program_id, "sun.direction", light_dir);
+	glUniform3fv(glGetUniformLocation(program_id, "sun.direction"), 1, light_dir.raw);
 	shader_rendered_view_send(&shader_rendered, view);
 	shader_rendered_camera_position_send(&shader_rendered, camera.pos);
 
 	uniform_mat4f_send(program_id, "lightProj", proj_light);
-	uniform_mat4f_send(program_id, "lightView", view_light);
+	//uniform_mat4f_send(program_id, "lightView", view_light);
+	glUniformMatrix4fv(glGetUniformLocation(program_id, "lightView"), 1, GL_FALSE, view_light.raw[0]);
 
 	dir_shadow_map.SendTexture(program_id);
 
@@ -242,11 +244,16 @@ void Scene::motion(int x, int y) {
 	GLfloat depth;
 	glReadPixels(x, d.height - y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
 
-	glm::mat4 projection = perspective_projection_compute(d.width, d.height);
-	glm::mat4 view = camera_view_compute(&camera);
-	const glm::vec3 window_coords = {x, d.height - y, depth};
-	const glm::vec4 viewport = {0, 0, d.width, d.height};
-	glm::vec3 point = glm::unProject(window_coords, view, projection, viewport);
+	const float FOV = glm_rad(60.0);
+	const float ASPECT_RATIO = d.width / (float)d.height;
+	const float PLANE_NEAR = 0.1;
+	const float PLANE_FAR = 200.0;
+	const mat4s projection = glms_perspective(FOV, ASPECT_RATIO, PLANE_NEAR, PLANE_FAR);
+	mat4s view = camera_view_compute(&camera);
+	mat4s world_space = glms_mat4_mul(projection, view);
+	const vec3s window_coords = {{(float)x, d.height - (float)y, depth}};
+	const vec4s viewport = {{0, 0, (float)d.width, (float)d.height}};
+	vec3s point = glms_unproject(window_coords, world_space, viewport);
 
 	// Update piece world position
 	pieces[selected_id].transform.pos.x = point.x;
