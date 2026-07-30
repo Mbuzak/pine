@@ -3,5 +3,5 @@ add_library(Engine STATIC camera.cpp frame.c light.cpp mesh.cpp
 	uniform.cpp material.cpp skybox.cpp controller.c rendered.cpp outline.cpp
 )
 
-target_link_libraries(Engine PUBLIC SDL2::SDL2)
+target_link_libraries(Engine PUBLIC SDL2::SDL2 PRIVATE cglm)
 target_include_directories(Engine PUBLIC ${CMAKE_SOURCE_DIR}/libs)
