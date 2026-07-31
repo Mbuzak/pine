@@ -16,15 +16,16 @@ void Scene::Setup() {
 	shader_skybox_init(&shaders[SHADERS_SKYBOX]);
 	shader_outline_init(&shaders[SHADERS_OUTLINE]);
 	shader_rendered_init(&shaders[SHADERS_RENDERED]);
+	shader_shadow_map_init(&shaders[SHADERS_SHADOW_MAP]);
 
 	renderer_skybox_init(&renderer_skybox, &shaders[SHADERS_SKYBOX]);
-
-	// Shaders & renderers
-	glm::mat4 proj_light = orthographic_projection_compute();
-	mat4s view_light = camera_view_compute(&camera_light);
-	dir_shadow_map.Init(proj_light, view_light);
+	dir_shadow_map.Init(&shaders[SHADERS_SHADOW_MAP]);
 
 	const mat4s proj = perspective_projection_compute(d.width, d.height);
+	mat4s proj_light = orthographic_projection_compute();
+	mat4s view_light = camera_view_compute(&camera_light);
+	uniform_mat4_send(shaders, SHADERS_COUNT, UNIFORM_LIGHT_PROJECTION, proj_light);
+	uniform_mat4_send(shaders, SHADERS_COUNT, UNIFORM_LIGHT_VIEW, view_light);
 	uniform_mat4_send(shaders, SHADERS_COUNT, UNIFORM_PROJECTION, proj);
 
 	// Load models
@@ -168,6 +169,7 @@ void Scene::display() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 		mat4s view = camera_view_compute(&camera);
+		uniform_vec3_send(shaders, SHADERS_COUNT, UNIFORM_CAMERA_COORDS, camera.pos);
 		uniform_mat4_send(shaders, SHADERS_COUNT, UNIFORM_VIEW, view);
 
 		renderer_skybox_render(&renderer_skybox);
@@ -189,9 +191,6 @@ void Scene::RenderToTexture(GLuint program_id) {
 }
 
 void Scene::RenderShapes(GLuint program_id) {
-	glm::mat4 proj_light = orthographic_projection_compute();
-	mat4s view_light = camera_view_compute(&camera_light);
-
 	// rysowanie obiektów nie-selekcyjnych (identyfikator 0)
 	glStencilFunc(GL_ALWAYS, 0, 0xFF);
 
@@ -205,10 +204,6 @@ void Scene::RenderShapes(GLuint program_id) {
 	uniform_light_directional_send(program_id, "sun.", &sun);
 	vec3s light_dir = direction_compute(camera_light.rot);
 	glUniform3fv(glGetUniformLocation(program_id, "sun.direction"), 1, light_dir.raw);
-	glUniform3fv(glGetUniformLocation(shaders[SHADERS_RENDERED].id, "cameraPos"), 1, camera.pos.raw);
-
-	uniform_mat4f_send(program_id, "lightProj", proj_light);
-	glUniformMatrix4fv(glGetUniformLocation(program_id, "lightView"), 1, GL_FALSE, view_light.raw[0]);
 
 	dir_shadow_map.SendTexture(program_id);
 
@@ -271,11 +266,11 @@ mat4s perspective_projection_compute(float width, float height) {
 	return glms_perspective(FOV, ASPECT_RATIO, PLANE_NEAR, PLANE_FAR);
 }
 
-glm::mat4 orthographic_projection_compute() {
+mat4s orthographic_projection_compute() {
 	const float SIZE = 18.0;
 	const float PLANE_NEAR = 2.0;
 	const float PLANE_FAR = 35.5;
-	return glm::ortho(-SIZE, SIZE, -SIZE, SIZE, PLANE_NEAR, PLANE_FAR);
+	return glms_ortho(-SIZE, SIZE, -SIZE, SIZE, PLANE_NEAR, PLANE_FAR);
 }
 
 int selection_id_compute(int x, int y) {

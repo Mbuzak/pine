@@ -17,27 +17,12 @@ extern "C" {
 }
 #endif
 
-enum LocationShadowMap {
-	LOCATION_SHADOW_MAP_LIGHT_PROJECTION,
-	LOCATION_SHADOW_MAP_LIGHT_VIEW,
-	LOCATION_SHADOW_MAP_MODEL,
-	LOCATION_SHADOW_MAP_COUNT
-};
-
-struct ShaderShadowMap {
-	GLuint id;
-	GLuint locations[LOCATION_SHADOW_MAP_COUNT];
-};
-
-void shader_shadow_map_init(ShaderShadowMap*, glm::mat4, glm::mat4);
-
-void shader_shadow_map_light_projection_send(ShaderShadowMap*, glm::mat4);
-void shader_shadow_map_light_view_send(ShaderShadowMap*, mat4s);
+void shader_shadow_map_init(Shader*);
 
 // Shadow map of direction or point light
 class ShadowMap {
 public:
-	void Init(glm::mat4, mat4s);
+	void Init(Shader*);
 
 	// Render shapes to depth map
 	void Render(std::vector<Shape>);
@@ -48,7 +33,7 @@ public:
 	const unsigned int width = 1024;
 	const unsigned int height = 1024;
 
-	ShaderShadowMap shader;
+	Shader* shader;
 	GLuint fbo_id;
 	GLuint texture_id;
 };

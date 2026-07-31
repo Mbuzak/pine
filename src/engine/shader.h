@@ -23,6 +23,10 @@ enum Uniform {
 	UNIFORM_VIEW,
 	UNIFORM_MODEL,
 	UNIFORM_TEXTURE,
+	UNIFORM_LIGHT_PROJECTION,
+	UNIFORM_LIGHT_VIEW,
+	UNIFORM_SHADOW_TEXTURE,
+	UNIFORM_CAMERA_COORDS,
 	UNIFORM_COUNT
 };
 
@@ -33,6 +37,7 @@ typedef struct {
 
 void shader_init(Shader* shader, const char* name, const int count, const int* uniform_ids, const char uniform_names[][32]);
 
+void uniform_vec3_send(Shader*, int, int, vec3s);
 void uniform_mat4_send(Shader*, int, int, mat4s);
 
 #endif

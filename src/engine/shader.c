@@ -126,6 +126,17 @@ void shader_init(Shader* shader, const char* name, const int count,
 	}
 }
 
+void uniform_vec3_send(Shader* shaders, int count, int uniform_id, vec3s vec) {
+	for (int i = 0; i < count; i++) {
+		int location = shaders[i].locations[uniform_id];
+		if (location != -1) {
+			glUseProgram(shaders[i].id);
+			glUniform3fv(location, 1, vec.raw);
+			glUseProgram(0);
+		}
+	}
+}
+
 void uniform_mat4_send(Shader* shaders, int count, int uniform_id, mat4s mat) {
 	for (int i = 0; i < count; i++) {
 		int location = shaders[i].locations[uniform_id];

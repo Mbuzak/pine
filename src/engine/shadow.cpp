@@ -1,37 +1,23 @@
 #include "shadow.hpp"
 
-void shader_shadow_map_init(ShaderShadowMap* shader,
-	glm::mat4 light_projection, mat4s light_view)
-{
-	shader->id = program_init("shadow_map");
-	shader->locations[LOCATION_SHADOW_MAP_LIGHT_PROJECTION] =
-		glGetUniformLocation(shader->id, "lightProj");
-	shader->locations[LOCATION_SHADOW_MAP_LIGHT_VIEW] =
-		glGetUniformLocation(shader->id, "lightView");
-	shader->locations[LOCATION_SHADOW_MAP_MODEL] =
-		glGetUniformLocation(shader->id, "matModel");
+void shader_shadow_map_init(Shader* shader) {
+	const int COUNT = 3;
+	const int UNIFORM_IDS[COUNT] = {
+		UNIFORM_LIGHT_PROJECTION,
+		UNIFORM_LIGHT_VIEW,
+		UNIFORM_MODEL,
+	};
+	char UNIFORM_NAMES[COUNT][32] = {
+		"lightProj",
+		"lightView",
+		"matModel",
+	};
 
-	// Send default uniforms
-	glUseProgram(shader->id);
-	shader_shadow_map_light_projection_send(shader, light_projection);
-	shader_shadow_map_light_view_send(shader, light_view);
-	glUseProgram(0);
+	shader_init(shader, "shadow_map", COUNT, UNIFORM_IDS, UNIFORM_NAMES);
 }
 
-void shader_shadow_map_light_projection_send(ShaderShadowMap* shader,
-	glm::mat4 projection)
-{
-	glUniformMatrix4fv(shader->locations[LOCATION_SHADOW_MAP_LIGHT_PROJECTION],
-		1, GL_FALSE, glm::value_ptr(projection));
-}
-
-void shader_shadow_map_light_view_send(ShaderShadowMap* shader, mat4s view) {
-	glUniformMatrix4fv(shader->locations[LOCATION_SHADOW_MAP_LIGHT_VIEW],
-		1, GL_FALSE, view.raw[0]);
-}
-
-void ShadowMap::Init(glm::mat4 projection_light, mat4s view_light) {
-	shader_shadow_map_init(&shader, projection_light, view_light);
+void ShadowMap::Init(Shader* shader) {
+	this->shader = shader;
 
 	// Create texture
 	glGenTextures(1, &texture_id);
@@ -62,9 +48,9 @@ void ShadowMap::Render(std::vector<Shape> pieces) {
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo_id);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-	glUseProgram(shader.id);
+	glUseProgram(shader->id);
 	for (Shape piece: pieces) {
-		glUniformMatrix4fv(shader.locations[LOCATION_SHADOW_MAP_MODEL],
+		glUniformMatrix4fv(shader->locations[UNIFORM_MODEL],
 			1, GL_FALSE, glm::value_ptr(transform_model_compute(&piece.transform)));
 		mesh_texture_draw(piece.mesh);
 	}

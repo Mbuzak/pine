@@ -40,6 +40,7 @@ enum Shaders {
 	SHADERS_RENDERED,
 	SHADERS_SKYBOX,
 	SHADERS_OUTLINE,
+	SHADERS_SHADOW_MAP,
 	SHADERS_COUNT
 };
 
@@ -82,7 +83,7 @@ public:
 };
 
 mat4s perspective_projection_compute(float, float);
-glm::mat4 orthographic_projection_compute();
+mat4s orthographic_projection_compute();
 
 int selection_id_compute(int, int);
 
