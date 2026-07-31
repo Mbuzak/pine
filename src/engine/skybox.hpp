@@ -7,11 +7,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "mesh.hpp"
-#include "camera.hpp"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+#include "camera.h"
 #include "shader.h"
 #include "texture.h"
 #ifdef __cplusplus

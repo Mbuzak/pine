@@ -14,7 +14,6 @@
 #include "engine/entity.hpp"
 #include "engine/light.hpp"
 #include "engine/shadow.hpp"
-#include "engine/camera.hpp"
 #include "engine/skybox.hpp"
 #include "engine/rendered.hpp"
 #include "engine/outline.hpp"
@@ -25,6 +24,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#include "engine/camera.h"
 #include "engine/shader.h"
 #include "engine/display.h"
 #include "engine/frame.h"

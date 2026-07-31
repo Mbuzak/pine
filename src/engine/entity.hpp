@@ -5,12 +5,12 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "mesh.hpp"
-#include "material.hpp"
 #include "light.hpp"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+#include "material.h"
 #include "texture.h"
 #ifdef __cplusplus
 }

@@ -1,4 +1,4 @@
-#include "camera.hpp"
+#include "camera.h"
 
 vec3s direction_compute(vec2s rot) {
 	vec3s dir = {{cos(glm_rad(rot.y)) * cos(glm_rad(rot.x)), sin(glm_rad(rot.x)), sin(glm_rad(rot.y)) * cos(glm_rad(rot.x))}};

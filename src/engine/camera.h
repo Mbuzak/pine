@@ -1,5 +1,5 @@
-#ifndef CAMERA_HPP
-#define CAMERA_HPP
+#ifndef PINE_CAMERA_H
+#define PINE_CAMERA_H
 
 #include "cglm/struct.h"
 #include <GL/glew.h>
