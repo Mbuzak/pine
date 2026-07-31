@@ -18,6 +18,6 @@ extern "C" {
 #endif
 
 void shader_outline_init(Shader*);
-void shader_outline_render(Shader*, mat4s, int, Transform*, Mesh*);
+void shader_outline_render(Shader*, int, Transform*, Mesh*);
 
 #endif

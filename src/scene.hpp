@@ -36,6 +36,13 @@ extern "C" {
 
 #define __CHECK_FOR_ERRORS 	{GLenum errCode; if ((errCode = glGetError()) != GL_NO_ERROR) printf("Error (%d): %s in file %s at line %d !\n", errCode, gluErrorString(errCode), __FILE__,  __LINE__);}
 
+enum Shaders {
+	SHADERS_RENDERED,
+	SHADERS_SKYBOX,
+	SHADERS_OUTLINE,
+	SHADERS_COUNT
+};
+
 class Scene {
 public:
 	Scene() = default;
@@ -44,9 +51,7 @@ public:
 	RendererSkybox renderer_skybox;
 	RendererTerrain renderer_terrain;
 
-	ShaderRendered shader_rendered;
-	static const int SHADER_COUNT = 2;
-	Shader shaders[SHADER_COUNT];
+	Shader shaders[SHADERS_COUNT];
 
 	Camera camera;
 	Camera camera_light;
@@ -76,7 +81,7 @@ public:
 	void display();
 };
 
-glm::mat4 perspective_projection_compute(float, float);
+mat4s perspective_projection_compute(float, float);
 glm::mat4 orthographic_projection_compute();
 
 int selection_id_compute(int, int);

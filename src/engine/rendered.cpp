@@ -1,38 +1,22 @@
 #include "rendered.hpp"
 
-void shader_rendered_init(ShaderRendered* shader, glm::mat4 projection) {
-	shader->id = program_init("rendered");
-	shader->locations[LOCATION_RENDERED_PROJECTION] =
-		glGetUniformLocation(shader->id, "matProj");
-	shader->locations[LOCATION_RENDERED_VIEW] =
-		glGetUniformLocation(shader->id, "matView");
-	shader->locations[LOCATION_RENDERED_CAMERA_POSITION] =
-		glGetUniformLocation(shader->id, "cameraPos");
+void shader_rendered_init(Shader* shader) {
+	const int COUNT = 3;
+	const int UNIFORM_IDS[COUNT] = {
+		UNIFORM_PROJECTION,
+		UNIFORM_VIEW,
+		UNIFORM_MODEL,
+	};
+	char UNIFORM_NAMES[COUNT][32] = {
+		"matProj",
+		"matView",
+		"matModel",
+	};
 
-	glUseProgram(shader->id);
-	shader_rendered_projection_send(shader, projection);
-	glUseProgram(0);
+	shader_init(shader, "rendered", COUNT, UNIFORM_IDS, UNIFORM_NAMES);
 }
 
-void shader_rendered_projection_send(ShaderRendered* shader,
-	glm::mat4 projection)
-{
-	glUniformMatrix4fv(shader->locations[LOCATION_RENDERED_PROJECTION], 1,
-		GL_FALSE, glm::value_ptr(projection));
-}
-
-void shader_rendered_view_send(ShaderRendered* shader, mat4s view) {
-	glUniformMatrix4fv(shader->locations[LOCATION_RENDERED_VIEW], 1,
-		GL_FALSE, view.raw[0]);
-}
-
-void shader_rendered_camera_position_send(ShaderRendered* shader,
-	vec3s pos) {
-	glUniform3fv(shader->locations[LOCATION_RENDERED_CAMERA_POSITION],
-		1, pos.raw);
-}
-
-void rendered_shape_render(ShaderRendered* shader, Shape* shape) {
+void rendered_shape_render(Shader* shader, Shape* shape) {
 	glm::mat4 model = transform_model_compute(&shape->transform);
 	uniform_mat4f_send(shader->id, "matModel", model);
 	glm::mat3 matNormal = glm::transpose(glm::inverse(model));

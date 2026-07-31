@@ -28,15 +28,11 @@ void renderer_skybox_destroy(RendererSkybox* renderer) {
 	program_destroy(renderer->shader->id);
 }
 
-void renderer_skybox_render(RendererSkybox* renderer, mat4s view) {
+void renderer_skybox_render(RendererSkybox* renderer) {
 	const float size = 80.0;
 	glm::mat4 scale = glm::scale(glm::mat4(1), glm::vec3(size));
 
 	glUseProgram(renderer->shader->id);
-	// Send view uniform
-	glUniformMatrix4fv(renderer->shader->locations[UNIFORM_VIEW],
-		1, GL_FALSE, view.raw[0]);
-
 	// Send model uniform
 	glUniformMatrix4fv(renderer->shader->locations[UNIFORM_MODEL],
 		1, GL_FALSE, glm::value_ptr(scale));

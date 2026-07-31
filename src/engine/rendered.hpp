@@ -18,24 +18,8 @@ extern "C" {
 }
 #endif
 
-enum LocationRendered {
-	LOCATION_RENDERED_PROJECTION,
-	LOCATION_RENDERED_VIEW,
-	LOCATION_RENDERED_CAMERA_POSITION,
-	LOCATION_RENDERED_COUNT
-};
+void shader_rendered_init(Shader*);
 
-struct ShaderRendered {
-	GLuint id;
-	GLuint locations[LOCATION_RENDERED_COUNT];
-};
-
-void shader_rendered_init(ShaderRendered*, glm::mat4);
-
-void shader_rendered_projection_send(ShaderRendered*, glm::mat4);
-void shader_rendered_view_send(ShaderRendered*, mat4s);
-void shader_rendered_camera_position_send(ShaderRendered*, vec3s);
-
-void rendered_shape_render(ShaderRendered*, Shape*);
+void rendered_shape_render(Shader*, Shape*);
 
 #endif

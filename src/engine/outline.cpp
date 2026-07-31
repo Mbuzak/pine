@@ -16,7 +16,7 @@ void shader_outline_init(Shader* shader) {
 	shader_init(shader, "outline", COUNT, UNIFORM_IDS, UNIFORM_NAMES);
 }
 
-void shader_outline_render(Shader* shader, mat4s view, int selected_id, Transform* transform, Mesh* mesh) {
+void shader_outline_render(Shader* shader, int selected_id, Transform* transform, Mesh* mesh) {
 	glm::mat4 model = transform_model_compute(transform);
 	model = glm::scale(model, glm::vec3(1.35, 1.04, 1.35));
 
@@ -24,7 +24,6 @@ void shader_outline_render(Shader* shader, mat4s view, int selected_id, Transfor
 	glStencilFunc(GL_NOTEQUAL, selected_id + 1, 0xFF);
 	glDisable(GL_DEPTH_TEST);
 	glUseProgram(shader->id);
-	glUniformMatrix4fv(shader->locations[UNIFORM_VIEW], 1, GL_FALSE, view.raw[0]);
 	glUniformMatrix4fv(shader->locations[UNIFORM_MODEL], 1, GL_FALSE, glm::value_ptr(model));
 	mesh_texture_draw(mesh);
 

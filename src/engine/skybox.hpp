@@ -28,6 +28,6 @@ void shader_skybox_init(Shader*);
 
 void renderer_skybox_init(RendererSkybox*, Shader*);
 void renderer_skybox_destroy(RendererSkybox*);
-void renderer_skybox_render(RendererSkybox*, mat4s);
+void renderer_skybox_render(RendererSkybox*);
 
 #endif
