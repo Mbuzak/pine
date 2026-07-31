@@ -13,21 +13,33 @@ void Scene::Setup() {
 
 	sun = sun_init();
 
+	shader_skybox_init(&shaders[0]);
+	renderer_skybox_init(&renderer_skybox, &shaders[0]);
+
+	shader_outline_init(&shaders[1]);
+
+	const float FOV = glm_rad(60.0);
+	const float ASPECT_RATIO = d.width / (float)d.height;
+	const float PLANE_NEAR = 0.1;
+	const float PLANE_FAR = 200.0;
+	const mat4s proj = glms_perspective(FOV, ASPECT_RATIO, PLANE_NEAR, PLANE_FAR);
+
 	// Shaders & renderers
 	glm::mat4 proj_light = orthographic_projection_compute();
 	mat4s view_light = camera_view_compute(&camera_light);
 	glm::mat4 projection = perspective_projection_compute(d.width, d.height);
 	shader_rendered_init(&shader_rendered, projection);
-	shader_outline_init(&shader_outline, projection);
-	renderer_skybox_init(&renderer_skybox, projection);
 	dir_shadow_map.Init(proj_light, view_light);
 
+	uniform_mat4_send(shaders, SHADER_COUNT, UNIFORM_PROJECTION, proj);
+
 	// Load models
-	std::vector<std::string> model_names = {"pawn", "knight", "bishop", "rook", "king", "queen"};
-	for (std::string &name: model_names) {
+	const int MODEL_COUNT = 6;
+	char model_names[MODEL_COUNT][16] = {"pawn", "knight", "bishop", "rook", "king", "queen"};
+	for (int i = 0; i < MODEL_COUNT; i++) {
 		Mesh mesh;
-		mesh_texture_init(&mesh, name);
-		meshes.insert({name, mesh});
+		mesh_texture_init(&mesh, model_names[i]);
+		meshes.insert({model_names[i], mesh});
 	}
 
 	renderer_terrain_init(&renderer_terrain);
@@ -41,9 +53,8 @@ void Scene::Setup() {
 		lamp_init(&lamps[i], {(rand() % 40) - 20, 0.2, (rand() % 40) - 20});
 	}
 
-	std::vector<std::string> cn = {"pawn", "knight", "bishop", "rook", "queen", "king"};
 	for (int i = 0; i < 32; i++) {
-		std::string name = cn[rand() % cn.size()];
+		std::string name = model_names[rand() % MODEL_COUNT];
 		GLuint t = (rand() % 2) ? textures[TEX_WHT] : textures[TEX_BLC];
 		glm::vec3 pos = { (rand() % 40) - 20, 0.1, (rand() % 40) - 20 };
 		Shape piece;
@@ -220,7 +231,7 @@ void Scene::RenderShapes(GLuint program_id) {
 	}
 
 	if (selected_id >= 0) {
-		shader_outline_render(&shader_outline, view, selected_id,
+		shader_outline_render(&shaders[1], view, selected_id,
 			&pieces[selected_id].transform, pieces[selected_id].mesh);
 	}
 

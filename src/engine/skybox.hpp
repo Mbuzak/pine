@@ -19,14 +19,14 @@ extern "C" {
 #endif
 
 struct RendererSkybox {
-	Shader shader;
+	Shader* shader;
 	Mesh mesh;
 	GLuint texture_id;
 };
 
 void shader_skybox_init(Shader*);
 
-void renderer_skybox_init(RendererSkybox*, glm::mat4);
+void renderer_skybox_init(RendererSkybox*, Shader*);
 void renderer_skybox_destroy(RendererSkybox*);
 void renderer_skybox_render(RendererSkybox*, mat4s);
 

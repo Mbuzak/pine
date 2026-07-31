@@ -45,7 +45,8 @@ public:
 	RendererTerrain renderer_terrain;
 
 	ShaderRendered shader_rendered;
-	ShaderOutline shader_outline;
+	static const int SHADER_COUNT = 2;
+	Shader shaders[SHADER_COUNT];
 
 	Camera camera;
 	Camera camera_light;

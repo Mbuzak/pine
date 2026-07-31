@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "cglm/struct.h"
 
 /* Creates program with vertex and fragment shader
  * filename - name for both vertex and fragment shader file
@@ -29,5 +30,9 @@ typedef struct {
 	GLuint id;
 	GLuint* locations;
 } Shader;
+
+void shader_init(Shader* shader, const char* name, const int count, const int* uniform_ids, const char uniform_names[][32]);
+
+void uniform_mat4_send(Shader*, int, int, mat4s);
 
 #endif

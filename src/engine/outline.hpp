@@ -17,22 +17,7 @@ extern "C" {
 }
 #endif
 
-enum LocationOutline {
-	LOCATION_OUTLINE_PROJECTION,
-	LOCATION_OUTLINE_VIEW,
-	LOCATION_OUTLINE_MODEL,
-	LOCATION_OUTLINE_COUNT
-};
-
-struct ShaderOutline {
-	GLuint id;
-	GLuint locations[LOCATION_OUTLINE_COUNT];
-};
-
-void shader_outline_init(ShaderOutline*, glm::mat4);
-void shader_outline_projection_send(ShaderOutline*, glm::mat4);
-void shader_outline_view_send(ShaderOutline*, mat4s);
-void shader_outline_model_send(ShaderOutline*, glm::mat4);
-void shader_outline_render(ShaderOutline*, mat4s, int, Transform*, Mesh*);
+void shader_outline_init(Shader*);
+void shader_outline_render(Shader*, mat4s, int, Transform*, Mesh*);
 
 #endif

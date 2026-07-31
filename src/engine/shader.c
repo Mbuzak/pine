@@ -110,3 +110,29 @@ void program_error_check(GLuint program, GLenum mode) {
 		free(log);
 	}
 }
+
+void shader_init(Shader* shader, const char* name, const int count,
+				 const int* uniform_ids, const char uniform_names[][32]) {
+	shader->id = program_init(name);
+	shader->locations = malloc(sizeof(GLuint) * UNIFORM_COUNT);
+
+	for (int i = 0; i < UNIFORM_COUNT; i++) {
+		shader->locations[i] = -1;
+	}
+
+	for (int i = 0; i < count; i++) {
+		shader->locations[uniform_ids[i]] =
+			glGetUniformLocation(shader->id, uniform_names[i]);
+	}
+}
+
+void uniform_mat4_send(Shader* shaders, int count, int uniform_id, mat4s mat) {
+	for (int i = 0; i < count; i++) {
+		int location = shaders[i].locations[uniform_id];
+		if (location != -1) {
+			glUseProgram(shaders[i].id);
+			glUniformMatrix4fv(location, 1, GL_FALSE, mat.raw[0]);
+			glUseProgram(0);
+		}
+	}
+}
