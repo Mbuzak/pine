@@ -12,7 +12,6 @@
 #include <map>
 #include "engine/mesh.hpp"
 #include "engine/entity.hpp"
-#include "engine/light.hpp"
 #include "engine/shadow.hpp"
 #include "engine/skybox.hpp"
 #include "engine/rendered.hpp"
@@ -30,6 +29,7 @@ extern "C" {
 #include "engine/frame.h"
 #include "engine/controller.h"
 #include "engine/texture.h"
+#include "engine/light.h"
 #ifdef __cplusplus
 }
 #endif

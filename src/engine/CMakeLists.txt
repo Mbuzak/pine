@@ -1,4 +1,4 @@
-add_library(Engine STATIC camera.c frame.c light.cpp mesh.cpp
+add_library(Engine STATIC camera.c frame.c light.c mesh.cpp
 	entity.cpp shader.c shadow.cpp texture.c display.c terrain.cpp
 	uniform.cpp material.c skybox.cpp controller.c rendered.cpp outline.cpp
 )

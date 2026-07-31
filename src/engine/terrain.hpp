@@ -3,6 +3,7 @@
 
 #include "SDL2/SDL.h"
 #include "entity.hpp"
+#include "uniform.hpp"
 
 #ifdef __cplusplus
 extern "C" {
