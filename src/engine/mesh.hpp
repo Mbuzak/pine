@@ -1,10 +1,11 @@
 #ifndef PINE_MESH
 #define PINE_MESH
 
-#include <GL/glew.h>
-#include <glm/glm.hpp>
+#include "cglm/struct.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <iostream>
+#include <GL/glew.h>
 #include <string>
 #include <vector>
 
@@ -30,11 +31,11 @@ struct Mesh {
 void mesh_terrain_init(Mesh*);
 
 int mesh_raw_init(Mesh*);
-int mesh_texture_init(Mesh*, std::string);
+int mesh_texture_init(Mesh*, const char*);
 
 void mesh_raw_draw(Mesh*);
 void mesh_texture_draw(Mesh*);
 
-bool load_obj(const char*, std::vector<glm::vec3>&, std::vector<glm::vec2>&, std::vector<glm::vec3>&);
+bool load_obj(const char*, std::vector<vec3s>&, std::vector<vec2s>&, std::vector<vec3s>&);
 
 #endif

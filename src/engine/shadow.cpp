@@ -51,7 +51,7 @@ void ShadowMap::Render(std::vector<Shape> pieces) {
 	glUseProgram(shader->id);
 	for (Shape piece: pieces) {
 		glUniformMatrix4fv(shader->locations[UNIFORM_MODEL],
-			1, GL_FALSE, glm::value_ptr(transform_model_compute(&piece.transform)));
+			1, GL_FALSE, transform_model_compute(&piece.transform).raw[0]);
 		mesh_texture_draw(piece.mesh);
 	}
 	glUseProgram(0);

@@ -16,14 +16,13 @@ uniform mat4 matProj;
 uniform mat4 matView;
 uniform mat4 matModel;
 
-uniform mat3 matNormal;
-
 uniform mat4 lightProj;
 uniform mat4 lightView;
 
 void main() {
 	out_data.position = matModel * inPosition;
 	out_data.uv = inUV;
+	mat3 matNormal = mat3(transpose(inverse(matModel)));
 	out_data.normal = normalize(matNormal * inNormal);
 	out_data.position_light = lightProj * lightView * matModel * inPosition;
 

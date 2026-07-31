@@ -11,13 +11,11 @@ void renderer_terrain_init(RendererTerrain* renderer) {
 	frame_init(&renderer->frame);
 }
 
-void renderer_terrain_render(RendererTerrain* renderer, GLuint shader_id) {
-	glm::mat4 model = glm::translate(glm::mat4(1.0),
-		{ renderer->position.x, 0, renderer->position.y });
-	uniform_mat4f_send(shader_id, "matModel", model);
-	glm::mat3 matNormal = glm::transpose(glm::inverse(model));
-	glUniformMatrix3fv(glGetUniformLocation(shader_id, "matNormal"), 1, GL_FALSE, glm::value_ptr(matNormal));
-	uniform_material_send(shader_id, "my_material.", &renderer->material);
-	texture_2d_send(shader_id, renderer->texture_id);
+void renderer_terrain_render(RendererTerrain* renderer, Shader* shader) {
+	vec3s pos = { renderer->position.x, 0, renderer->position.y };
+	mat4s model = glms_translate(glms_mat4_identity(), pos);
+	glUniformMatrix4fv(shader->locations[UNIFORM_MODEL], 1, GL_FALSE, model.raw[0]);
+	uniform_material_send(shader->id, "my_material.", &renderer->material);
+	texture_2d_send(shader->id, renderer->texture_id);
 	mesh_raw_draw(&renderer->mesh);
 }

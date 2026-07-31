@@ -3,9 +3,6 @@
 
 #include "cglm/struct.h"
 #include <GL/glew.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <vector>
 #include "entity.hpp"
 

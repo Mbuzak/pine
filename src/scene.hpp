@@ -17,7 +17,6 @@
 #include "engine/rendered.hpp"
 #include "engine/outline.hpp"
 #include "engine/terrain.hpp"
-#include "engine/uniform.hpp"
 #include "SDL2/SDL.h"
 
 #ifdef __cplusplus

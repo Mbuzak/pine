@@ -51,7 +51,7 @@ void Scene::Setup() {
 	for (int i = 0; i < 32; i++) {
 		std::string name = model_names[rand() % MODEL_COUNT];
 		GLuint t = (rand() % 2) ? textures[TEX_WHT] : textures[TEX_BLC];
-		glm::vec3 pos = { (rand() % 40) - 20, 0.1, (rand() % 40) - 20 };
+		vec3s pos = { (rand() % 40) - 20, 0.1, (rand() % 40) - 20 };
 		Shape piece;
 		shape_init(&piece, pos, &meshes.at(name), t);
 		pieces.push_back(piece);
@@ -186,7 +186,7 @@ void Scene::RenderToTexture(GLuint program_id) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(program_id);
-	renderer_terrain_render(&renderer_terrain, shaders[SHADERS_RENDERED].id);
+	renderer_terrain_render(&renderer_terrain, &shaders[SHADERS_RENDERED]);
 	glUseProgram(0);
 }
 
@@ -199,7 +199,7 @@ void Scene::RenderShapes(GLuint program_id) {
 	for (int i = 0; i < lamps.size(); i++) {
 		std::string name = "lights[" + std::to_string(i) + "].";
 		uniform_light_point_send(program_id, name.c_str(), &lamps[i].light);
-		uniform_vec3f_send(program_id, (name + "position").c_str(), lamps[i].transform.pos);
+		glUniform3fv(glGetUniformLocation(program_id, (name + "position").c_str()), 1, lamps[i].transform.pos.raw);
 	}
 	uniform_light_directional_send(program_id, "sun.", &sun);
 	vec3s light_dir = direction_compute(camera_light.rot);
@@ -208,7 +208,7 @@ void Scene::RenderShapes(GLuint program_id) {
 	dir_shadow_map.SendTexture(program_id);
 
 	glUniform1i(glGetUniformLocation(shaders[SHADERS_RENDERED].id, "is_terrain"), 1);
-	renderer_terrain_render(&renderer_terrain, shaders[SHADERS_RENDERED].id);
+	renderer_terrain_render(&renderer_terrain, &shaders[SHADERS_RENDERED]);
 	glUniform1i(glGetUniformLocation(shaders[SHADERS_RENDERED].id, "is_terrain"), 0);
 	
 	glUseProgram(program_id);

@@ -1,9 +1,7 @@
 #ifndef PINE_TERRAIN_HPP
 #define PINE_TERRAIN_HPP
 
-#include "SDL2/SDL.h"
 #include "entity.hpp"
-#include "uniform.hpp"
 
 #ifdef __cplusplus
 extern "C" {
@@ -11,12 +9,13 @@ extern "C" {
 #include "frame.h"
 #include "texture.h"
 #include "display.h"
+#include "shader.h"
 #ifdef __cplusplus
 }
 #endif
 
 struct RendererTerrain {
-	glm::vec2 position;
+	vec2s position;
 	Mesh mesh;
 	Material material;
 	GLuint texture_id;
@@ -26,6 +25,6 @@ struct RendererTerrain {
 
 void renderer_terrain_init(RendererTerrain*);
 
-void renderer_terrain_render(RendererTerrain*, GLuint);
+void renderer_terrain_render(RendererTerrain*, Shader*);
 
 #endif

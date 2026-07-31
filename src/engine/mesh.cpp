@@ -96,13 +96,16 @@ int mesh_raw_init(Mesh* mesh) {
 	return 0;
 }
 
-int mesh_texture_init(Mesh* mesh, std::string filename) {
-	std::string path = "res/models/" + filename + ".obj";
-	std::vector<glm::vec3> vertices;
-	std::vector<glm::vec2> uvs;
-	std::vector<glm::vec3> normals;
-	if (!load_obj(path.c_str(), vertices, uvs, normals)) {
-		std::cout << "Error: Mesh path: " << path << " not exists!\n";
+int mesh_texture_init(Mesh* mesh, const char* filename) {
+	char path[32];
+	strcpy(path, "res/models/");
+	strcat(path, filename);
+	strcat(path, ".obj");
+	std::vector<vec3s> vertices;
+	std::vector<vec2s> uvs;
+	std::vector<vec3s> normals;
+	if (!load_obj(path, vertices, uvs, normals)) {
+		printf("Error: Mesh path: %s not exists!\n", path);
 		exit(0);
 	}
 	mesh->size = vertices.size();
@@ -115,17 +118,17 @@ int mesh_texture_init(Mesh* mesh, std::string filename) {
 	glGenBuffers(MESH_TEXTURE_COUNT, mesh->vbos);
 
 	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbos[MESH_TEXTURE_POSITIONS]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vec3s) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbos[MESH_TEXTURE_UV_COORDS]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * uvs.size(), &uvs[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vec2s) * uvs.size(), &uvs[0], GL_STATIC_DRAW);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(1);
 
 	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbos[MESH_TEXTURE_NORMALS]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * normals.size(), &normals[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vec3s) * normals.size(), &normals[0], GL_STATIC_DRAW);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(2);
 
@@ -146,14 +149,14 @@ void mesh_texture_draw(Mesh* mesh) {
 	glBindVertexArray(0);
 }
 
-bool load_obj(const char* path, std::vector<glm::vec3>& out_vertices,
-	std::vector<glm::vec2>& out_uvs, std::vector<glm::vec3>& out_normals) {
+bool load_obj(const char* path, std::vector<vec3s>& out_vertices,
+	std::vector<vec2s>& out_uvs, std::vector<vec3s>& out_normals) {
 	printf("Loading OBJ file %s ... ", path);
 
 	std::vector<unsigned int> vertexIndices, uvIndices, normalIndices;
-	std::vector<glm::vec3> temp_vertices;
-	std::vector<glm::vec2> temp_uvs;
-	std::vector<glm::vec3> temp_normals;
+	std::vector<vec3s> temp_vertices;
+	std::vector<vec2s> temp_uvs;
+	std::vector<vec3s> temp_normals;
 
 	FILE* file = fopen(path, "r");
 	if(file == NULL){
@@ -172,13 +175,13 @@ bool load_obj(const char* path, std::vector<glm::vec3>& out_vertices,
 
 		// read vertex coordinates
 		if (strcmp(lineHeader, "v") == 0) {
-			glm::vec3 vertex;
+			vec3s vertex;
 			fscanf(file, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z);
 			temp_vertices.push_back(vertex);
 		}
 		// read texture coordinates
 		else if (strcmp(lineHeader, "vt") == 0) {
-			glm::vec2 uv;
+			vec2s uv;
 			fscanf(file, "%f %f\n", &uv.x, &uv.y);
 			// Invert V coordinate since we will only use DDS texture,
 			// which are inverted. Remove if you want to use TGA or BMP loaders.
@@ -187,7 +190,7 @@ bool load_obj(const char* path, std::vector<glm::vec3>& out_vertices,
 		}
 		// read normal vectors
 		else if (strcmp(lineHeader, "vn") == 0) {
-			glm::vec3 normal;
+			vec3s normal;
 			fscanf(file, "%f %f %f\n", &normal.x, &normal.y, &normal.z);
 			temp_normals.push_back(normal);
 		}
@@ -231,9 +234,9 @@ bool load_obj(const char* path, std::vector<glm::vec3>& out_vertices,
 		unsigned int normalIndex = normalIndices[i];
 
 		// Get the attributes thanks to the index
-		glm::vec3 vertex = temp_vertices[ vertexIndex-1 ];
-		glm::vec2 uv = temp_uvs[ uvIndex-1 ];
-		glm::vec3 normal = temp_normals[ normalIndex-1 ];
+		vec3s vertex = temp_vertices[ vertexIndex-1 ];
+		vec2s uv = temp_uvs[ uvIndex-1 ];
+		vec3s normal = temp_normals[ normalIndex-1 ];
 
 		// Put the attributes in buffers
 		out_vertices.push_back(vertex);

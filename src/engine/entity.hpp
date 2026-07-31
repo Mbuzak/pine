@@ -1,9 +1,8 @@
 #ifndef PINE_ENTITY
 #define PINE_ENTITY
 
+#include "cglm/struct.h"
 #include <GL/glew.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include "mesh.hpp"
 
 #ifdef __cplusplus
@@ -17,12 +16,12 @@ extern "C" {
 #endif
 
 typedef struct {
-	glm::vec3 pos;
-	glm::vec3 rot;
+	vec3s pos;
+	vec3s rot;
 	float scale;
 } Transform;
 
-glm::mat4 transform_model_compute(const Transform*);
+mat4s transform_model_compute(const Transform*);
 
 struct Shape {
 	Transform transform;
@@ -36,7 +35,7 @@ struct Lamp {
 	Transform transform;
 };
 
-void shape_init(Shape*, glm::vec3, Mesh*, GLuint);
-void lamp_init(Lamp*, glm::vec3);
+void shape_init(Shape*, vec3s, Mesh*, GLuint);
+void lamp_init(Lamp*, vec3s);
 
 #endif
