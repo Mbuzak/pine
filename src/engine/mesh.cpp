@@ -1,98 +1,105 @@
 #include "mesh.hpp"
 #include "stb_image.h"
 
+void attribute_vec2_enable(Mesh* mesh, GLuint index, GLint size, vec2s* data) {
+	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbos[index]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vec2s) * size, data, GL_STATIC_DRAW);
+	glVertexAttribPointer(index, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(index);
+}
+
+void attribute_vec3_enable(Mesh* mesh, GLuint index, GLint size, vec3s* data) {
+	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbos[index]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vec3s) * size, data, GL_STATIC_DRAW);
+	glVertexAttribPointer(index, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(index);
+}
+
+void ibo_enable(Mesh* mesh, GLint ibo_size, GLuint* indices) {
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ibo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, ibo_size * sizeof(GLuint), indices, GL_STATIC_DRAW);
+}
+
 void mesh_terrain_init(Mesh* mesh) {
-	GLfloat coords[3 * 4] = {
-		-80.0,  0.0, -80.0,
-		-80.0,  0.0, 80.0,
-		80.0, 0.0, -80.0,
-		80.0, 0.0, 80.0,
+	const int vertex_count = 4;
+	const int triangle_count = 2;
+	vec3s coords[vertex_count] = {
+		{{-80.0,  0.0, -80.0}},
+		{{-80.0,  0.0, 80.0}},
+		{{80.0, 0.0, -80.0}},
+		{{80.0, 0.0, 80.0}},
 	};
-	GLfloat uv_coords[2 * 4] = {
-		0.0, 0.0,
-		0.0, 1.0,
-		1.0, 0.0,
-		1.0, 1.0,
+	vec2s uv_coords[vertex_count] = {
+		{{0.0, 0.0}},
+		{{0.0, 1.0}},
+		{{1.0, 0.0}},
+		{{1.0, 1.0}},
 	};
-	GLfloat normals[3 * 4] = {
-		0.0, 1.0, 0.0,
-		0.0, 1.0, 0.0,
-		0.0, 1.0, 0.0,
-		0.0, 1.0, 0.0,
+	vec3s normals[vertex_count] = {
+		{{0.0, 1.0, 0.0}},
+		{{0.0, 1.0, 0.0}},
+		{{0.0, 1.0, 0.0}},
+		{{0.0, 1.0, 0.0}},
 	};
-	GLuint indices[2 * 3] = {
+	GLuint indices[triangle_count * 3] = {
 		0, 1, 2,
 		1, 2, 3
 	};
-	mesh->size = 2 * 3;
+	mesh->size = triangle_count * 3;
 
-	// Create VAO
 	glGenVertexArrays(1, &mesh->vao);
+	mesh->vbos = new GLuint[3];
+	glGenBuffers(3, mesh->vbos);
+	glGenBuffers(1, &mesh->ibo);
+
 	glBindVertexArray(mesh->vao);
-
-	mesh->vbos = new GLuint[4];
-	glGenBuffers(4, mesh->vbos);
-
-	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbos[0]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * 4, coords, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbos[1]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 2 * 4, uv_coords, GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(1);
-
-	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbos[2]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * 4, normals, GL_STATIC_DRAW);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(2);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->vbos[3]);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->size * sizeof(GLuint), indices, GL_STATIC_DRAW);
-
+	attribute_vec3_enable(mesh, 0, vertex_count, coords);
+	attribute_vec2_enable(mesh, 1, vertex_count, uv_coords);
+	attribute_vec3_enable(mesh, 2, vertex_count, normals);
+	ibo_enable(mesh, mesh->size, indices);
 	glBindVertexArray(0);
 }
 
 int mesh_raw_init(Mesh* mesh) {
 	mesh->size = 36;
 
-	GLfloat positions[8*3] = {
-		1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f, 1.0f,
-		-1.0f, -1.0f, 1.0f,
-		1.0f, -1.0f, 1.0f,
-		1.0f, 1.0f, -1.0f,
-		-1.0f, 1.0f, -1.0f,
-		-1.0f, -1.0f, -1.0f,
-		1.0f, -1.0f, -1.0f
+	vec3s positions[8] = {
+		{{1.0, 1.0, 1.0}},
+		{{-1.0, 1.0, 1.0}},
+		{{-1.0, -1.0, 1.0}},
+		{{1.0, -1.0, 1.0}},
+		{{1.0, 1.0, -1.0}},
+		{{-1.0, 1.0, -1.0}},
+		{{-1.0, -1.0, -1.0}},
+		{{1.0, -1.0, -1.0}}
 	};
 
 	GLuint indices[12*3] = {
-		5, 0, 1, 5, 4, 0,
-		2, 0, 3, 2, 1, 0,
-		7, 0, 4, 7, 3, 0,
-		3, 6, 2, 3, 7, 6,
-		1, 2, 6, 1, 6, 5,
-		4, 5, 6, 4, 6, 7
+		5, 0, 1,
+		5, 4, 0,
+		2, 0, 3,
+		2, 1, 0,
+		7, 0, 4,
+		7, 3, 0,
+		3, 6, 2,
+		3, 7, 6,
+		1, 2, 6,
+		1, 6, 5,
+		4, 5, 6,
+		4, 6, 7
 	};
 
 	glGenVertexArrays(1, &mesh->vao);
+
+	mesh->vbos = new GLuint[1];
+	glGenBuffers(1, mesh->vbos);
+	glGenBuffers(1, &mesh->ibo);
+
 	glBindVertexArray(mesh->vao);
-
-	mesh->vbos = new GLuint[MESH_RAW_COUNT];
-	glGenBuffers(MESH_RAW_COUNT, mesh->vbos);
-
-	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbos[MESH_RAW_POSITIONS]);
-	glBufferData(GL_ARRAY_BUFFER, 8*3*sizeof(GLfloat), positions, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(0);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->vbos[MESH_RAW_INDICES]);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->size * sizeof(GLuint), indices, GL_STATIC_DRAW);
-
+	attribute_vec3_enable(mesh, 0, 8, positions);
+	ibo_enable(mesh, mesh->size, indices);
 	glBindVertexArray(0);
-	
+
 	return 0;
 }
 
@@ -168,10 +175,9 @@ bool load_obj(const char* path, std::vector<vec3s>& out_vertices,
 		char lineHeader[128];
 
 		// read the first word of the line
-		int res = fscanf(file, "%s", lineHeader);
-
-		if (res == EOF)
+		if (fscanf(file, "%s", lineHeader) == EOF) {
 			break;
+		}
 
 		// read vertex coordinates
 		if (strcmp(lineHeader, "v") == 0) {
@@ -183,9 +189,6 @@ bool load_obj(const char* path, std::vector<vec3s>& out_vertices,
 		else if (strcmp(lineHeader, "vt") == 0) {
 			vec2s uv;
 			fscanf(file, "%f %f\n", &uv.x, &uv.y);
-			// Invert V coordinate since we will only use DDS texture,
-			// which are inverted. Remove if you want to use TGA or BMP loaders.
-			// uv.y = -uv.y;
 			temp_uvs.push_back(uv);
 		}
 		// read normal vectors
@@ -196,7 +199,6 @@ bool load_obj(const char* path, std::vector<vec3s>& out_vertices,
 		}
 		// read faces (triangles)
 		else if (strcmp(lineHeader, "f") == 0) {
-			std::string vertex1, vertex2, vertex3;
 			unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
 			int matches = fscanf(file, "%d/%d/%d %d/%d/%d %d/%d/%d\n", &vertexIndex[0], &uvIndex[0], &normalIndex[0],
 									&vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2], &normalIndex[2]);
