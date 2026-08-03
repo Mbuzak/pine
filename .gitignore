@@ -7,3 +7,6 @@ libs/
 # KDevelop
 pine.kdev4
 .kdev4/
+
+# executable
+pine
