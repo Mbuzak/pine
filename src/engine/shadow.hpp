@@ -4,11 +4,11 @@
 #include "cglm/struct.h"
 #include <GL/glew.h>
 #include <vector>
-#include "entity.hpp"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+#include "entity.h"
 #include "shader.h"
 #ifdef __cplusplus
 }

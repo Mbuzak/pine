@@ -1,18 +1,11 @@
-#ifndef RENDERED_HPP
-#define RENDERED_HPP
+#ifndef RENDERED_H
+#define RENDERED_H
 
 #include "cglm/struct.h"
 #include <GL/glew.h>
-#include "entity.hpp"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "entity.h"
 #include "shader.h"
 #include "texture.h"
-#ifdef __cplusplus
-}
-#endif
 
 void shader_rendered_init(Shader*);
 

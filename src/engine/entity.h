@@ -1,19 +1,12 @@
-#ifndef PINE_ENTITY
-#define PINE_ENTITY
+#ifndef PINE_ENTITY_H
+#define PINE_ENTITY_H
 
 #include "cglm/struct.h"
 #include <GL/glew.h>
-#include "mesh.hpp"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "mesh.h"
 #include "material.h"
 #include "texture.h"
 #include "light.h"
-#ifdef __cplusplus
-}
-#endif
 
 typedef struct {
 	vec3s pos;
@@ -23,17 +16,17 @@ typedef struct {
 
 mat4s transform_model_compute(const Transform*);
 
-struct Shape {
+typedef struct {
 	Transform transform;
 	Material material;
 	GLuint texture_;
 	Mesh* mesh;
-};
+} Shape;
 
-struct Lamp {
+typedef struct {
 	LightPoint light;
 	Transform transform;
-};
+} Lamp;
 
 void shape_init(Shape*, vec3s, Mesh*, GLuint);
 void lamp_init(Lamp*, vec3s);

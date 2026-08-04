@@ -1,4 +1,4 @@
-#include "mesh.hpp"
+#include "mesh.h"
 #include "stb_image.h"
 
 void attribute_vec2_enable(Mesh* mesh, GLuint index, GLint size, vec2s* data) {
@@ -23,7 +23,7 @@ void ibo_enable(Mesh* mesh, GLint ibo_size, GLuint* indices) {
 void mesh_cube_init(Mesh* mesh) {
 	const int vertex_count = 24;
 	const int triangle_count = 12;
-	vec3s coords[vertex_count] = {
+	vec3s coords[24] = {
 		{{-1.0, -1.0, 1.0}},
 		{{-1.0, 1.0, 1.0}},
 		{{1.0, -1.0, 1.0}},
@@ -49,7 +49,7 @@ void mesh_cube_init(Mesh* mesh) {
 		{{1.0, 1.0, -1.0}},
 		{{1.0, 1.0, 1.0}},
 	};
-	vec2s uv_coords[vertex_count] = {
+	vec2s uv_coords[24] = {
 		{{0.0, 0.0}},
 		{{0.0, 0.0}},
 		{{0.0, 0.0}},
@@ -75,7 +75,7 @@ void mesh_cube_init(Mesh* mesh) {
 		{{0.0, 0.0}},
 		{{0.0, 0.0}},
 	};
-	vec3s normals[vertex_count] = {
+	vec3s normals[24] = {
 		{{0.0, 0.0, -1.0}},
 		{{0.0, 0.0, -1.0}},
 		{{0.0, 0.0, -1.0}},
@@ -101,7 +101,7 @@ void mesh_cube_init(Mesh* mesh) {
 		{{1.0, 0.0, 0.0}},
 		{{1.0, 0.0, 0.0}},
 	};
-	GLuint indices[triangle_count * 3] = {
+	GLuint indices[12 * 3] = {
 		0, 1, 2, 1, 2, 3,
 		4, 5, 7, 4, 6, 7,
 		8, 9, 11, 8, 10, 11,
@@ -112,7 +112,7 @@ void mesh_cube_init(Mesh* mesh) {
 	mesh->size = triangle_count * 3;
 
 	glGenVertexArrays(1, &mesh->vao);
-	mesh->vbos = new GLuint[3];
+	mesh->vbos = malloc(sizeof(GLuint) * 3);
 	glGenBuffers(3, mesh->vbos);
 	glGenBuffers(1, &mesh->ibo);
 
@@ -127,32 +127,27 @@ void mesh_cube_init(Mesh* mesh) {
 void mesh_terrain_init(Mesh* mesh) {
 	const int vertex_count = 4;
 	const int triangle_count = 2;
-	vec3s coords[vertex_count] = {
+	vec3s coords[4] = {
 		{{-80.0,  0.0, -80.0}},
 		{{-80.0,  0.0, 80.0}},
 		{{80.0, 0.0, -80.0}},
 		{{80.0, 0.0, 80.0}},
 	};
-	vec2s uv_coords[vertex_count] = {
-		{{0.0, 0.0}},
-		{{0.0, 1.0}},
-		{{1.0, 0.0}},
-		{{1.0, 1.0}},
-	};
-	vec3s normals[vertex_count] = {
+	vec2s uv_coords[4] = {{{0.0, 0.0}}, {{0.0, 1.0}}, {{1.0, 0.0}},{{1.0, 1.0}}};
+	vec3s normals[4] = {
 		{{0.0, 1.0, 0.0}},
 		{{0.0, 1.0, 0.0}},
 		{{0.0, 1.0, 0.0}},
 		{{0.0, 1.0, 0.0}},
 	};
-	GLuint indices[triangle_count * 3] = {
+	GLuint indices[2 * 3] = {
 		0, 1, 2,
 		1, 2, 3
 	};
 	mesh->size = triangle_count * 3;
 
 	glGenVertexArrays(1, &mesh->vao);
-	mesh->vbos = new GLuint[3];
+	mesh->vbos = malloc(sizeof(GLuint) * 3);
 	glGenBuffers(3, mesh->vbos);
 	glGenBuffers(1, &mesh->ibo);
 
@@ -167,11 +162,5 @@ void mesh_terrain_init(Mesh* mesh) {
 void mesh_raw_draw(Mesh* mesh) {
 	glBindVertexArray(mesh->vao);
 	glDrawElements(GL_TRIANGLES, mesh->size, GL_UNSIGNED_INT, NULL);
-	glBindVertexArray(0);
-}
-
-void mesh_texture_draw(Mesh* mesh) {
-	glBindVertexArray(mesh->vao);
-	glDrawArrays(GL_TRIANGLES, 0, mesh->size);
 	glBindVertexArray(0);
 }

@@ -9,17 +9,17 @@
 #include <string>
 #include <vector>
 #include <array>
-#include "engine/mesh.hpp"
-#include "engine/entity.hpp"
 #include "engine/shadow.hpp"
-#include "engine/rendered.hpp"
-#include "engine/outline.hpp"
-#include "engine/terrain.hpp"
 #include "SDL2/SDL.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+#include "engine/outline.h"
+#include "engine/terrain.h"
+#include "engine/rendered.h"
+#include "engine/entity.h"
+#include "engine/mesh.h"
 #include "engine/camera.h"
 #include "engine/shader.h"
 #include "engine/display.h"

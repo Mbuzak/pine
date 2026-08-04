@@ -1,8 +1,8 @@
-#include "rendered.hpp"
+#include "rendered.h"
 
 void shader_rendered_init(Shader* shader) {
 	const int COUNT = 7;
-	const int UNIFORM_IDS[COUNT] = {
+	const int UNIFORM_IDS[7] = {
 		UNIFORM_PROJECTION,
 		UNIFORM_VIEW,
 		UNIFORM_MODEL,
@@ -11,7 +11,7 @@ void shader_rendered_init(Shader* shader) {
 		UNIFORM_SHADOW_TEXTURE,
 		UNIFORM_CAMERA_COORDS,
 	};
-	char UNIFORM_NAMES[COUNT][32] = {
+	char UNIFORM_NAMES[7][32] = {
 		"matProj",
 		"matView",
 		"matModel",

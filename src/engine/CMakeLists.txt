@@ -1,6 +1,6 @@
-add_library(Engine STATIC camera.c frame.c light.c mesh.cpp
-	entity.cpp shader.c shadow.cpp texture.c display.c terrain.cpp
-	material.c controller.c rendered.cpp outline.cpp
+add_library(Engine STATIC camera.c frame.c light.c mesh.c
+	entity.c shader.c shadow.cpp texture.c display.c terrain.c
+	material.c controller.c rendered.c outline.c
 )
 
 target_link_libraries(Engine PUBLIC SDL2::SDL2 PRIVATE cglm)

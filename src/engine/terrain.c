@@ -1,11 +1,13 @@
-#include "terrain.hpp"
+#include "terrain.h"
 
 void renderer_terrain_init(RendererTerrain* renderer) {
-	renderer->position = {0.0, 0.0};
+	vec2s pos = {{0.0, 0.0}};
+	renderer->position = pos;
 	mesh_terrain_init(&renderer->mesh);
-	renderer->material = { .ambient = {0.1, 0.1, 0.1},
-		.diffuse = {0.7, 0.3, 0.1}, .specular = {0.3, 0.1, 0.1},
-		.shininess = 1.0 };
+	Material material = { .ambient = {0.1, 0.1, 0.1},
+	.diffuse = {0.7, 0.3, 0.1}, .specular = {0.3, 0.1, 0.1},
+	.shininess = 1.0 };
+	renderer->material = material;
 	renderer->texture_id = texture_2d_init("grass.png");
 
 	frame_init(&renderer->frame);
