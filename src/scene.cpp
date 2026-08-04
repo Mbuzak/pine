@@ -13,12 +13,10 @@ void Scene::Setup() {
 
 	sun = sun_init();
 
-	shader_skybox_init(&shaders[SHADERS_SKYBOX]);
 	shader_outline_init(&shaders[SHADERS_OUTLINE]);
 	shader_rendered_init(&shaders[SHADERS_RENDERED]);
 	shader_shadow_map_init(&shaders[SHADERS_SHADOW_MAP]);
 
-	renderer_skybox_init(&renderer_skybox, &shaders[SHADERS_SKYBOX]);
 	dir_shadow_map.Init(&shaders[SHADERS_SHADOW_MAP]);
 
 	const mat4s proj = perspective_projection_compute(d.width, d.height);
@@ -171,8 +169,6 @@ void Scene::display() {
 		mat4s view = camera_view_compute(&camera);
 		uniform_vec3_send(shaders, SHADERS_COUNT, UNIFORM_CAMERA_COORDS, camera.pos);
 		uniform_mat4_send(shaders, SHADERS_COUNT, UNIFORM_VIEW, view);
-
-		renderer_skybox_render(&renderer_skybox);
 
 		RenderShapes(shaders[SHADERS_RENDERED].id);
 

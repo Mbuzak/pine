@@ -38,7 +38,7 @@ Display display_init(unsigned int width, unsigned int height, const char* name) 
 	}
 
 	glEnable(GL_DEPTH_TEST);
-	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+	glClearColor(0.7f, 0.7f, 1.0f, 1.0f);
 	glEnable(GL_STENCIL_TEST);
 	glClearStencil(0);
 

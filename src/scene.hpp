@@ -13,7 +13,6 @@
 #include "engine/mesh.hpp"
 #include "engine/entity.hpp"
 #include "engine/shadow.hpp"
-#include "engine/skybox.hpp"
 #include "engine/rendered.hpp"
 #include "engine/outline.hpp"
 #include "engine/terrain.hpp"
@@ -37,7 +36,6 @@ extern "C" {
 
 enum Shaders {
 	SHADERS_RENDERED,
-	SHADERS_SKYBOX,
 	SHADERS_OUTLINE,
 	SHADERS_SHADOW_MAP,
 	SHADERS_COUNT
@@ -48,7 +46,6 @@ public:
 	Scene() = default;
 
 	Display d;
-	RendererSkybox renderer_skybox;
 	RendererTerrain renderer_terrain;
 
 	Shader shaders[SHADERS_COUNT];
