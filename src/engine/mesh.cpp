@@ -60,49 +60,6 @@ void mesh_terrain_init(Mesh* mesh) {
 	glBindVertexArray(0);
 }
 
-int mesh_raw_init(Mesh* mesh) {
-	mesh->size = 36;
-
-	vec3s positions[8] = {
-		{{1.0, 1.0, 1.0}},
-		{{-1.0, 1.0, 1.0}},
-		{{-1.0, -1.0, 1.0}},
-		{{1.0, -1.0, 1.0}},
-		{{1.0, 1.0, -1.0}},
-		{{-1.0, 1.0, -1.0}},
-		{{-1.0, -1.0, -1.0}},
-		{{1.0, -1.0, -1.0}}
-	};
-
-	GLuint indices[12*3] = {
-		5, 0, 1,
-		5, 4, 0,
-		2, 0, 3,
-		2, 1, 0,
-		7, 0, 4,
-		7, 3, 0,
-		3, 6, 2,
-		3, 7, 6,
-		1, 2, 6,
-		1, 6, 5,
-		4, 5, 6,
-		4, 6, 7
-	};
-
-	glGenVertexArrays(1, &mesh->vao);
-
-	mesh->vbos = new GLuint[1];
-	glGenBuffers(1, mesh->vbos);
-	glGenBuffers(1, &mesh->ibo);
-
-	glBindVertexArray(mesh->vao);
-	attribute_vec3_enable(mesh, 0, 8, positions);
-	ibo_enable(mesh, mesh->size, indices);
-	glBindVertexArray(0);
-
-	return 0;
-}
-
 int mesh_texture_init(Mesh* mesh, const char* filename) {
 	char path[32];
 	strcpy(path, "res/models/");

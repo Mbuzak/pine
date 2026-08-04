@@ -34,45 +34,6 @@ GLuint texture_2d_init(const char* file) {
 	return id;
 }
 
-GLuint texture_cube_map_init() {
-	const char files[6][30] = {"res/skybox/posx.jpg", "res/skybox/negx.jpg",
-	"res/skybox/posy.jpg", "res/skybox/negy.jpg", "res/skybox/posz.jpg", "res/skybox/negz.jpg"
-	};
-
-	GLuint id;
-	glGenTextures(1, &id);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, id);
-
-	// Texture flip turned off. Why?
-	stbi_set_flip_vertically_on_load(false);
-
-	for (int i = 0; i < 6; ++i) {
-		int width, height, n;
-		unsigned char *texture;
-
-		texture = stbi_load(files[i], &width, &height, &n, 0);
-		if (texture == NULL) {
-			printf("Image %s can't be loaded!\n", files[i]);
-			exit(1);
-		}
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture);
-
-		stbi_image_free(texture);
-	}
-
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_REPEAT);
-	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-
-	// Powrot Flipowanie tekstury
-	stbi_set_flip_vertically_on_load(true);
-
-	return id;
-}
-
 void texture_2d_send(GLuint program_id, GLuint texture_id) {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture_id);

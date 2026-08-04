@@ -24,7 +24,6 @@ struct Mesh {
 
 void mesh_terrain_init(Mesh*);
 
-int mesh_raw_init(Mesh*);
 int mesh_texture_init(Mesh*, const char*);
 
 void mesh_raw_draw(Mesh*);
