@@ -17,7 +17,7 @@ void Scene::Setup() {
 	shader_rendered_init(&shaders[SHADERS_RENDERED]);
 	shader_shadow_map_init(&shaders[SHADERS_SHADOW_MAP]);
 
-	dir_shadow_map.Init(&shaders[SHADERS_SHADOW_MAP]);
+	shadow_map_init(&dir_shadow_map, &shaders[SHADERS_SHADOW_MAP]);
 
 	const mat4s proj = perspective_projection_compute(d.width, d.height);
 	mat4s proj_light = orthographic_projection_compute();
@@ -40,12 +40,12 @@ void Scene::Setup() {
 		lamp_init(&lamps[i], {(rand() % 40) - 20, 0.2, (rand() % 40) - 20});
 	}
 
-	for (int i = 0; i < 32; i++) {
+	for (int i = 0; i < shape_count; i++) {
 		GLuint t = (rand() % 2) ? textures[TEX_WHT] : textures[TEX_BLC];
 		vec3s pos = { (rand() % 40) - 20, 1.0, (rand() % 40) - 20 };
-		Shape piece;
-		shape_init(&piece, pos, &mesh_cube, t);
-		pieces.push_back(piece);
+		Shape shape;
+		shape_init(&shape, pos, &mesh_cube, t);
+		shapes[i] = shape;
 	}
 
 	printf("\nESC - exit\n");
@@ -149,7 +149,7 @@ void Scene::display() {
 		__CHECK_FOR_ERRORS
 
 		// Shadow FBO
-		dir_shadow_map.Render(pieces);
+		shadow_map_render(&dir_shadow_map, shapes, shape_count);
 
 		// World model detection FBO
 		RenderToTexture(shaders[SHADERS_RENDERED].id);
@@ -194,21 +194,21 @@ void Scene::RenderShapes(GLuint program_id) {
 	vec3s light_dir = direction_compute(camera_light.rot);
 	glUniform3fv(glGetUniformLocation(program_id, "sun.direction"), 1, light_dir.raw);
 
-	dir_shadow_map.SendTexture(program_id);
+	shadow_map_texture_send(&dir_shadow_map, program_id);
 
 	glUniform1i(glGetUniformLocation(shaders[SHADERS_RENDERED].id, "is_terrain"), 1);
 	renderer_terrain_render(&renderer_terrain, &shaders[SHADERS_RENDERED]);
 	glUniform1i(glGetUniformLocation(shaders[SHADERS_RENDERED].id, "is_terrain"), 0);
 	
 	glUseProgram(program_id);
-	for (int i = 0; i < pieces.size(); ++i) {
+	for (int i = 0; i < shape_count; ++i) {
 		glStencilFunc(GL_ALWAYS, i + 1, 0xFF);
-		rendered_shape_render(&shaders[SHADERS_RENDERED], &pieces[i]);
+		rendered_shape_render(&shaders[SHADERS_RENDERED], &shapes[i]);
 	}
 
 	if (selected_id >= 0) {
 		shader_outline_render(&shaders[SHADERS_OUTLINE], selected_id,
-			&pieces[selected_id].transform, pieces[selected_id].mesh);
+			&shapes[selected_id].transform, shapes[selected_id].mesh);
 	}
 
 	glUseProgram(0);
@@ -243,8 +243,8 @@ void Scene::motion(int x, int y) {
 	vec3s point = glms_unproject(window_coords, world_space, viewport);
 
 	// Update piece world position
-	pieces[selected_id].transform.pos.x = point.x;
-	pieces[selected_id].transform.pos.z = point.z;
+	shapes[selected_id].transform.pos.x = point.x;
+	shapes[selected_id].transform.pos.z = point.z;
 }
 
 mat4s perspective_projection_compute(float width, float height) {

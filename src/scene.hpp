@@ -7,14 +7,13 @@
 #include <stdlib.h>
 #include <iostream>
 #include <string>
-#include <vector>
 #include <array>
-#include "engine/shadow.hpp"
 #include "SDL2/SDL.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+#include "engine/shadow.h"
 #include "engine/outline.h"
 #include "engine/terrain.h"
 #include "engine/rendered.h"
@@ -58,7 +57,8 @@ public:
 
 	Sun sun;
 	std::array<Lamp, 4> lamps;
-	std::vector<Shape> pieces;
+	const int shape_count = 32;
+	Shape shapes[32];
 
 	ShadowMap dir_shadow_map;
 
