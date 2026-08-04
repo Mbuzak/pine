@@ -27,13 +27,7 @@ void Scene::Setup() {
 	uniform_mat4_send(shaders, SHADERS_COUNT, UNIFORM_PROJECTION, proj);
 
 	// Load models
-	const int MODEL_COUNT = 6;
-	char model_names[MODEL_COUNT][16] = {"pawn", "knight", "bishop", "rook", "king", "queen"};
-	for (int i = 0; i < MODEL_COUNT; i++) {
-		Mesh mesh;
-		mesh_texture_init(&mesh, model_names[i]);
-		meshes.insert({model_names[i], mesh});
-	}
+	mesh_cube_init(&mesh_cube);
 
 	renderer_terrain_init(&renderer_terrain);
 
@@ -47,11 +41,10 @@ void Scene::Setup() {
 	}
 
 	for (int i = 0; i < 32; i++) {
-		std::string name = model_names[rand() % MODEL_COUNT];
 		GLuint t = (rand() % 2) ? textures[TEX_WHT] : textures[TEX_BLC];
-		vec3s pos = { (rand() % 40) - 20, 0.1, (rand() % 40) - 20 };
+		vec3s pos = { (rand() % 40) - 20, 1.0, (rand() % 40) - 20 };
 		Shape piece;
-		shape_init(&piece, pos, &meshes.at(name), t);
+		shape_init(&piece, pos, &mesh_cube, t);
 		pieces.push_back(piece);
 	}
 

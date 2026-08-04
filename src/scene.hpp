@@ -9,7 +9,6 @@
 #include <string>
 #include <vector>
 #include <array>
-#include <map>
 #include "engine/mesh.hpp"
 #include "engine/entity.hpp"
 #include "engine/shadow.hpp"
@@ -54,7 +53,7 @@ public:
 	Camera camera_light;
 	Controller controller;
 
-	std::map<std::string, Mesh> meshes;
+	Mesh mesh_cube;
 	GLuint* textures;
 
 	Sun sun;

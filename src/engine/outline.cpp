@@ -26,7 +26,8 @@ void shader_outline_render(Shader* shader, int selected_id, Transform* transform
 	glDisable(GL_DEPTH_TEST);
 	glUseProgram(shader->id);
 	glUniformMatrix4fv(shader->locations[UNIFORM_MODEL], 1, GL_FALSE, model.raw[0]);
-	mesh_texture_draw(mesh);
+	//mesh_texture_draw(mesh);
+	mesh_raw_draw(mesh);
 
 	glUseProgram(0);
 	glEnable(GL_DEPTH_TEST);
