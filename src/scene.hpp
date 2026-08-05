@@ -19,7 +19,6 @@ extern "C" {
 #include "engine/camera.h"
 #include "engine/shader.h"
 #include "engine/display.h"
-#include "engine/frame.h"
 #include "engine/controller.h"
 #include "engine/texture.h"
 #include "engine/light.h"

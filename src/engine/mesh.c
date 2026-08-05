@@ -49,32 +49,6 @@ void mesh_cube_init(Mesh* mesh) {
 		{{1.0, 1.0, -1.0}},
 		{{1.0, 1.0, 1.0}},
 	};
-	vec2s uv_coords[24] = {
-		{{0.0, 0.0}},
-		{{0.0, 0.0}},
-		{{0.0, 0.0}},
-		{{0.0, 0.0}},
-		{{0.0, 0.0}},
-		{{0.0, 0.0}},
-		{{0.0, 0.0}},
-		{{0.0, 0.0}},
-		{{0.0, 0.0}},
-		{{0.0, 0.0}},
-		{{0.0, 0.0}},
-		{{0.0, 0.0}},
-		{{0.0, 0.0}},
-		{{0.0, 0.0}},
-		{{0.0, 0.0}},
-		{{0.0, 0.0}},
-		{{0.0, 0.0}},
-		{{0.0, 0.0}},
-		{{0.0, 0.0}},
-		{{0.0, 0.0}},
-		{{0.0, 0.0}},
-		{{0.0, 0.0}},
-		{{0.0, 0.0}},
-		{{0.0, 0.0}},
-	};
 	vec3s normals[24] = {
 		{{0.0, 0.0, -1.0}},
 		{{0.0, 0.0, -1.0}},
@@ -112,14 +86,13 @@ void mesh_cube_init(Mesh* mesh) {
 	mesh->size = triangle_count * 3;
 
 	glGenVertexArrays(1, &mesh->vao);
-	mesh->vbos = malloc(sizeof(GLuint) * 3);
-	glGenBuffers(3, mesh->vbos);
+	mesh->vbos = malloc(sizeof(GLuint) * 2);
+	glGenBuffers(2, mesh->vbos);
 	glGenBuffers(1, &mesh->ibo);
 
 	glBindVertexArray(mesh->vao);
 	attribute_vec3_enable(mesh, 0, vertex_count, coords);
-	attribute_vec2_enable(mesh, 1, vertex_count, uv_coords);
-	attribute_vec3_enable(mesh, 2, vertex_count, normals);
+	attribute_vec3_enable(mesh, 1, vertex_count, normals);
 	ibo_enable(mesh, mesh->size, indices);
 	glBindVertexArray(0);
 }

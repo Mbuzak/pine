@@ -33,11 +33,12 @@ void Scene::Setup() {
 	renderer_terrain_init(&renderer_terrain, &shaders[SHADERS_TERRAIN]);
 
 	for (int i = 0; i < 4; i++) {
-		lamp_init(&lamps[i], {(rand() % 40) - 20, 0.2, (rand() % 40) - 20});
+		vec3s pos = {{(rand() % 40) - 20.0f, 0.2, (rand() % 40) - 20.0f}};
+		lamp_init(&lamps[i], pos);
 	}
 
 	for (int i = 0; i < shape_count; i++) {
-		vec3s pos = { (rand() % 40) - 20, 1.0, (rand() % 40) - 20 };
+		vec3s pos = {{(rand() % 40) - 20.0f, 1.0, (rand() % 40) - 20.0f}};
 		Shape shape;
 		shape_init(&shape, pos, &mesh_cube);
 		shapes[i] = shape;
@@ -54,7 +55,6 @@ void Scene::Setup() {
 		glUniform3fv(glGetUniformLocation(program_id, (name + "position").c_str()), 1, lamps[i].transform.pos.raw);
 	}
 	uniform_light_directional_send(program_id, "sun.", &sun);
-
 	glUniform3fv(glGetUniformLocation(program_id, "sun.direction"), 1, light_dir.raw);
 	shadow_map_texture_send(&dir_shadow_map, program_id);
 
