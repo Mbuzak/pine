@@ -1,5 +1,15 @@
 #include "terrain.h"
 
+void terrain_init(Terrain* terrain) {
+	terrain->position = glms_vec2_fill(0.0);
+	mesh_terrain_init(&terrain->mesh);
+	Material material = {.ambient = {{0.1, 0.1, 0.1}},
+		.diffuse = {{0.7, 0.3, 0.1}}, .specular = {{0.3, 0.1, 0.1}},
+		.shininess = 1.0};
+	terrain->material = material;
+	terrain->texture_id = texture_2d_init("grass.png");
+}
+
 int fbo_terrain_init(Frame* frame) {
 	frame->width = 2048;
 	frame->height = 1024;
@@ -64,26 +74,18 @@ void shader_terrain_init(Shader* shader) {
 
 void renderer_terrain_init(RendererTerrain* renderer, Shader* shader) {
 	renderer->shader = shader;
-
-	renderer->position = glms_vec2_fill(0.0);
-	mesh_terrain_init(&renderer->mesh);
-	Material material = {.ambient = {{0.1, 0.1, 0.1}},
-		.diffuse = {{0.7, 0.3, 0.1}}, .specular = {{0.3, 0.1, 0.1}},
-		.shininess = 1.0};
-	renderer->material = material;
-	renderer->texture_id = texture_2d_init("grass.png");
-
+	terrain_init(&renderer->terrain);
 	fbo_terrain_init(&renderer->frame);
 
 	glUseProgram(renderer->shader->id);
-	uniform_material_send(renderer->shader->id, "my_material.", &renderer->material);
-	texture_2d_send(renderer->shader->id, renderer->texture_id);
+	uniform_material_send(renderer->shader->id, "my_material.", &renderer->terrain.material);
+	texture_2d_send(renderer->shader->id, renderer->terrain.texture_id);
 	glUseProgram(0);
 }
 
 void renderer_terrain_render(RendererTerrain* renderer) {
-	vec3s pos = {{renderer->position.x, 0, renderer->position.y}};
+	vec3s pos = {{renderer->terrain.position.x, 0, renderer->terrain.position.y}};
 	mat4s model = glms_translate(glms_mat4_identity(), pos);
 	glUniformMatrix4fv(renderer->shader->locations[UNIFORM_MODEL], 1, GL_FALSE, model.raw[0]);
-	mesh_raw_draw(&renderer->mesh);
+	mesh_raw_draw(&renderer->terrain.mesh);
 }

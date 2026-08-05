@@ -11,6 +11,13 @@
 #include "shader.h"
 
 typedef struct {
+	vec2s position;
+	Mesh mesh;
+	Material material;
+	GLuint texture_id;
+} Terrain;
+
+typedef struct {
 	GLuint fbo_id;
 	GLuint depth_id;
 	GLuint texture_id;
@@ -21,14 +28,12 @@ typedef struct {
 int frame_terrain_init(Frame* frame);
 
 typedef struct {
-	vec2s position;
-	Mesh mesh;
-	Material material;
-	GLuint texture_id;
+	Terrain terrain;
 	Shader* shader;
-
 	Frame frame;
 } RendererTerrain;
+
+void terrain_init(Terrain* terrain);
 
 void shader_terrain_init(Shader* shader);
 
