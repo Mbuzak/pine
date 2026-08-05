@@ -9,13 +9,12 @@ mat4s transform_model_compute(const Transform* transform) {
 	return model;
 }
 
-void shape_init(Shape* shape, vec3s pos, Mesh* mesh, GLuint texture_id) {
+void shape_init(Shape* shape, vec3s pos, Mesh* mesh) {
 	Transform transform = { .pos = pos, .rot = glms_vec3_zero(), .scale = 1.0 };
 	shape->transform = transform;
 	shape->mesh = mesh;
 	Material material = { .ambient = {0.1, 0.1, 0.1}, .diffuse = {0.7, 0.3, 0.1}, .specular = {0.3, 0.1, 0.1}, .shininess = 1.0 };
 	shape->material = material;
-	shape->texture_ = texture_id;
 }
 
 void lamp_init(Lamp* lamp, vec3s pos) {

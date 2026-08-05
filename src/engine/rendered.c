@@ -28,7 +28,5 @@ void rendered_shape_render(Shader* shader, Shape* shape) {
 	mat4s model = transform_model_compute(&shape->transform);
 	glUniformMatrix4fv(glGetUniformLocation(shader->id, "matModel"), 1, GL_FALSE, model.raw[0]);
 	uniform_material_send(shader->id, "my_material.", &shape->material);
-	texture_2d_send(shader->id, shape->texture_);
-	//mesh_texture_draw(shape->mesh);
 	mesh_raw_draw(shape->mesh);
 }

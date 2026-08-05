@@ -1,9 +1,6 @@
 #ifndef PINE_SCENE
 #define PINE_SCENE
 
-#define TEX_WHT 0
-#define TEX_BLC 1
-
 #include <stdlib.h>
 #include <iostream>
 #include <string>
@@ -36,6 +33,7 @@ enum Shaders {
 	SHADERS_RENDERED,
 	SHADERS_OUTLINE,
 	SHADERS_SHADOW_MAP,
+	SHADERS_TERRAIN,
 	SHADERS_COUNT
 };
 
@@ -53,7 +51,6 @@ public:
 	Controller controller;
 
 	Mesh mesh_cube;
-	GLuint* textures;
 
 	Sun sun;
 	std::array<Lamp, 4> lamps;

@@ -29,11 +29,13 @@ struct Material {
 
 in VertexData {
 	vec4 position;
+	vec2 uv;
 	vec3 normal;
 
 	vec4 position_light;
 } in_data;
 
+uniform sampler2D uTexture;
 uniform sampler2D tex_shadowMap;
 
 uniform vec3 cameraPos;
@@ -137,7 +139,7 @@ void main() {
 		light_coef += calculate_lamp(lights[i], my_material);
 	}
 
-	vec3 color = my_material.diffuse;
+	vec3 color = texture(uTexture, 30 * in_data.uv).xyz;
 	float shadow = calcDirectionalShadow();
 
 	vec3 finalColor = (sun.ambient + (1 - shadow) * light_coef) * color;

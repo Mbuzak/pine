@@ -5,7 +5,6 @@
 #include <GL/glew.h>
 #include "mesh.h"
 #include "material.h"
-#include "texture.h"
 #include "light.h"
 
 typedef struct {
@@ -14,12 +13,11 @@ typedef struct {
 	float scale;
 } Transform;
 
-mat4s transform_model_compute(const Transform*);
+mat4s transform_model_compute(const Transform* transform);
 
 typedef struct {
 	Transform transform;
 	Material material;
-	GLuint texture_;
 	Mesh* mesh;
 } Shape;
 
@@ -28,7 +26,7 @@ typedef struct {
 	Transform transform;
 } Lamp;
 
-void shape_init(Shape*, vec3s, Mesh*, GLuint);
-void lamp_init(Lamp*, vec3s);
+void shape_init(Shape* shape, vec3s pos, Mesh* mesh);
+void lamp_init(Lamp* lamp, vec3s pos);
 
 #endif

@@ -6,6 +6,7 @@ layout (location = 2) in vec3 inNormal;
 
 out VertexData {
 	vec4 position;
+	vec2 uv;
 	vec3 normal;
 
 	vec4 position_light;
@@ -20,6 +21,7 @@ uniform mat4 lightView;
 
 void main() {
 	out_data.position = matModel * inPosition;
+	out_data.uv = inUV;
 	mat3 matNormal = mat3(transpose(inverse(matModel)));
 	out_data.normal = normalize(matNormal * inNormal);
 	out_data.position_light = lightProj * lightView * matModel * inPosition;

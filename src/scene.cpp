@@ -16,6 +16,7 @@ void Scene::Setup() {
 	shader_outline_init(&shaders[SHADERS_OUTLINE]);
 	shader_rendered_init(&shaders[SHADERS_RENDERED]);
 	shader_shadow_map_init(&shaders[SHADERS_SHADOW_MAP]);
+	shader_terrain_init(&shaders[SHADERS_TERRAIN]);
 
 	shadow_map_init(&dir_shadow_map, &shaders[SHADERS_SHADOW_MAP]);
 
@@ -29,24 +30,45 @@ void Scene::Setup() {
 	// Load models
 	mesh_cube_init(&mesh_cube);
 
-	renderer_terrain_init(&renderer_terrain);
-
-	// Load textures
-	textures = new GLuint[2];
-	textures[TEX_WHT] = texture_2d_init("white.jpg");
-	textures[TEX_BLC] = texture_2d_init("black.jpg");
+	renderer_terrain_init(&renderer_terrain, &shaders[SHADERS_TERRAIN]);
 
 	for (int i = 0; i < 4; i++) {
 		lamp_init(&lamps[i], {(rand() % 40) - 20, 0.2, (rand() % 40) - 20});
 	}
 
 	for (int i = 0; i < shape_count; i++) {
-		GLuint t = (rand() % 2) ? textures[TEX_WHT] : textures[TEX_BLC];
 		vec3s pos = { (rand() % 40) - 20, 1.0, (rand() % 40) - 20 };
 		Shape shape;
-		shape_init(&shape, pos, &mesh_cube, t);
+		shape_init(&shape, pos, &mesh_cube);
 		shapes[i] = shape;
 	}
+
+	vec3s light_dir = direction_compute(camera_light.rot);
+
+	GLuint program_id;
+	program_id = shaders[SHADERS_RENDERED].id;
+	glUseProgram(program_id);
+	for (int i = 0; i < lamps.size(); i++) {
+		std::string name = "lights[" + std::to_string(i) + "].";
+		uniform_light_point_send(program_id, name.c_str(), &lamps[i].light);
+		glUniform3fv(glGetUniformLocation(program_id, (name + "position").c_str()), 1, lamps[i].transform.pos.raw);
+	}
+	uniform_light_directional_send(program_id, "sun.", &sun);
+
+	glUniform3fv(glGetUniformLocation(program_id, "sun.direction"), 1, light_dir.raw);
+	shadow_map_texture_send(&dir_shadow_map, program_id);
+
+	program_id = shaders[SHADERS_TERRAIN].id;
+	glUseProgram(program_id);
+	for (int i = 0; i < lamps.size(); i++) {
+		std::string name = "lights[" + std::to_string(i) + "].";
+		uniform_light_point_send(program_id, name.c_str(), &lamps[i].light);
+		glUniform3fv(glGetUniformLocation(program_id, (name + "position").c_str()), 1, lamps[i].transform.pos.raw);
+	}
+	uniform_light_directional_send(program_id, "sun.", &sun);
+	glUniform3fv(glGetUniformLocation(program_id, "sun.direction"), 1, light_dir.raw);
+	shadow_map_texture_send(&dir_shadow_map, program_id);
+	glUseProgram(0);
 
 	printf("\nESC - exit\n");
 	printf("LPM/RPM - select/rotate\n");
@@ -150,19 +172,16 @@ void Scene::display() {
 
 		// Shadow FBO
 		shadow_map_render(&dir_shadow_map, shapes, shape_count);
-
 		// World model detection FBO
-		RenderToTexture(shaders[SHADERS_RENDERED].id);
+		RenderToTexture(shaders[SHADERS_TERRAIN].id);
 
 		// Default FBO
 		glViewport(0, 0, d.width, d.height);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
 		mat4s view = camera_view_compute(&camera);
 		uniform_vec3_send(shaders, SHADERS_COUNT, UNIFORM_CAMERA_COORDS, camera.pos);
 		uniform_mat4_send(shaders, SHADERS_COUNT, UNIFORM_VIEW, view);
-
 		RenderShapes(shaders[SHADERS_RENDERED].id);
 
 		SDL_GL_SwapWindow(d.window);
@@ -175,7 +194,7 @@ void Scene::RenderToTexture(GLuint program_id) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(program_id);
-	renderer_terrain_render(&renderer_terrain, &shaders[SHADERS_RENDERED]);
+	renderer_terrain_render(&renderer_terrain);
 	glUseProgram(0);
 }
 
@@ -183,23 +202,9 @@ void Scene::RenderShapes(GLuint program_id) {
 	// rysowanie obiektów nie-selekcyjnych (identyfikator 0)
 	glStencilFunc(GL_ALWAYS, 0, 0xFF);
 
-	glUseProgram(program_id);
-	// Send light
-	for (int i = 0; i < lamps.size(); i++) {
-		std::string name = "lights[" + std::to_string(i) + "].";
-		uniform_light_point_send(program_id, name.c_str(), &lamps[i].light);
-		glUniform3fv(glGetUniformLocation(program_id, (name + "position").c_str()), 1, lamps[i].transform.pos.raw);
-	}
-	uniform_light_directional_send(program_id, "sun.", &sun);
-	vec3s light_dir = direction_compute(camera_light.rot);
-	glUniform3fv(glGetUniformLocation(program_id, "sun.direction"), 1, light_dir.raw);
+	glUseProgram(shaders[SHADERS_TERRAIN].id);
+	renderer_terrain_render(&renderer_terrain);
 
-	shadow_map_texture_send(&dir_shadow_map, program_id);
-
-	glUniform1i(glGetUniformLocation(shaders[SHADERS_RENDERED].id, "is_terrain"), 1);
-	renderer_terrain_render(&renderer_terrain, &shaders[SHADERS_RENDERED]);
-	glUniform1i(glGetUniformLocation(shaders[SHADERS_RENDERED].id, "is_terrain"), 0);
-	
 	glUseProgram(program_id);
 	for (int i = 0; i < shape_count; ++i) {
 		glStencilFunc(GL_ALWAYS, i + 1, 0xFF);
