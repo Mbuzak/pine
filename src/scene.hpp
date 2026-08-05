@@ -2,7 +2,6 @@
 #define PINE_SCENE
 
 #include <stdlib.h>
-#include <iostream>
 #include <string>
 #include <array>
 #include "SDL2/SDL.h"
@@ -61,10 +60,7 @@ public:
 	int selected_id = -1;
 
 private:
-	void RenderShapes(GLuint);
-
 	int events_handle();
-	void motion(int, int);
 	void rotate(int, int);
 
 public:
@@ -72,9 +68,6 @@ public:
 	void display();
 };
 
-mat4s perspective_projection_compute(float, float);
 mat4s orthographic_projection_compute();
-
-int selection_id_compute(int, int);
 
 #endif

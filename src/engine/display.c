@@ -18,7 +18,7 @@ Display display_init(unsigned int width, unsigned int height, const char* name) 
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 	//SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-	display.window = SDL_CreateWindow(name, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+	display.window = SDL_CreateWindow(name, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);
 	if (display.window == NULL) {
 		printf("[error] Create SDL window failed!\n");
 		exit(0);
@@ -55,7 +55,24 @@ void display_destroy(Display* display) {
 	SDL_Quit();
 }
 
-void display_reshape(Display* display, int width, int height) {
-	display->width = width;
-	display->height = height;
+vec3s screen_to_world_space_convert(int x, int y, SDL_Window* window, mat4s view) {
+	int width, height;
+	SDL_GetWindowSize(window, &width, &height);
+
+	GLfloat depth;
+	glReadPixels(x, height - y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+
+	const mat4s projection = perspective_projection_compute(width, height);
+	mat4s world_space = glms_mat4_mul(projection, view);
+	const vec3s window_coords = {{(float)x, height - (float)y, depth}};
+	const vec4s viewport = {{0, 0, (float)width, (float)height}};
+	return glms_unproject(window_coords, world_space, viewport);
+}
+
+mat4s perspective_projection_compute(float width, float height) {
+	const float FOV = glm_rad(60.0);
+	const float ASPECT_RATIO = width / (float)height;
+	const float PLANE_NEAR = 0.1;
+	const float PLANE_FAR = 200.0;
+	return glms_perspective(FOV, ASPECT_RATIO, PLANE_NEAR, PLANE_FAR);
 }

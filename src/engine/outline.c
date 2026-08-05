@@ -17,18 +17,19 @@ void shader_outline_init(Shader* shader) {
 }
 
 void shader_outline_render(Shader* shader, int selected_id, Transform* transform, Mesh* mesh) {
+	if (selected_id < 0) {
+		return;
+	}
+
 	mat4s model = transform_model_compute(transform);
-	vec3s scale = {1.35, 1.04, 1.35};
-	model = glms_scale(model, scale);
+	model = glms_scale(model, glms_vec3_fill(1.1));
 
 	glStencilMask(0x00);
 	glStencilFunc(GL_NOTEQUAL, selected_id + 1, 0xFF);
 	glDisable(GL_DEPTH_TEST);
 	glUseProgram(shader->id);
 	glUniformMatrix4fv(shader->locations[UNIFORM_MODEL], 1, GL_FALSE, model.raw[0]);
-	//mesh_texture_draw(mesh);
 	mesh_raw_draw(mesh);
-
 	glUseProgram(0);
 	glEnable(GL_DEPTH_TEST);
 	glStencilFunc(GL_ALWAYS, 0, 0xFF);

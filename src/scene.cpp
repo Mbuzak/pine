@@ -84,13 +84,6 @@ int Scene::events_handle() {
 				quit = 1;
 				break;
 
-			case SDL_WINDOWEVENT:
-				if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
-					display_reshape(&d, e.window.data1, e.window.data2);
-					// TODO: Send perspective projection
-				}
-				break;
-
 			case SDL_KEYUP:
 				controller.keys_pressed[e.key.keysym.sym] = 0;
 				break;
@@ -109,7 +102,15 @@ int Scene::events_handle() {
 				}
 
 				if (controller.mouse_button_left == 1) {
-					motion(e.motion.x, e.motion.y);
+					if (selected_id < 0) {
+						break;
+					}
+					mat4s view = camera_view_compute(&camera);
+					glBindFramebuffer(GL_FRAMEBUFFER, renderer_terrain.frame.fbo_id);
+					vec3s world_coord = screen_to_world_space_convert(e.motion.x, e.motion.y, d.window, view);
+					glBindFramebuffer(GL_FRAMEBUFFER, 0);
+					shapes[selected_id].transform.pos.x = world_coord.x;
+					shapes[selected_id].transform.pos.z = world_coord.z;
 				}
 				break;
 
@@ -120,7 +121,9 @@ int Scene::events_handle() {
 			case SDL_MOUSEBUTTONDOWN:
 				if (e.button.button == SDL_BUTTON_LEFT) {
 					controller.mouse_button_left = 1;
-					selected_id = selection_id_compute(e.button.x, d.height - e.button.y);
+					GLuint stencil;
+					glReadPixels(e.button.x, d.height - e.button.y, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &stencil);
+					selected_id = stencil - 1;
 				}
 				if (e.button.button == SDL_BUTTON_RIGHT) {
 					controller.mouse_button_right = 1;
@@ -149,59 +152,26 @@ int Scene::events_handle() {
 
 void Scene::display() {
 	while (events_handle() != 1) {
-		vec3s dir = direction_compute(camera.rot);
-		vec3s right = right_vector_compute(dir);
-		const float speed = 0.5;
-		if (controller.keys_pressed[SDLK_w] == 1) {
-			vec3s mydir = glms_vec3_scale(dir, speed);
-			camera.pos = glms_vec3_add(camera.pos, mydir);
-		}
-		if (controller.keys_pressed[SDLK_s] == 1) {
-			vec3s mydir = glms_vec3_scale(dir, speed);
-			camera.pos = glms_vec3_sub(camera.pos, mydir);
-		}
-		if (controller.keys_pressed[SDLK_a] == 1) {
-			vec3s mydir = glms_vec3_scale(right, speed);
-			camera.pos = glms_vec3_add(camera.pos, mydir);
-		}
-		if (controller.keys_pressed[SDLK_d] == 1) {
-			vec3s mydir = glms_vec3_scale(right, speed);
-			camera.pos = glms_vec3_sub(camera.pos, mydir);
-		}
 		__CHECK_FOR_ERRORS
+		camera_move(&camera, controller.keys_pressed, shaders, SHADERS_COUNT);
 
-		mat4s view = camera_view_compute(&camera);
-		uniform_vec3_send(shaders, SHADERS_COUNT, UNIFORM_CAMERA_COORDS, camera.pos);
-		uniform_mat4_send(shaders, SHADERS_COUNT, UNIFORM_VIEW, view);
-
-		// rysowanie obiektów nie-selekcyjnych (identyfikator 0)
-		glStencilFunc(GL_ALWAYS, 0, 0xFF);
-
-		// Shadow FBO
 		shadow_map_render(&dir_shadow_map, shapes, shape_count);
 		glViewport(0, 0, d.width, d.height);
 
 		renderer_terrain_render(&renderer_terrain);
 
-		RenderShapes(shaders[SHADERS_RENDERED].id);
+		glUseProgram(shaders[SHADERS_RENDERED].id);
+		for (int i = 0; i < shape_count; ++i) {
+			glStencilFunc(GL_ALWAYS, i + 1, 0xFF);
+			rendered_shape_render(&shaders[SHADERS_RENDERED], &shapes[i]);
+		}
+		glStencilFunc(GL_ALWAYS, 0, 0xFF);
+
+		shader_outline_render(&shaders[SHADERS_OUTLINE], selected_id,
+			&shapes[selected_id].transform, shapes[selected_id].mesh);
 
 		SDL_GL_SwapWindow(d.window);
 	}
-}
-
-void Scene::RenderShapes(GLuint program_id) {
-	glUseProgram(program_id);
-	for (int i = 0; i < shape_count; ++i) {
-		glStencilFunc(GL_ALWAYS, i + 1, 0xFF);
-		rendered_shape_render(&shaders[SHADERS_RENDERED], &shapes[i]);
-	}
-
-	if (selected_id >= 0) {
-		shader_outline_render(&shaders[SHADERS_OUTLINE], selected_id,
-			&shapes[selected_id].transform, shapes[selected_id].mesh);
-	}
-
-	glUseProgram(0);
 }
 
 void Scene::rotate(int x, int y) {
@@ -212,48 +182,9 @@ void Scene::rotate(int x, int y) {
 	controller.mouse_pos.y = y;
 }
 
-void Scene::motion(int x, int y) {
-	if (selected_id < 0) {
-		return;
-	}
-
-	glBindFramebuffer(GL_FRAMEBUFFER, renderer_terrain.frame.fbo_id);
-	GLfloat depth;
-	glReadPixels(x, d.height - y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
-
-	const float FOV = glm_rad(60.0);
-	const float ASPECT_RATIO = d.width / (float)d.height;
-	const float PLANE_NEAR = 0.1;
-	const float PLANE_FAR = 200.0;
-	const mat4s projection = glms_perspective(FOV, ASPECT_RATIO, PLANE_NEAR, PLANE_FAR);
-	mat4s view = camera_view_compute(&camera);
-	mat4s world_space = glms_mat4_mul(projection, view);
-	const vec3s window_coords = {{(float)x, d.height - (float)y, depth}};
-	const vec4s viewport = {{0, 0, (float)d.width, (float)d.height}};
-	vec3s point = glms_unproject(window_coords, world_space, viewport);
-
-	// Update piece world position
-	shapes[selected_id].transform.pos.x = point.x;
-	shapes[selected_id].transform.pos.z = point.z;
-}
-
-mat4s perspective_projection_compute(float width, float height) {
-	const float FOV = glm_rad(60.0);
-	const float ASPECT_RATIO = width / (float)height;
-	const float PLANE_NEAR = 0.1;
-	const float PLANE_FAR = 200.0;
-	return glms_perspective(FOV, ASPECT_RATIO, PLANE_NEAR, PLANE_FAR);
-}
-
 mat4s orthographic_projection_compute() {
 	const float SIZE = 18.0;
 	const float PLANE_NEAR = 2.0;
 	const float PLANE_FAR = 35.5;
 	return glms_ortho(-SIZE, SIZE, -SIZE, SIZE, PLANE_NEAR, PLANE_FAR);
-}
-
-int selection_id_compute(int x, int y) {
-	GLuint stencil;
-	glReadPixels(x, y, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &stencil);
-	return stencil - 1;
 }

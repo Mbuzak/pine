@@ -18,3 +18,29 @@ mat4s camera_view_compute(Camera* camera) {
 	mat4s view = glms_lookat(camera->pos, center, up);
 	return view;
 }
+
+void camera_move(Camera* camera, int keys_pressed[128], Shader* shaders, int shader_count) {
+	vec3s dir = direction_compute(camera->rot);
+	vec3s right = right_vector_compute(dir);
+	const float speed = 0.5;
+	if (keys_pressed[SDLK_w] == 1) {
+		vec3s mydir = glms_vec3_scale(dir, speed);
+		camera->pos = glms_vec3_add(camera->pos, mydir);
+	}
+	if (keys_pressed[SDLK_s] == 1) {
+		vec3s mydir = glms_vec3_scale(dir, speed);
+		camera->pos = glms_vec3_sub(camera->pos, mydir);
+	}
+	if (keys_pressed[SDLK_a] == 1) {
+		vec3s mydir = glms_vec3_scale(right, speed);
+		camera->pos = glms_vec3_add(camera->pos, mydir);
+	}
+	if (keys_pressed[SDLK_d] == 1) {
+		vec3s mydir = glms_vec3_scale(right, speed);
+		camera->pos = glms_vec3_sub(camera->pos, mydir);
+	}
+
+	mat4s view = camera_view_compute(camera);
+	uniform_vec3_send(shaders, shader_count, UNIFORM_CAMERA_COORDS, camera->pos);
+	uniform_mat4_send(shaders, shader_count, UNIFORM_VIEW, view);
+}

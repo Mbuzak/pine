@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <GL/glew.h>
 #include "SDL2/SDL.h"
+#include "cglm/struct.h"
 
 typedef struct {
 	unsigned int width;
@@ -16,6 +17,7 @@ typedef struct {
 Display display_init(unsigned int, unsigned int, const char*);
 void display_destroy(Display*);
 
-void display_reshape(Display*, int, int);
+vec3s screen_to_world_space_convert(int x, int y, SDL_Window* window, mat4s view);
+mat4s perspective_projection_compute(float, float);
 
 #endif
