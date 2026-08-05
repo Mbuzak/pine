@@ -77,15 +77,26 @@ void renderer_terrain_init(RendererTerrain* renderer, Shader* shader) {
 	terrain_init(&renderer->terrain);
 	fbo_terrain_init(&renderer->frame);
 
+	vec3s pos = {{renderer->terrain.position.x, 0, renderer->terrain.position.y}};
+	mat4s model = glms_translate(glms_mat4_identity(), pos);
+
 	glUseProgram(renderer->shader->id);
 	uniform_material_send(renderer->shader->id, "my_material.", &renderer->terrain.material);
 	texture_2d_send(renderer->shader->id, renderer->terrain.texture_id);
+	glUniformMatrix4fv(renderer->shader->locations[UNIFORM_MODEL], 1, GL_FALSE, model.raw[0]);
 	glUseProgram(0);
 }
 
 void renderer_terrain_render(RendererTerrain* renderer) {
-	vec3s pos = {{renderer->terrain.position.x, 0, renderer->terrain.position.y}};
-	mat4s model = glms_translate(glms_mat4_identity(), pos);
-	glUniformMatrix4fv(renderer->shader->locations[UNIFORM_MODEL], 1, GL_FALSE, model.raw[0]);
+	glUseProgram(renderer->shader->id);
+	// Render world model detection
+	glBindFramebuffer(GL_FRAMEBUFFER, renderer->frame.fbo_id);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	mesh_raw_draw(&renderer->terrain.mesh);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+	// Render terrain
+	mesh_raw_draw(&renderer->terrain.mesh);
+	glUseProgram(0);
 }

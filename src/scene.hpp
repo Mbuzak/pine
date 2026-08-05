@@ -61,7 +61,6 @@ public:
 	int selected_id = -1;
 
 private:
-	void RenderToTexture(GLuint);
 	void RenderShapes(GLuint);
 
 	int events_handle();

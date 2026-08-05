@@ -1,5 +1,5 @@
-#include "scene.hpp"
 #include "stb_image.h"
+#include "scene.hpp"
 
 void Scene::Setup() {
 	d = display_init(1280, 720, "pine");
@@ -170,41 +170,26 @@ void Scene::display() {
 		}
 		__CHECK_FOR_ERRORS
 
-		// Shadow FBO
-		shadow_map_render(&dir_shadow_map, shapes, shape_count);
-		// World model detection FBO
-		RenderToTexture(shaders[SHADERS_TERRAIN].id);
-
-		// Default FBO
-		glViewport(0, 0, d.width, d.height);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		mat4s view = camera_view_compute(&camera);
 		uniform_vec3_send(shaders, SHADERS_COUNT, UNIFORM_CAMERA_COORDS, camera.pos);
 		uniform_mat4_send(shaders, SHADERS_COUNT, UNIFORM_VIEW, view);
+
+		// rysowanie obiektów nie-selekcyjnych (identyfikator 0)
+		glStencilFunc(GL_ALWAYS, 0, 0xFF);
+
+		// Shadow FBO
+		shadow_map_render(&dir_shadow_map, shapes, shape_count);
+		glViewport(0, 0, d.width, d.height);
+
+		renderer_terrain_render(&renderer_terrain);
+
 		RenderShapes(shaders[SHADERS_RENDERED].id);
 
 		SDL_GL_SwapWindow(d.window);
 	}
 }
 
-void Scene::RenderToTexture(GLuint program_id) {
-	glViewport(0, 0, d.width, d.height);
-	glBindFramebuffer(GL_FRAMEBUFFER, renderer_terrain.frame.fbo_id);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	glUseProgram(program_id);
-	renderer_terrain_render(&renderer_terrain);
-	glUseProgram(0);
-}
-
 void Scene::RenderShapes(GLuint program_id) {
-	// rysowanie obiektów nie-selekcyjnych (identyfikator 0)
-	glStencilFunc(GL_ALWAYS, 0, 0xFF);
-
-	glUseProgram(shaders[SHADERS_TERRAIN].id);
-	renderer_terrain_render(&renderer_terrain);
-
 	glUseProgram(program_id);
 	for (int i = 0; i < shape_count; ++i) {
 		glStencilFunc(GL_ALWAYS, i + 1, 0xFF);
