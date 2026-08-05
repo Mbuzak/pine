@@ -18,5 +18,6 @@ vec3s right_vector_compute(vec3s);
 mat4s camera_view_compute(Camera*);
 
 void camera_move(Camera* camera, int keys_pressed[128], Shader* shaders, int shader_count);
+void camera_rotate(Camera* camera, float offset_x, float offset_y);
 
 #endif

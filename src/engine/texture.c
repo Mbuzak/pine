@@ -2,10 +2,7 @@
 #include "stb_image.h"
 
 GLuint texture_2d_init(const char* file) {
-	GLuint id;
-
-	// Load from file
-	char path[64] = "res/textures/";
+	char path[32] = "res/textures/";
 	strcat(path, file);
 
 	int width, height, n;
@@ -17,6 +14,7 @@ GLuint texture_2d_init(const char* file) {
 	}
 	
 	// Bind texture
+	GLuint id;
 	glGenTextures(1, &id);
 	glBindTexture(GL_TEXTURE_2D, id);
 	

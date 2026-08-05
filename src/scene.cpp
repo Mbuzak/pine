@@ -5,8 +5,8 @@ void Scene::Setup() {
 	d = display_init(1280, 720, "pine");
 	controller_init(&controller);
 
-	camera = { .pos = {-22.0, 9.0, -0.0}, .rot = {-15, 0} };
-	camera_light = { .pos = {-10.0, 2.0, -10.0}, .rot = {-45, 60} };
+	camera = {.pos = {{-22.0, 9.0, -0.0}}, .rot = {{-15, 0}}};
+	camera_light = {.pos = {{-10.0, 2.0, -10.0}}, .rot = {{-45, 60}}};
 
 	stbi_set_flip_vertically_on_load(true);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -98,10 +98,18 @@ int Scene::events_handle() {
 
 			case SDL_MOUSEMOTION:
 				if (controller.mouse_button_right == 1) {
-					rotate(e.motion.x, e.motion.y);
+					// rotate camera
+					int width, height;
+					SDL_GetWindowSize(d.window, &width, &height);
+					float offset_x = (controller.mouse_pos.x - e.motion.x) / (float)width;
+					float offset_y = (controller.mouse_pos.y - e.motion.y) / (float)height;
+					camera_rotate(&camera, offset_x, offset_y);
+					controller.mouse_pos.x = e.motion.x;
+					controller.mouse_pos.y = e.motion.y;
 				}
 
 				if (controller.mouse_button_left == 1) {
+					// move object
 					if (selected_id < 0) {
 						break;
 					}
@@ -112,10 +120,6 @@ int Scene::events_handle() {
 					shapes[selected_id].transform.pos.x = world_coord.x;
 					shapes[selected_id].transform.pos.z = world_coord.z;
 				}
-				break;
-
-			case SDL_MOUSEWHEEL:
-				camera.pos.z += 0.5 * e.wheel.y;
 				break;
 
 			case SDL_MOUSEBUTTONDOWN:
@@ -153,33 +157,19 @@ int Scene::events_handle() {
 void Scene::display() {
 	while (events_handle() != 1) {
 		__CHECK_FOR_ERRORS
+		// Calculations
 		camera_move(&camera, controller.keys_pressed, shaders, SHADERS_COUNT);
 
+		// Render
 		shadow_map_render(&dir_shadow_map, shapes, shape_count);
 		glViewport(0, 0, d.width, d.height);
-
 		renderer_terrain_render(&renderer_terrain);
-
-		glUseProgram(shaders[SHADERS_RENDERED].id);
-		for (int i = 0; i < shape_count; ++i) {
-			glStencilFunc(GL_ALWAYS, i + 1, 0xFF);
-			rendered_shape_render(&shaders[SHADERS_RENDERED], &shapes[i]);
-		}
-		glStencilFunc(GL_ALWAYS, 0, 0xFF);
-
+		rendered_shapes_render(&shaders[SHADERS_RENDERED], shapes, shape_count);
 		shader_outline_render(&shaders[SHADERS_OUTLINE], selected_id,
 			&shapes[selected_id].transform, shapes[selected_id].mesh);
 
 		SDL_GL_SwapWindow(d.window);
 	}
-}
-
-void Scene::rotate(int x, int y) {
-	const float rad_to_degree = 57.3;
-	camera.rot.y += 2 * rad_to_degree * (x - controller.mouse_pos.x) / (float)d.width;
-	controller.mouse_pos.x = x;
-	camera.rot.x -= 2 * rad_to_degree * (controller.mouse_pos.y - y) / (float)d.height;
-	controller.mouse_pos.y = y;
 }
 
 mat4s orthographic_projection_compute() {

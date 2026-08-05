@@ -7,8 +7,8 @@
 #include "shader.h"
 #include "texture.h"
 
-void shader_rendered_init(Shader*);
+void shader_rendered_init(Shader* shader);
 
-void rendered_shape_render(Shader*, Shape*);
+void rendered_shapes_render(Shader* shader, Shape* shapes, int shape_count);
 
 #endif

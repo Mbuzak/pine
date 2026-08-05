@@ -44,3 +44,10 @@ void camera_move(Camera* camera, int keys_pressed[128], Shader* shaders, int sha
 	uniform_vec3_send(shaders, shader_count, UNIFORM_CAMERA_COORDS, camera->pos);
 	uniform_mat4_send(shaders, shader_count, UNIFORM_VIEW, view);
 }
+
+void camera_rotate(Camera* camera, float offset_x, float offset_y) {
+	const float speed = 2.0;
+	const float RADIANS_TO_DEGREE = 57.3;
+	camera->rot.y += speed * RADIANS_TO_DEGREE * offset_x;
+	camera->rot.x -= speed * RADIANS_TO_DEGREE * offset_y;
+}
