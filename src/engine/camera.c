@@ -2,8 +2,7 @@
 
 vec3s direction_compute(vec2s rot) {
 	vec3s dir = {{cos(glm_rad(rot.y)) * cos(glm_rad(rot.x)), sin(glm_rad(rot.x)), sin(glm_rad(rot.y)) * cos(glm_rad(rot.x))}};
-	glms_vec3_normalize(dir);
-	return dir;
+	return glms_vec3_normalize(dir);
 }
 
 vec3s right_vector_compute(vec3s direction) {
@@ -19,7 +18,7 @@ mat4s camera_view_compute(Camera* camera) {
 	return view;
 }
 
-void camera_move(Camera* camera, int keys_pressed[128], Shader* shaders, int shader_count) {
+void camera_move(Camera* camera, int keys_pressed[128]) {
 	vec3s dir = direction_compute(camera->rot);
 	vec3s right = right_vector_compute(dir);
 	const float speed = 0.5;
@@ -39,10 +38,6 @@ void camera_move(Camera* camera, int keys_pressed[128], Shader* shaders, int sha
 		vec3s mydir = glms_vec3_scale(right, speed);
 		camera->pos = glms_vec3_sub(camera->pos, mydir);
 	}
-
-	mat4s view = camera_view_compute(camera);
-	uniform_vec3_send(shaders, shader_count, UNIFORM_CAMERA_COORDS, camera->pos);
-	uniform_mat4_send(shaders, shader_count, UNIFORM_VIEW, view);
 }
 
 void camera_rotate(Camera* camera, float offset_x, float offset_y) {

@@ -49,22 +49,14 @@ int fbo_terrain_init(Frame* frame) {
 }
 
 void shader_terrain_init(Shader* shader) {
-	const int COUNT = 7;
-	const int UNIFORM_IDS[7] = {
-		UNIFORM_PROJECTION,
-		UNIFORM_VIEW,
+	const int COUNT = 3;
+	const int UNIFORM_IDS[3] = {
 		UNIFORM_MODEL,
-		UNIFORM_LIGHT_PROJECTION,
-		UNIFORM_LIGHT_VIEW,
 		UNIFORM_SHADOW_TEXTURE,
 		UNIFORM_CAMERA_COORDS,
 	};
-	char UNIFORM_NAMES[7][32] = {
-		"matProj",
-		"matView",
+	char UNIFORM_NAMES[3][32] = {
 		"matModel",
-		"lightProj",
-		"lightView",
 		"tex_shadowMap",
 		"cameraPos",
 	};

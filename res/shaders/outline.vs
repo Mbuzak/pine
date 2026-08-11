@@ -2,10 +2,13 @@
 
 layout (location = 0) in vec4 inPosition;
 
-uniform mat4 matProj;
-uniform mat4 matView;
+layout (std140) uniform Matrices {
+	mat4 projection;
+	mat4 view;
+};
+
 uniform mat4 matModel;
 
 void main() {
-	gl_Position = matProj * matView * matModel * inPosition;
+	gl_Position = projection * view * matModel * inPosition;
 }

@@ -1,11 +1,13 @@
 #version 330 core
 layout (location = 0) in vec4 inPosition;
 
-uniform mat4 lightProj;
-uniform mat4 lightView;
+layout (std140) uniform MatricesLight {
+    mat4 projection_light;
+    mat4 view_light;
+};
 
 uniform mat4 matModel;
 
 void main() {
-    gl_Position = lightProj * lightView * matModel * inPosition;
+    gl_Position = projection_light * view_light * matModel * inPosition;
 }

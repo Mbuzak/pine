@@ -136,14 +136,3 @@ void uniform_vec3_send(Shader* shaders, int count, int uniform_id, vec3s vec) {
 		}
 	}
 }
-
-void uniform_mat4_send(Shader* shaders, int count, int uniform_id, mat4s mat) {
-	for (int i = 0; i < count; i++) {
-		int location = shaders[i].locations[uniform_id];
-		if (location != -1) {
-			glUseProgram(shaders[i].id);
-			glUniformMatrix4fv(location, 1, GL_FALSE, mat.raw[0]);
-			glUseProgram(0);
-		}
-	}
-}

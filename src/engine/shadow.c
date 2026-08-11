@@ -1,15 +1,11 @@
 #include "shadow.h"
 
 void shader_shadow_map_init(Shader* shader) {
-	const int COUNT = 3;
-	const int UNIFORM_IDS[3] = {
-		UNIFORM_LIGHT_PROJECTION,
-		UNIFORM_LIGHT_VIEW,
+	const int COUNT = 1;
+	const int UNIFORM_IDS[1] = {
 		UNIFORM_MODEL,
 	};
-	char UNIFORM_NAMES[3][32] = {
-		"lightProj",
-		"lightView",
+	char UNIFORM_NAMES[1][32] = {
 		"matModel",
 	};
 

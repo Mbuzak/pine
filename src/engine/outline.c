@@ -1,15 +1,11 @@
 #include "outline.h"
 
 void shader_outline_init(Shader* shader) {
-	const int COUNT = 3;
-	const int UNIFORM_IDS[3] = {
-		UNIFORM_PROJECTION,
-		UNIFORM_VIEW,
+	const int COUNT = 1;
+	const int UNIFORM_IDS[1] = {
 		UNIFORM_MODEL,
 	};
-	char UNIFORM_NAMES[3][32] = {
-		"matProj",
-		"matView",
+	char UNIFORM_NAMES[1][32] = {
 		"matModel",
 	};
 

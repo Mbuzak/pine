@@ -1,6 +1,27 @@
 #include "stb_image.h"
 #include "scene.hpp"
 
+void ubo_init(UBO* ubo, int binding_id, int shader_count, GLuint* shaders_id, const char* block_name, int size) {
+	ubo->blocks_id = new GLuint[shader_count];
+	for (int i = 0; i < shader_count; i++) {
+		ubo->blocks_id[i] = glGetUniformBlockIndex(shaders_id[i], block_name);
+		glUniformBlockBinding(shaders_id[i], ubo->blocks_id[i], binding_id);
+	}
+
+	glGenBuffers(1, &ubo->id);
+	glBindBuffer(GL_UNIFORM_BUFFER, ubo->id);
+	glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_STATIC_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	glBindBufferRange(GL_UNIFORM_BUFFER, binding_id, ubo->id, 0, size);
+}
+
+void ubo_uniform_mat4_send(GLuint ubo_id, int offset, mat4s matrix) {
+	glBindBuffer(GL_UNIFORM_BUFFER, ubo_id);
+	glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(mat4), matrix.raw);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
 void Scene::Setup() {
 	d = display_init(1280, 720, "pine");
 	controller_init(&controller);
@@ -20,12 +41,19 @@ void Scene::Setup() {
 
 	shadow_map_init(&dir_shadow_map, &shaders[SHADERS_SHADOW_MAP]);
 
+	GLuint shaders_id[3] = {shaders[SHADERS_TERRAIN].id, shaders[SHADERS_RENDERED].id, shaders[SHADERS_OUTLINE].id};
+	GLuint ubo_light_shaders_id[3] = {shaders[SHADERS_RENDERED].id, shaders[SHADERS_SHADOW_MAP].id, shaders[SHADERS_TERRAIN].id};
+	ubo_init(&ubo, 0, 3, shaders_id, "Matrices", 2 * sizeof(mat4));
+	ubo_init(&ubo_light, 1, 3, ubo_light_shaders_id, "MatricesLight", 2 * sizeof(mat4));
+
+	// Send default UBO uniforms
 	const mat4s proj = perspective_projection_compute(d.width, d.height);
+	ubo_uniform_mat4_send(ubo.id, 0, proj);
+
 	mat4s proj_light = orthographic_projection_compute();
 	mat4s view_light = camera_view_compute(&camera_light);
-	uniform_mat4_send(shaders, SHADERS_COUNT, UNIFORM_LIGHT_PROJECTION, proj_light);
-	uniform_mat4_send(shaders, SHADERS_COUNT, UNIFORM_LIGHT_VIEW, view_light);
-	uniform_mat4_send(shaders, SHADERS_COUNT, UNIFORM_PROJECTION, proj);
+	ubo_uniform_mat4_send(ubo_light.id, 0, proj_light);
+	ubo_uniform_mat4_send(ubo_light.id, sizeof(mat4), view_light);
 
 	// Load models
 	mesh_cube_init(&mesh_cube);
@@ -158,7 +186,10 @@ void Scene::display() {
 	while (events_handle() != 1) {
 		__CHECK_FOR_ERRORS
 		// Calculations
-		camera_move(&camera, controller.keys_pressed, shaders, SHADERS_COUNT);
+		camera_move(&camera, controller.keys_pressed);
+		mat4s view = camera_view_compute(&camera);
+		uniform_vec3_send(shaders, SHADERS_COUNT, UNIFORM_CAMERA_COORDS, camera.pos);
+		ubo_uniform_mat4_send(ubo.id, sizeof(mat4), view);
 
 		// Render
 		shadow_map_render(&dir_shadow_map, shapes, shape_count);

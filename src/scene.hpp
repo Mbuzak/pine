@@ -35,6 +35,14 @@ enum Shaders {
 	SHADERS_COUNT
 };
 
+typedef struct {
+	GLuint id;
+	GLuint* blocks_id;
+} UBO;
+
+void ubo_init(UBO* ubo, int binding_id, int shader_count, GLuint* shaders_id, const char* block_name, int size);
+void ubo_uniform_mat4_send(GLuint ubo_id, int offset, mat4s matrix);
+
 class Scene {
 public:
 	Scene() = default;
@@ -59,6 +67,8 @@ public:
 
 	int selected_id = -1;
 
+	UBO ubo;
+	UBO ubo_light;
 private:
 	int events_handle();
 	void rotate(int, int);
